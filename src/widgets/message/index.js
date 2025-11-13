@@ -1,13 +1,13 @@
 
 /**
- * Class representing signup page in Welcome module.
- * @class __welcome_signup
+ * Class representing Signin page in Welcome module.
+ * @class __welcome_Signin
  * @extends __welcome_interact
  */
-const Signup = require("..")
+const Signin = require("..")
 require('./skin');
 
-class signup_message extends Signup {
+class signin_message extends Signin {
 
   /**
    ** @param {object} opt
@@ -41,4 +41,4 @@ class signup_message extends Signup {
 
 }
 
-module.exports = signup_message
+module.exports = signin_message

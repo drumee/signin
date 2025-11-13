@@ -6,6 +6,7 @@
  */
 const Signup = require("..")
 require('./skin');
+const RECONNECT = 'reconnect';
 
 class signin_form extends Signup {
 
@@ -22,45 +23,116 @@ class signin_form extends Signup {
   }
 
   /**
+  * To avoid full page reload upon login 
+  */
+  gotSignedIn() {
+    if (Visitor.isOnline()) {
+      this.anim([1, { alpha: 0.0 }]);
+      RADIO_BROADCAST.trigger("user:signed:in", this.mget('reconnect'));
+    } else {
+      Drumee.start()
+    }
+  }
+
+  /**
    *
   */
   onDomRefresh() {
     this.feed(require('./skeleton').default(this));
   }
 
+  /**
+   * 
+   * @param {*} data 
+   */
+  checkLoginStatus(data) {
+    setTimeout(() => {
+      this.setItemStatus('commit-button', "0", "haptic");
+    }, 500)
+    this.debug("AAA:52", data)
+    switch (data.status) {
+      case "INCOMPLETE_SIGNUP":
+        this.triggerHandlers({ service: "onboarding" })
+        return
+      case "BLOCKED":
+      case "ARCHIVED":
+        return this.renderMessage(LOCALE.BLOCKED_ACCOUNT);
+
+      case "ok":
+        let { onboarded, email } = data.user.profile;
+        if (!onboarded) {
+          return this.triggerHandlers({ email, service: "onboarding" })
+        }
+      case "ALREADY_SIGNED_IN":
+        Visitor.set(data);
+        if (this.mget(RECONNECT)) {
+          RADIO_BROADCAST.trigger("user:signed:in", RECONNECT);
+          wsRouter.restart(1);
+          this.suppress();
+          Butler.sleep()
+          return;
+        }
+        return this.gotSignedIn(data);
+
+      case "no_cookie":
+        return this.retryLogin(data);
+
+      case _a.frozen:
+      case _a.locked:
+        return this.renderMessage(LOCALE.ACCOUNT_HAS_BEEN_DELETED);
+
+      case "CROSS_SIGNED_IN":
+        this.triggerHandlers({ service: "cross-signed-in" })
+        return;
+
+      case "WRONG_CREDENTIALS":
+        return this.renderMessage(LOCALE.CHECK_YOUR_MAIL);
+      case "INVALID_SECRET":
+      case "INVALID_CODE":
+        return this.renderMessage(LOCALE.INVALID_CODE);
+    }
+
+    if (data.secret) {
+      this.prompt_otp(data);
+      return;
+    }
+
+    let { user, organization, hub } = data;
+    if (user) {
+      Visitor.set(user);
+    }
+    if (organization) {
+      Organization.set(organization);
+    }
+    if (hub) {
+      Host.set(hub);
+    }
+    this.gotSignedIn(data);
+  }
 
   /**
    * 
    * @returns 
    */
   commitForm() {
-    let { email, password } = this.getData();
-    if (!email || !email.isEmail()) {
-      this.setItemStatus(_a.email, "error");
+    let { username, password } = this.getData();
+    this.debug("AAA:38", this.getData());
+    if (!username) {
+      this.setItemStatus(_a.username, "error");
       this.setItemStatus('commit-button', "0", "haptic");
       return
     }
-    this.debug("AAA", { email, password }, (!password || !password.length))
+    this.debug("AAA:44", { username, password }, (!password || !password.length))
     if (!password || !password.length) {
       this.setItemStatus(_a.password, "error");
       this.setItemStatus('commit-button', "0", "haptic");
       return
     }
-    this.debug("AAA:47", { email, password }, (!password || !password.length))
+    this.debug("AAA:47", { username, password }, (!password || !password.length))
     this.setItemStatus('commit-button', "1", "haptic");
-    this.postService(SERVICE.signup.create_account, { email, password }).then((data) => {
-      this.debug("AAA:49", data)
-      switch (data.status) {
-        case 'user_exists':
-          message = LOCALE.ALREADY_EXISTS.format(email);
-          break
-        case 'ok':
-          location.reload()
-          break
-        case 'onboarding':
-          this.triggerHandlers({ data, service: data.status })
-          break
-      }
+    let vars = { username, password }
+    this.postService(SERVICE.yp.signin, { vars }).then((data) => {
+      this.checkLoginStatus(data)
     }).catch(() => {
       this.triggerHandlers({ service: "signup-error" })
     })
@@ -197,28 +269,15 @@ class signin_form extends Signup {
     })
   }
 
+
   /**
-   *
-  */
-  renderMessage(message) {
-    this.triggerHandlers({ service: _a.error, message })
-    // this.debug('renderMessage', msg, this)
-    // const msgBox = Skeletons.Note({
-    //   className: `${this.fig.family}__note error-msg`,
-    //   content: msg
-    // })
-
-    // if (!this.__buttonWrapper || !this.__buttonWrapper) return;
-    // this.__buttonWrapper.el.dataset.mode = _a.closed;
-    // this.__messageBox.el.dataset.mode = _a.open;
-    // this.__messageBox.feed(msgBox);
-
-    // const f = () => {
-    //   this.__messageBox.el.dataset.mode = _a.closed
-    //   this.__messageBox.clear()
-    //   this.__buttonWrapper.el.dataset.mode = _a.open
-    // }
-    // return _.delay(f, Visitor.timeout(3000))
+   * 
+   */
+  renderMessage(content) {
+    // this.triggerHandlers({ service: _a.error, message })
+    this.ensurePart(_a.message).then((p) => {
+      p.set({ content })
+    })
   }
 
 

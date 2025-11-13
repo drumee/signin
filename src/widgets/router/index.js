@@ -6,7 +6,7 @@ const { button } = require("../toolkit/skeleton")
  * @extends __welcome_interact
  */
 require('./skin');
-class signup_router extends LetcBox {
+class signin_router extends LetcBox {
 
   /**
    ** @param {object} opt
@@ -63,7 +63,7 @@ class signup_router extends LetcBox {
    */
   async onUiEvent(cmd, args = {}) {
     const service = args.service || cmd.get(_a.service);
-    this.debug("AAA:64zz", service, this)
+    this.debug("AAA:64zz", service, args, this)
     let buttons;
     switch (service) {
       case _a.next:
@@ -71,9 +71,11 @@ class signup_router extends LetcBox {
         this.mset(data)
         this.loadWidget(1)
         break;
+
       case "onboarding":
-        this.feed({ kind: "onboarding" })
+        this.feed({ ...args, kind: "onboarding", type: "app", service: "onboarding-complete" })
         break;
+
       case "user_exists":
         buttons = [
           button(this, {
@@ -91,10 +93,10 @@ class signup_router extends LetcBox {
             priority: "primary"
           }),
         ]
-        this.feed({ message: args.message, buttons, kind: 'signup_message', title: "Ooop!" })
+        this.feed({ message: args.message, buttons, kind: 'signin_message', title: "Ooop!" })
         break;
 
-      case 'signup-completed':
+      case 'onboarding-complete':
         buttons = [
           button(this, {
             label: LOCALE.GO_TO_DRUMEEOS,
@@ -104,7 +106,7 @@ class signup_router extends LetcBox {
             priority: "primary"
           }),
         ]
-        this.feed({ buttons, kind: 'signup_message', title: LOCALE.SIGNUP_COMPLETED, message: LOCALE.DRUMEEOS_IS_NOW_READY })
+        this.feed({ buttons, kind: 'signin_message', title: LOCALE.SIGNUP_COMPLETED, message: LOCALE.DRUMEEOS_IS_NOW_READY })
         break;
 
       case 'onboarding':
@@ -112,6 +114,9 @@ class signup_router extends LetcBox {
         this.feed({ kind: 'onboarding', email: this.mget(_a.email), uiHandler: [this], type: 'app', service: "signup-completed" })
         break;
 
+      case 'login':
+        return location.reload();
+        
       case _a.error:
         buttons = [
           button(this, {
@@ -122,11 +127,11 @@ class signup_router extends LetcBox {
             priority: "secondary"
           }),
         ]
-        this.feed({ message: args.message, buttons, kind: 'signup_message', title: "Ooop!" })
+        this.feed({ message: args.message, buttons, kind: 'signin_message', title: "Ooop!" })
         break;
 
     }
   }
 }
 
-module.exports = signup_router
+module.exports = signin_router

@@ -3,15 +3,25 @@ const { entry, header, button, password, termsAndConditions } = require("../../t
 function __skl_welcome_signup(ui) {
   const fig = ui.fig.family
   let haptic = 10000;
+  let message = Skeletons.Box.X({
+    className: `${fig}__error-container`,
+    kids: [
+      Skeletons.Note({
+        className: `${fig}__error-content`,
+        content: "",
+        sys_pn: _a.message
+      }),
+    ]
+  })
   const form = Skeletons.Box.Y({
     className: `${fig}__form`,
     kids: [
       entry(ui, {
-        placeholder: "example@email.com",
-        name: _a.email,
-        sys_pn: _a.email,
+        placeholder: "username or email",
+        name: _a.username,
+        sys_pn: _a.username,
         service: _a.input,
-        value: ui.mget(_a.email) || ""
+        value: ui.mget(_a.username) || ""
       }),
       password(ui, {
         placeholder: "",
@@ -28,6 +38,7 @@ function __skl_welcome_signup(ui) {
         sys_pn: "commit-button",
         haptic
       }),
+      message
     ]
   })
 

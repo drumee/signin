@@ -1,6 +1,7 @@
 // @use "sass:meta";
 @use '@drumee/ui-styles/src/mixins';
 @use 'terms-and-conditions';
+@use 'cross-signin';
 @use '../../toolkit/skin' as *;
 
 .signin-form {
@@ -109,6 +110,24 @@
       border: 1px solid var(--neutral-300);
       margin: auto 0;
     }
+  }
+
+  &__error-container {
+    width: 100%;
+    height: auto;
+    align-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  &__error-content {
+    color: var(--red-500);
+    font-style: normal;
+    font-size: 14px;
+    line-height: 22px;
+    text-align: center;
+    letter-spacing: 1px;
   }
 
   &__terms {
