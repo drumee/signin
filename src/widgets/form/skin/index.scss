@@ -59,6 +59,7 @@
     height: 26px;
     justify-content: space-between;
     opacity: 1;
+    gap: var(--spacer-4)
   }
 
   &__text {
@@ -81,12 +82,11 @@
         margin-right: auto;
         margin-left: var(--spacer-2);
       }
+
       &.c2 {
         margin-right: 0;
       }
     }
-
-
   }
 
   &__separator {

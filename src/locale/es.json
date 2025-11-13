@@ -56,5 +56,6 @@
   "DRUMEEOS_IS_NOW_READY": "DrumeeOS ya está listo.<br> Comencemos a explorar y a dar forma a tu experiencia.",
   "GO_TO_DRUMEEOS": "Visita DrumeeOS",
   "NO_ACCOUNT": "¿No tienes cuenta? {0}",
-  "Q_NO_ACCOUNT": "¿No tienes cuenta?"
+  "Q_NO_ACCOUNT": "¿No tienes cuenta?",
+  "PASSWORD_CONFIRM": "Confirmar Contraseña"
 }
