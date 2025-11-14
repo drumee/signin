@@ -152,20 +152,25 @@ class signin_form extends Signup {
       case 'signin':
         this.commitForm();
         break;
-      // case 'use-google':
-      //   this.debug(`POSTING = ${service}`, args, status, cmd);
-      //   this.postService(SERVICE.register.google_start, {}).then((data) => {
-      //     this._handleResponse(data)
-      //   })
-      //   break;
-      // case 'use-apple':
-      //   this.debug(`POSTING = ${service}`, args, status, cmd);
-      //   this.postService(SERVICE.register.apple_start, {}).then((data) => {
-      //     this._handleResponse(data)
-      //   })
-      //   break;
-      // default:
-      //   this.debug("Created by kind builder");
+      case 'reset-password':
+        this.debug("AAA:88 Navigating to reset password", this.getData())
+        let { username } = this.getData();
+        if (!username || !username.isEmail()) {
+          this.setItemStatus(_a.username, _a.error, _a.status)
+        } else {
+          this.setItemStatus(_a.username, "", _a.status);
+          this.postService(SERVICE.otp.send, { email: username }).then((data) => {
+            this.debug("AAA:97 OTP sent", data)
+            if (data.sent) {
+              this.triggerHandlers({ data, service: 'otp-sent' })
+            } else {
+              this.triggerHandlers({ service: 'otp-not-sent', email: username })
+            }
+          }).catch((e) => {
+            this.warn("AAA:104 Error sending OTP", e)
+          })
+          break;
+        }
     }
   }
 

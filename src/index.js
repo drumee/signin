@@ -10,6 +10,8 @@ function start() {
   Kind.registerAddons(require("./vendor/onboarding-ui/app/seeds"));
 }
 
+require("@drumee/ui-toolkit");
+
 if (document.readyState == 'complete') {
   start()
 } else {

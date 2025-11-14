@@ -74,7 +74,7 @@ function __skl_welcome_signup(ui) {
         kids: [
           Skeletons.Element({ content: LOCALE.Q_NO_ACCOUNT, className: `${fig}__text` }),
           Skeletons.Element({ content: LOCALE.SIGN_UP, className: `${fig}__text link c1`, href: "#/welcome/signup" }),
-          Skeletons.Element({ content: `${LOCALE.Q_FORGOT_PASSWORD}?`, className: `${fig}__text link c2`, href: "#/welcome/reset" }),
+          Skeletons.Element({ content: `${LOCALE.Q_FORGOT_PASSWORD}`, className: `${fig}__text link c2`, service: "reset-password" }),
         ]
       }),
       Skeletons.Element({ content: LOCALE.OR, className: `${fig}__separator` }),

@@ -135,6 +135,10 @@
       }
     }
 
+    &.full-width {
+      width: 100%;
+    }
+
     &.secondary {
       justify-content: center;
       background-color: var(--neutral-200);
@@ -145,6 +149,10 @@
         color: var(--neutral-900);
         border-radius: 50%;
         padding: 6px;
+      }
+
+      &.full-width {
+        width: 100%;
       }
     }
 

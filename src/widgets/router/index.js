@@ -42,17 +42,22 @@ class signin_router extends LetcBox {
    *
   */
   onDomRefresh() {
-    this.fetchService(SERVICE.signup.get_info, {}).then((data) => {
-      this.mset(data)
-      this.feed({ ...data, kind: 'signin_form' });
-      // if (data.otp) {
-      //   this.loadWidget(1)
-      // } else {
-      //   this.loadWidget(0)
-      // }
-    }).catch(() => {
-      this.loadWidget(0)
-    })
+    this.feed({
+          kind: 'dtk_dialog',
+          body: { kind: 'dtk_pwsetter', sys_pn: 'pwsetter' },
+          buttons: button(this, {
+            label: LOCALE.RESET_PASSWORD,
+            priority: 'secondary full-width',
+            service: 'password-reset',
+            type: _a.email,
+            sys_pn: "commit-button",
+            haptic: 2000
+          }),
+          message: '',
+          title: LOCALE.SET_NEW_PASSWORD,
+          service: 'otp-verified'
+        });
+    // this.feed({ kind: 'signin_form' });
   }
 
 
@@ -116,7 +121,42 @@ class signin_router extends LetcBox {
 
       case 'login':
         return location.reload();
-        
+
+      case 'otp-failed':
+        this.debug("AAA", args)
+        return this.feed({ kind: 'signin_otp', api: SERVICE.otp.verify, service: 'otp-verified' });
+
+      case 'otp-verified':
+        this.debug("AAA", args)
+        return this.feed({
+          kind: 'dtk_dialog',
+          body: { kind: 'dtk_pwsetter', sys_pn: 'pwsetter' },
+          buttons: button(this, {
+            label: LOCALE.RESET_PASSWORD,
+            service: 'password-reset',
+            type: _a.email,
+            sys_pn: "commit-button",
+            haptic: 2000
+          }),
+          message: '',
+          title: LOCALE.SET_NEW_PASSWOR,
+          service: 'otp-verified'
+        });
+
+      case 'otp-sent':
+        this.debug("AAA:119", args)
+        await Kind.waitFor('dtk_otp');
+        this.feed({
+          payload: args.data,
+          kind: 'dtk_otp',
+          api: SERVICE.otp.verify,
+          title: LOCALE.Q_FORGOT_PASSWORD,
+          message: LOCALE.WE_HAVE_SENT_CODE.format(args.data.email),
+          service: 'otp-verified'
+        });
+        this._otp = this.children.last()
+        return
+
       case _a.error:
         buttons = [
           button(this, {
