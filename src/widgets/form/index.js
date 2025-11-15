@@ -148,7 +148,7 @@ class signin_form extends Signup {
     this.debug(`onUiEvent xx 69 service = ${service}`, args, status, cmd);
     switch (service) {
       case _a.input:
-        if (status != _e.Enter) break;
+        if (![_e.commit, _e.Enter].includes(status)) break;
       case 'signin':
         this.commitForm();
         break;

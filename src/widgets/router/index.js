@@ -42,22 +42,14 @@ class signin_router extends LetcBox {
    *
   */
   onDomRefresh() {
-    this.feed({
-          kind: 'dtk_dialog',
-          body: { kind: 'dtk_pwsetter', sys_pn: 'pwsetter' },
-          buttons: button(this, {
-            label: LOCALE.RESET_PASSWORD,
-            priority: 'secondary full-width',
-            service: 'password-reset',
-            type: _a.email,
-            sys_pn: "commit-button",
-            haptic: 2000
-          }),
-          message: '',
-          title: LOCALE.SET_NEW_PASSWORD,
-          service: 'otp-verified'
-        });
-    // this.feed({ kind: 'signin_form' });
+    // this.feed({
+    //   kind: 'dtk_dialog',
+    //   body: { kind: 'dtk_pwsetter', sys_pn: 'pwsetter', label: LOCALE.RESET_PASSWORD },
+    //   message: '',
+    //   title: LOCALE.SET_NEW_PASSWORD,
+    //   service: 'otp-verified'
+    // });
+    this.feed({ kind: 'signin_form' });
   }
 
 
@@ -75,6 +67,10 @@ class signin_router extends LetcBox {
         let { data } = args;
         this.mset(data)
         this.loadWidget(1)
+        break;
+
+      case "onboarding":
+        this.feed({ ...args, kind: "onboarding", type: "app", service: "onboarding-complete" })
         break;
 
       case "onboarding":
@@ -127,21 +123,35 @@ class signin_router extends LetcBox {
         return this.feed({ kind: 'signin_otp', api: SERVICE.otp.verify, service: 'otp-verified' });
 
       case 'otp-verified':
-        this.debug("AAA", args)
-        return this.feed({
+        this.debug("AAA:126", args)
+        this.feed({
           kind: 'dtk_dialog',
-          body: { kind: 'dtk_pwsetter', sys_pn: 'pwsetter' },
-          buttons: button(this, {
+          body: {
+            kind: 'dtk_pwsetter',
+            sys_pn: 'pwsetter',
             label: LOCALE.RESET_PASSWORD,
-            service: 'password-reset',
-            type: _a.email,
-            sys_pn: "commit-button",
-            haptic: 2000
-          }),
+            api: SERVICE.otp.set_password,
+            payload: args.data
+          },
           message: '',
-          title: LOCALE.SET_NEW_PASSWOR,
-          service: 'otp-verified'
+          title: LOCALE.SET_NEW_PASSWORD,
+          service: 'password-set'
         });
+        return
+      // return this.feed({
+      //   kind: 'dtk_dialog',
+      //   body: { kind: 'dtk_pwsetter', sys_pn: 'pwsetter' },
+      //   buttons: button(this, {
+      //     label: LOCALE.RESET_PASSWORD,
+      //     service: 'password-reset',
+      //     type: _a.email,
+      //     sys_pn: "commit-button",
+      //     haptic: 2000
+      //   }),
+      //   message: '',
+      //   title: LOCALE.SET_NEW_PASSWOR,
+      //   service: 'otp-verified'
+      // });
 
       case 'otp-sent':
         this.debug("AAA:119", args)

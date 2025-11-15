@@ -5,7 +5,7 @@
  * @returns 
  */
 export function button(ui, opt) {
-  let { label, ico, service, sys_pn, className, priority="primary", type, haptic } = opt;
+  let { label, ico, service, sys_pn, className, priority = "primary", type, haptic } = opt;
   const pfx = className || `${ui.fig.group}__button`;
   let kids = []
   if (label) kids.push(
@@ -143,9 +143,9 @@ export function entry(ui, opt) {
  * @param {*} passmeter 
  * @returns 
  */
-export function password(ui, cn, passmeter) {
+export function password(ui, opt) {
   const pfx = `${ui.fig.family}__entry`;
-  const a = Skeletons.Box.X({
+  return Skeletons.Box.X({
     className: `${pfx}-main`,
     sys_pn: 'wrapper-pw',
     partHandler: [ui],
@@ -160,41 +160,11 @@ export function password(ui, cn, passmeter) {
         mode: _a.commit,
         sys_pn: _a.password,
         require: _a.password,
-        shower: 1
+        shower: 1,
+        ...opt
       })
     ]
   });
-
-  if (passmeter) {
-    a.kids.unshift(Skeletons.Box.X({
-      className: `${ui.fig.group}__pw-meter widget__pw-meter wrapper`,
-      kids: [
-        Skeletons.Box.X({
-          className: `${ui.fig.group}__pw-meter widget__pw-meter score-limit`,
-          sys_pn: 'ref-pwm-score-limit'
-        }),
-
-        Skeletons.Box.X({
-          className: `${ui.fig.group}__pw-meter widget__pw-meter bar-holder`,
-          kids: [
-            Skeletons.Element({
-              className: `${ui.fig.group}__pw-meter widget__pw-meter strength`,
-              sys_pn: 'ref-pwm'
-            })
-          ]
-        }),
-
-        Skeletons.Button.Svg({
-          ico: 'info',
-          className: `${ui.fig.group}__pw-meter widget__pw-meter info`,
-          tooltips: {
-            content: LOCALE.DIGITS_MINIMUM_COMBINE
-          }
-        })
-      ]
-    }));
-  }
-  return a;
 };
 
 
