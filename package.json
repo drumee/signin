@@ -61,6 +61,6 @@
   },
   "dependencies": {
     "@drumee/ui-styles": "^1.0.1",
-    "@drumee/ui-toolkit": "^0.0.1"
+    "@drumee/ui-toolkit": "^0.0.6"
   }
 }

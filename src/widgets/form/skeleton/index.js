@@ -24,7 +24,7 @@ function __skl_welcome_signup(ui) {
         value: ui.mget(_a.username) || ""
       }),
       password(ui, {
-        placeholder: "",
+        placeholder: LOCALE.PASSWORD,
         name: _a.password,
         sys_pn: _a.password,
         service: _a.input,

@@ -25,13 +25,25 @@ class signin_form extends Signup {
   /**
   * To avoid full page reload upon login 
   */
-  gotSignedIn() {
-    if (Visitor.isOnline()) {
-      this.anim([1, { alpha: 0.0 }]);
-      RADIO_BROADCAST.trigger("user:signed:in", this.mget('reconnect'));
-    } else {
-      Drumee.start()
+  gotSignedIn(data) {
+    let { user, organization, hub } = data;
+    if (user) {
+      Visitor.set(user);
     }
+    if (organization) {
+      Organization.set(organization);
+    }
+    if (hub) {
+      Host.set(hub);
+    }
+    if (this.mget(RECONNECT)) {
+      RADIO_BROADCAST.trigger("user:signed:in", RECONNECT);
+      wsRouter.restart(1);
+      this.suppress();
+      Butler.sleep()
+      return;
+    }
+    Drumee.start()
   }
 
   /**
@@ -49,7 +61,6 @@ class signin_form extends Signup {
     setTimeout(() => {
       this.setItemStatus('commit-button', "0", "haptic");
     }, 500)
-    this.debug("AAA:52", data)
     switch (data.status) {
       case "INCOMPLETE_SIGNUP":
         this.triggerHandlers({ service: "onboarding" })
@@ -64,14 +75,6 @@ class signin_form extends Signup {
           return this.triggerHandlers({ email, service: "onboarding" })
         }
       case "ALREADY_SIGNED_IN":
-        Visitor.set(data);
-        if (this.mget(RECONNECT)) {
-          RADIO_BROADCAST.trigger("user:signed:in", RECONNECT);
-          wsRouter.restart(1);
-          this.suppress();
-          Butler.sleep()
-          return;
-        }
         return this.gotSignedIn(data);
 
       case "no_cookie":
@@ -97,16 +100,6 @@ class signin_form extends Signup {
       return;
     }
 
-    let { user, organization, hub } = data;
-    if (user) {
-      Visitor.set(user);
-    }
-    if (organization) {
-      Organization.set(organization);
-    }
-    if (hub) {
-      Host.set(hub);
-    }
     this.gotSignedIn(data);
   }
 
@@ -116,19 +109,16 @@ class signin_form extends Signup {
    */
   commitForm() {
     let { username, password } = this.getData();
-    this.debug("AAA:38", this.getData());
     if (!username) {
       this.setItemStatus(_a.username, "error");
       this.setItemStatus('commit-button', "0", "haptic");
       return
     }
-    this.debug("AAA:44", { username, password }, (!password || !password.length))
     if (!password || !password.length) {
       this.setItemStatus(_a.password, "error");
       this.setItemStatus('commit-button', "0", "haptic");
       return
     }
-    this.debug("AAA:47", { username, password }, (!password || !password.length))
     this.setItemStatus('commit-button', "1", "haptic");
     let vars = { username, password }
     this.postService(SERVICE.yp.signin, { vars }).then((data) => {
@@ -145,7 +135,6 @@ class signin_form extends Signup {
   onUiEvent(cmd, args = {}) {
     const service = args.service || cmd.mget(_a.service);
     let status = cmd.status;
-    this.debug(`onUiEvent xx 69 service = ${service}`, args, status, cmd);
     switch (service) {
       case _a.input:
         if (![_e.commit, _e.Enter].includes(status)) break;
@@ -164,7 +153,7 @@ class signin_form extends Signup {
             if (data.sent) {
               this.triggerHandlers({ data, service: 'otp-sent' })
             } else {
-              this.triggerHandlers({ service: 'otp-not-sent', email: username })
+              this.renderMessage(LOCALE.OOPS_EMAIL_NOT_FOUND, 3000);
             }
           }).catch((e) => {
             this.warn("AAA:104 Error sending OTP", e)
@@ -223,7 +212,6 @@ class signin_form extends Signup {
    * @param {*} data 
    */
   _handleResponse(data) {
-    this.debug("AAA:_handleResponse", data)
     switch (data.status) {
       case "user_exists":
         return this.renderMessage(data.status, `${LOCALE.EMAIL_ALREADY_EXISTS} (${data.email})`)
@@ -278,13 +266,18 @@ class signin_form extends Signup {
   /**
    * 
    */
-  renderMessage(content) {
-    // this.triggerHandlers({ service: _a.error, message })
+  renderMessage(content, timeout = 0) {
     this.ensurePart(_a.message).then((p) => {
       p.set({ content })
     })
+    if (timeout > 0) {
+      setTimeout(() => {
+        this.ensurePart(_a.message).then((p) => {
+          p.set({ content: "" })
+        })
+      }, timeout);
+    }
   }
-
 
   /**
    * @param {string} code
