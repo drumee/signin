@@ -59,7 +59,12 @@ class signin_router extends LetcBox {
     if (hub) {
       Host.set(hub);
     }
-    Drumee.start()
+
+    wsRouter.restart(1);
+    Drumee.start();
+    setTimeout(() => {
+      if (typeof Wm === 'undefined') location.reload();
+    }, 1500);
   }
 
   /**
@@ -69,7 +74,7 @@ class signin_router extends LetcBox {
    */
   async onUiEvent(cmd, args = {}) {
     const service = args.service || cmd.get(_a.service);
-    this.debug("AAA:64zz", service, args, this)
+    this.debug("AAA:64zz", cmd, service, args, this)
     let buttons;
     let { error, data } = args;
     switch (service) {
@@ -105,9 +110,13 @@ class signin_router extends LetcBox {
         return location.reload();
 
       case 'otp-failed':
-        return this.feed({ kind: 'signin_otp', api: SERVICE.otp.verify, service: 'otp-verified' });
+        return this.feed({ kind: 'dtk_otp', api: SERVICE.otp.verify, service: 'otp-verified' });
 
       case 'otp-verified':
+        this.debug("AAA:121", data)
+        if (!data || !data.secret) {
+          return
+        }
         this.feed({
           kind: 'dtk_dialog',
           body: {
@@ -116,7 +125,7 @@ class signin_router extends LetcBox {
             uiHandler: [this],
             label: LOCALE.RESET_PASSWORD,
             api: SERVICE.otp.set_password,
-            payload: args.data,
+            payload: data,
             service: 'password-set'
           },
           message: '',

@@ -36,14 +36,18 @@ class signin_form extends Signup {
     if (hub) {
       Host.set(hub);
     }
+    wsRouter.restart(1);
     if (this.mget(RECONNECT)) {
       RADIO_BROADCAST.trigger("user:signed:in", RECONNECT);
-      wsRouter.restart(1);
       this.suppress();
       Butler.sleep()
       return;
     }
-    Drumee.start()
+    
+    Drumee.start();
+    setTimeout(() => {
+      if (typeof Wm === 'undefined') location.reload();
+    }, 3000);
   }
 
   /**
