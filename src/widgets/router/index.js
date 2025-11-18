@@ -86,7 +86,15 @@ class signin_router extends LetcBox {
         }
         break;
       case "onboarding":
-        this.feed({ ...args, kind: "onboarding", type: "app", service: "onboarding-complete" })
+        let kind = "onboarding";
+        let name = "onboarding";
+        Kind.loadPlugin({ name, kind }).then(() => {
+          Kind.waitFor(kind).then((k) => {
+            this.feed({ ...args, kind, type: "app", service: "onboarding-complete" })
+          })
+        }).catch((e) => {
+          this.warn(`Failed to load onboarding plugin`, e)
+        })
         break;
 
       case 'onboarding-complete':

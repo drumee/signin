@@ -7,7 +7,7 @@
  */
 function start() {
   Kind.registerAddons(require("./seeds"));
-  Kind.registerAddons(require("./vendor/onboarding-ui/app/seeds"));
+  // Kind.registerAddons(require("./vendor/onboarding-ui/app/seeds"));
 }
 
 require("@drumee/ui-toolkit");

@@ -2,7 +2,7 @@ const { resolve } = require("path");
 const { exec } = require('shelljs');
 const { writeFileSync, readFileSync } = require('jsonfile');
 const { existsSync } = require('fs');
-const { UI_RUNTIME_HOST, UI_RUNTIME_PATH } = process.env;
+const { UI_RUNTIME_HOST } = process.env;
 class DrumeeSyncer {
   constructor(opt) {
     this.options = opt || {};
@@ -47,7 +47,7 @@ class DrumeeSyncer {
    * @returns 
    */
   get_hash(stats) {
-    console.log(`BUILDING FROM HASH=${stats.hash}`, stats.compiler, __dirname);
+    console.log(`BUILDING FROM HASH=${stats.hash}`, stats.compiler, this.options, __dirname);
     let { sync_templates, bundle_path, target, bundle_base, no_hash } = this.options;
     let file = resolve(bundle_path, "index.json");
     const { stdout } = exec("git log -1 --pretty=format:'%h'", { silent: true });
