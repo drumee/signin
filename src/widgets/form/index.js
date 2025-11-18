@@ -43,7 +43,7 @@ class signin_form extends Signup {
       Butler.sleep()
       return;
     }
-    
+
     Drumee.start();
     setTimeout(() => {
       if (typeof Wm === 'undefined') location.reload();
@@ -76,7 +76,7 @@ class signin_form extends Signup {
       case "ok":
         let { onboarded, email } = data.user.profile;
         if (!onboarded) {
-          return this.triggerHandlers({ email, service: "onboarding" })
+          return this.triggerHandlers({ ...data, email, service: "onboarding" })
         }
       case "ALREADY_SIGNED_IN":
         return this.gotSignedIn(data);
@@ -162,8 +162,27 @@ class signin_form extends Signup {
           }).catch((e) => {
             this.warn("AAA:104 Error sending OTP", e)
           })
-          break;
         }
+        break;
+      case 'use-apple':
+        this.debug(`POSTING = ${service}`, args, status, cmd);
+        this.postService(SERVICE.apple.initiate, {}).then((data) => {
+          this._handleResponse(data);
+          document.onvisibilitychange = () => {
+            location.reload()
+          }
+        })
+        break;
+      case 'use-google':
+        this.debug(`POSTING = ${service}`, args, status, cmd);
+        this.postService(SERVICE.google.initiate, {}).then((data) => {
+          this._handleResponse(data);
+          document.onvisibilitychange = () => {
+            location.reload()
+          }
+        })
+        break;
+
     }
   }
 
