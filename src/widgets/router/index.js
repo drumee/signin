@@ -107,11 +107,7 @@ class signin_router extends LetcBox {
             priority: "primary"
           }),
         ]
-        this.feed({ buttons, kind: 'dtk_message', title: LOCALE.SIGNUP_COMPLETED, message: LOCALE.DRUMEEOS_IS_NOW_READY })
-        break;
-
-      case 'onboarding':
-        this.feed({ kind: 'onboarding', email: this.mget(_a.email), uiHandler: [this], type: 'app', service: "signup-completed" })
+        this.feed({ buttons, kind: 'dtk_dialog', title: LOCALE.SIGNUP_COMPLETED, message: LOCALE.DRUMEEOS_IS_NOW_READY })
         break;
 
       case 'login':
@@ -164,7 +160,7 @@ class signin_router extends LetcBox {
             priority: "secondary"
           }),
         ]
-        this.feed({ message: args.message, buttons, kind: 'dtk_message', service: _a.home, title: "Ooop!" })
+        this.feed({ message: args.message, buttons, kind: 'dtk_dialog', service: _a.home, title: "Ooop!" })
         break;
 
       case _a.home:
