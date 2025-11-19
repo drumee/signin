@@ -75,7 +75,7 @@ class signin_form extends Signup {
 
       case "ok":
         let { onboarded, email, firstname, lastname } = data.user.profile;
-        if (!onboarded && (!firstname || !lastname)) {
+        if (!onboarded && !firstname && !lastname) {
           return this.triggerHandlers({ ...data, email, service: "onboarding" })
         }
       case "ALREADY_SIGNED_IN":
