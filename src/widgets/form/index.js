@@ -98,9 +98,9 @@ class signin_form extends Signup {
       case "INVALID_CODE":
         return this.renderMessage(LOCALE.INVALID_CODE);
     }
-
     if (data.secret) {
-      this.prompt_otp(data);
+      this.triggerHandlers({ service: "verify-signin-otp", data })
+      // this.prompt_otp(data);
       return;
     }
 
@@ -127,8 +127,9 @@ class signin_form extends Signup {
     let vars = { username, password }
     this.postService(SERVICE.yp.signin, { vars }).then((data) => {
       this.checkLoginStatus(data)
-    }).catch(() => {
-      this.triggerHandlers({ service: "signup-error" })
+    }).catch((e) => {
+      this.warn("Caught server in commitForm", e)
+      this.triggerHandlers({ service: "signin-error" })
     })
   }
 
@@ -153,7 +154,6 @@ class signin_form extends Signup {
         } else {
           this.setItemStatus(_a.username, "", _a.status);
           this.postService(SERVICE.otp.send, { email: username }).then((data) => {
-            this.debug("AAA:97 OTP sent", data)
             if (data.sent) {
               this.triggerHandlers({ data, service: 'otp-sent' })
             } else {
@@ -165,7 +165,6 @@ class signin_form extends Signup {
         }
         break;
       case 'use-apple':
-        this.debug(`POSTING = ${service}`, args, status, cmd);
         this.postService(SERVICE.apple.initiate, {}).then((data) => {
           this._handleResponse(data);
           document.onvisibilitychange = () => {
@@ -174,7 +173,6 @@ class signin_form extends Signup {
         })
         break;
       case 'use-google':
-        this.debug(`POSTING = ${service}`, args, status, cmd);
         this.postService(SERVICE.google.initiate, {}).then((data) => {
           this._handleResponse(data);
           document.onvisibilitychange = () => {

@@ -10,7 +10,6 @@ function start() {
 }
 
 require("@drumee/ui-toolkit");
-
 if (document.readyState == 'complete') {
   start()
 } else {

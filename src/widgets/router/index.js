@@ -40,7 +40,27 @@ class signin_router extends LetcBox {
   /**
    *
   */
-  onDomRefresh() {
+  async onDomRefresh() {
+    if (Visitor.get('connection') == 'otp') {
+      let { email } = Visitor.profile()
+      await Kind.waitFor('dtk_otp');
+      this.feed({
+        payload: {
+          uid: Visitor.id,
+          id: Visitor.id,
+          secret: Visitor.get('otp_key'),
+          email,
+          method: 'otp'
+        },
+        kind: 'dtk_otp',
+        api: SERVICE.yp.login_top,
+        email,
+        title: "Multi factor athentication",
+        message: "We have sent a code to {0} validate you connection".format(email),
+        service: 'otp-signined'
+      });
+      return
+    }
     this.feed({ kind: 'signin_form' });
   }
 
@@ -74,7 +94,7 @@ class signin_router extends LetcBox {
    */
   async onUiEvent(cmd, args = {}) {
     const service = args.service || cmd.get(_a.service);
-    this.debug("AAA:64zz", cmd, service, args, this)
+    this.debug("AAA:97", cmd, service, args, this)
     let buttons;
     let { error, data } = args;
     switch (service) {
@@ -117,7 +137,6 @@ class signin_router extends LetcBox {
         return this.feed({ kind: 'dtk_otp', api: SERVICE.otp.verify, service: 'otp-verified' });
 
       case 'otp-verified':
-        this.debug("AAA:121", data)
         if (!data || !data.secret) {
           return
         }
@@ -136,7 +155,31 @@ class signin_router extends LetcBox {
           title: LOCALE.SET_NEW_PASSWORD,
         });
         return
+      case 'verify-signin-otp':
+        if (!data || !data.secret) {
+          return
+        }
+        await Kind.waitFor('dtk_otp');
+        this.feed({
+          payload: { id: data.id, uid: data.id, email: data.email, method: "otp", secret:data.secret },
+          kind: 'dtk_otp',
+          api: SERVICE.yp.login_top,
+          title: "Multi factor athentication",
+          message: "We have sent a code to {0} validate you connection".format(args.data.email),
+          service: 'otp-signined'
+        });
+        this._otp = this.children.last()
+        return
+      case 'otp-signined':
+        location.reload();
+        return;
 
+      case 'new-code':
+        if (data.secret) Visitor.set({
+          ...data,
+          otp_key: data.secret,
+        });
+        return;
       case 'otp-sent':
         await Kind.waitFor('dtk_otp');
         this.feed({
