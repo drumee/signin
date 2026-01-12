@@ -61,9 +61,9 @@ class signin_router extends LetcBox {
       });
       return
     }
+    location.hash = "#/welcome/signin"
     this.feed({ kind: 'signin_form' });
   }
-
 
   /**
   * To avoid full page reload upon login 
@@ -108,13 +108,18 @@ class signin_router extends LetcBox {
       case "onboarding":
         let kind = "onboarding";
         let name = "onboarding";
-        Kind.loadPlugin({ name, kind }).then(() => {
+        Kind.loadPlugin({ name, kind }).then((widget) => {
+          if (!widget) {
+            return location.reload()
+          }
           Kind.waitFor(kind).then((k) => {
             this.feed({ ...args, kind, type: "app", service: "onboarding-complete" })
           })
         }).catch((e) => {
           this.warn(`Failed to load onboarding plugin`, e)
+          location.reload()
         })
+        // location.reload() // TMP FIX
         break;
 
       case 'onboarding-complete':
@@ -161,7 +166,7 @@ class signin_router extends LetcBox {
         }
         await Kind.waitFor('dtk_otp');
         this.feed({
-          payload: { id: data.id, uid: data.id, email: data.email, method: "otp", secret:data.secret },
+          payload: { id: data.id, uid: data.id, email: data.email, method: "otp", secret: data.secret },
           kind: 'dtk_otp',
           api: SERVICE.yp.login_top,
           title: "Multi factor athentication",
