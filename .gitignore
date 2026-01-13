@@ -138,3 +138,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 src/vendor/onboarding-ui/*
+.dev-tools.rc/
+build/
+node_modules/
+package-lock.json
