@@ -37,8 +37,8 @@ class signin_router extends LetcBox {
     this.feed(opt);
   }
 
-  /**
-   *
+/**
+  *
   */
   async onDomRefresh() {
     if (Visitor.get('connection') == 'otp') {
