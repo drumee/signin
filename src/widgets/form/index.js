@@ -250,7 +250,7 @@ class signin_form extends Signup {
         return
       case "prompt":
         if (data.authUrl) {
-          location.href = data.authUrl
+          location.href = data.authUrl;
         }
         break;
       default:

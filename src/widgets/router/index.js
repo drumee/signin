@@ -61,6 +61,11 @@ class signin_router extends LetcBox {
       });
       return
     }
+    let { main_domain, protocol, endpoint } = bootstrap()
+    if (!Visitor.isOnline() && location.host != main_domain) {
+      location.href = `${protocol}://${main_domain}${endpoint}#/welcome/signin`
+      return
+    }
     location.hash = "#/welcome/signin"
     this.feed({ kind: 'signin_form' });
   }
