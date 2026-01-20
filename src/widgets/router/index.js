@@ -17,7 +17,12 @@ class signin_router extends LetcBox {
     this.mset({ flow: _a.y });
     this._step = parseInt(localStorage.signup_step) || 0;
     this._max_step = 1;
-    LOCALE = { ...LOCALE, ...require("../../locale")(Visitor.language()) }
+    this.debug("AAAA:20", LOCALE)
+    try {
+      LOCALE.extend(require("../../locale")('en'))
+    } catch (e) {
+      LOCALE = { ...LOCALE, ...require("../../locale")(Visitor.language()) }
+    }
   }
 
   /** */
@@ -37,9 +42,9 @@ class signin_router extends LetcBox {
     this.feed(opt);
   }
 
-/**
-  *
-  */
+  /**
+    *
+    */
   async onDomRefresh() {
     if (Visitor.get('connection') == 'otp') {
       let { email } = Visitor.profile()

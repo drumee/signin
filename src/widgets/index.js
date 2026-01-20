@@ -28,4 +28,5 @@ class signup_common extends LetcBox {
   }
 }
 
+console.log("AAAA:31 SIGNIN")
 module.exports = signup_common
