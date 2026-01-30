@@ -6,6 +6,10 @@ function terms_and_conditions(ui) {
     l = 'fr';
   }
   let source = Platform.get('termsandconditions') || '{}';
+  source = {
+    "fr": "https://tunnel.drumee.com/termsandconditions/fr/CGU_Drumee2.html",
+    "en": "https://tunnel.drumee.com/termsandconditions/en/CGU_Drumee1.html"
+  }
   source = JSON.parse(source)
   let href = source[l] || ''
   let download = ''

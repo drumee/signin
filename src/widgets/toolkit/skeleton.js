@@ -184,6 +184,7 @@ export function termsAndConditions(ui, opt) {
   return Skeletons.Note({
     className: `${pfx}__terms`,
     content,
-
+    href : "https://qh7fEQuCMW7POEIYNN7Jw.app.drumee.org/Docs/CGU-DRUMEE.pdf"
+    // service:"terms-and-conditions"
   });
 }

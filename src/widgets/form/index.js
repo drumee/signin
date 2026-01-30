@@ -146,6 +146,9 @@ class signin_form extends Signup {
       case 'signin':
         this.commitForm();
         break;
+      case "terms-and-conditions":
+        this.loadTermsAndConditions()
+        break;
       case 'reset-password':
         this.debug("AAA:88 Navigating to reset password", this.getData())
         let { username } = this.getData();
@@ -198,6 +201,8 @@ class signin_form extends Signup {
   */
   downloadTermsAndConditions() {
     this.debug('downloadTermsAndConditions', this)
+    let url = "https://qh7fEQuCMW7POEIYNN7Jw.app.drumee.org/Docs/CGU-DRUMEE.pdf"
+    window.open(url, "_blank", "noopener; noreferrer");
     return
   }
 

@@ -17,7 +17,6 @@ class signin_router extends LetcBox {
     this.mset({ flow: _a.y });
     this._step = parseInt(localStorage.signup_step) || 0;
     this._max_step = 1;
-    this.debug("AAAA:20", LOCALE)
     try {
       LOCALE.extend(require("../../locale")('en'))
     } catch (e) {
@@ -118,17 +117,18 @@ class signin_router extends LetcBox {
       case "onboarding":
         let kind = "onboarding";
         let name = "onboarding";
-        Kind.loadPlugin({ name, kind }).then((widget) => {
-          if (!widget) {
-            return location.reload()
-          }
-          Kind.waitFor(kind).then((k) => {
-            this.feed({ ...args, kind, type: "app", service: "onboarding-complete" })
-          })
-        }).catch((e) => {
-          this.warn(`Failed to load onboarding plugin`, e)
-          location.reload()
-        })
+        location.reload()
+        // Kind.loadPlugin({ name, kind }).then((widget) => {
+        //   if (!widget) {
+        //     return location.reload()
+        //   }
+        //   Kind.waitFor(kind).then((k) => {
+        //     this.feed({ ...args, kind, type: "app", service: "onboarding-complete" })
+        //   })
+        // }).catch((e) => {
+        //   this.warn(`Failed to load onboarding plugin`, e)
+        //   location.reload()
+        // })
         // location.reload() // TMP FIX
         break;
 
