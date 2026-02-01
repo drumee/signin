@@ -117,7 +117,9 @@ class signin_router extends LetcBox {
       case "onboarding":
         let kind = "onboarding";
         let name = "onboarding";
-        location.reload()
+        setTimeout(() => {
+          location.reload()
+        }, 1000)
         // Kind.loadPlugin({ name, kind }).then((widget) => {
         //   if (!widget) {
         //     return location.reload()

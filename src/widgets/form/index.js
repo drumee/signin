@@ -74,10 +74,14 @@ class signin_form extends Signup {
         return this.renderMessage(LOCALE.BLOCKED_ACCOUNT);
 
       case "ok":
-        let { onboarded, email, firstname, lastname } = data.user.profile;
-        if (!onboarded && !firstname && !lastname) {
-          return this.triggerHandlers({ ...data, email, service: "onboarding" })
-        }
+        setTimeout(() => {
+          location.reload()
+        }, 1000)
+        // let { onboarded, email, firstname, lastname } = data.user.profile;
+        // if (!onboarded && !firstname && !lastname) {
+        //   return this.triggerHandlers({ ...data, email, service: "onboarding" })
+        // }
+        return;
       case "ALREADY_SIGNED_IN":
         return this.gotSignedIn(data);
 
