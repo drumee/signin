@@ -18,7 +18,7 @@ class signin_router extends LetcBox {
     this._step = parseInt(localStorage.signup_step) || 0;
     this._max_step = 1;
     try {
-      LOCALE.extend(require("../../locale")('en'))
+      LOCALE.extend(require("../../locale")('en'));
     } catch (e) {
       LOCALE = { ...LOCALE, ...require("../../locale")(Visitor.language()) }
     }

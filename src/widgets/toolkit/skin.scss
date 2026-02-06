@@ -19,6 +19,10 @@
     &[data-device="mobile"] {
       padding: 10px;
       height: auto;
+      align-content: start;
+      justify-content: flex-start;
+      align-items: flex-start;
+      justify-items: flex-start;
     }
   }
 
@@ -34,6 +38,11 @@
     border: 1px solid var(--neutral-200);
     padding: var(--spacer-7);
     border-radius: var(--corner-radius-6);
+
+    &[data-device="mobile"] {
+      top: 0;
+      padding: 10px;
+    }
   }
 
 
