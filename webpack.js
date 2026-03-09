@@ -130,6 +130,5 @@ module.exports = function () {
   const opt = normalize();
   let args = {};
   args[BUILD_TARGET] = join(UI_SRC_PATH, 'src')
-  // let signin = join(UI_SRC_PATH, 'src');
   return makeOptions(args, opt);
 }

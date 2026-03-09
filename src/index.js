@@ -9,7 +9,9 @@ function start() {
   Kind.registerAddons(require("./seeds"));
 }
 
-require("@drumee/ui-toolkit");
+const { loadWidgets } = require("@drumee/ui-toolkit");
+loadWidgets()
+
 if (document.readyState == 'complete') {
   start()
 } else {
