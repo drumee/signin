@@ -1,20 +1,5 @@
 @use '@drumee/ui-styles/src/mixins';
 
-$bg-dark: #0d0d1a;
-$card-bg: #1a1a2e;
-$card-border: #2a2a40;
-$input-bg: #12122a;
-$input-border: #3a3a55;
-$text-white: #ffffff;
-$text-muted: #8888aa;
-$text-label: #6666aa;
-$purple: #6c5ce7;
-$purple-light: #7c6df7;
-$purple-dark: #5b4bd6;
-$border-radius: 12px;
-$border-radius-sm: 8px;
-$border-radius-lg: 16px;
-
 @mixin signin-main {
 
   &__ui {
@@ -23,11 +8,11 @@ $border-radius-lg: 16px;
     align-content: center;
     align-items: center;
     justify-content: center;
-    background-color: $bg-dark;
+    background-color: var(--neutral-950);
     overflow: auto;
-    font-family: 'Inter', 'Armin Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-main);
     flex-wrap: wrap;
-    padding: 40px 20px;
+    padding: var(--spacer-10) var(--spacer-7);
 
     &[data-device="mobile"] {
       padding: 10px;
@@ -44,22 +29,22 @@ $border-radius-lg: 16px;
     align-items: center;
     width: 100%;
     max-width: 520px;
-    gap: 24px;
-    background-color: $card-bg;
-    border: 1px solid $card-border;
-    padding: 40px;
-    border-radius: $border-radius-lg;
+    gap: var(--spacer-6);
+    background-color: var(--neutral-900);
+    border: 1px solid var(--neutral-800);
+    padding: var(--spacer-10);
+    border-radius: var(--corner-radius-5);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 
     &[data-device="mobile"] {
       top: 0;
-      padding: 20px;
+      padding: var(--spacer-7);
     }
   }
 
   &__header {
     width: 100%;
-    gap: 12px;
+    gap: var(--spacer-4);
   }
 
   &__header-top {
@@ -71,7 +56,7 @@ $border-radius-lg: 16px;
   &__logo {
     &-container {
       align-items: center;
-      gap: 8px;
+      gap: var(--spacer-3);
     }
 
     &-content {
@@ -84,14 +69,14 @@ $border-radius-lg: 16px;
       svg {
         width: 100%;
         height: 100%;
-        color: $purple;
+        color: var(--primary-500);
       }
     }
 
     &-text {
-      font-weight: 700;
+      font-family: var(--font-bold);
       font-size: 22px;
-      color: $text-white;
+      color: var(--gray-white);
       letter-spacing: -0.5px;
     }
   }
@@ -104,44 +89,43 @@ $border-radius-lg: 16px;
   &__progress-step {
     width: 32px;
     height: 4px;
-    border-radius: 100px;
-    background: rgba(108, 92, 231, 0.2);
+    border-radius: var(--corner-radius-max);
+    background: var(--primary-100-5);
 
     &.active {
-      background: $purple;
+      background: var(--primary-500);
     }
   }
 
   &__text-container {
     width: 100%;
-    gap: 4px;
+    gap: var(--spacer-2);
   }
 
   &__title {
-    font-weight: 700;
+    font-family: var(--font-bold);
     font-size: 32px;
     line-height: 40px;
-    color: $purple-light;
+    color: var(--primary-400);
   }
 
   &__tips {
-    font-weight: 400;
+    font-family: var(--font-main);
     font-size: 16px;
     line-height: 24px;
-    color: $text-muted;
+    color: var(--neutral-600);
   }
 
   &__message {
-    font-weight: 400;
-    font-style: normal;
+    font-family: var(--font-main);
     font-size: 14px;
     line-height: 22px;
     text-align: center;
     letter-spacing: 1px;
-    color: $text-muted;
+    color: var(--neutral-600);
 
     span {
-      font-weight: bold;
+      font-family: var(--font-bold);
       cursor: pointer;
     }
   }
@@ -151,7 +135,7 @@ $border-radius-lg: 16px;
 @mixin signin-button {
 
   &__buttons {
-    gap: 12px;
+    gap: var(--spacer-4);
     width: 100%;
   }
 
@@ -159,9 +143,9 @@ $border-radius-lg: 16px;
   &__button-main {
     height: 52px;
     opacity: 1;
-    gap: 12px;
-    border-radius: $border-radius;
-    padding: 8px 16px;
+    gap: var(--spacer-4);
+    border-radius: var(--corner-radius-4);
+    padding: var(--spacer-3) var(--spacer-5);
     cursor: pointer;
     transition: all 0.2s ease;
 
@@ -174,22 +158,22 @@ $border-radius-lg: 16px;
       padding-right: 6px;
       justify-content: center;
       grid-template-columns: 1fr;
-      background: #433CC5;
-      color: $text-white;
+      background: var(--primary-600);
+      color: var(--gray-white);
       align-content: center;
       flex-wrap: wrap;
-      border-radius: $border-radius;
-      font-weight: 600;
+      border-radius: var(--corner-radius-4);
+      font-family: var(--font-medium);
 
       &:hover {
-        background: $purple-light;
-        box-shadow: 0 4px 16px rgba(108, 92, 231, 0.4);
+        background: var(--primary-400);
+        box-shadow: 0 4px 16px color-mix(in srgb, var(--primary-500) 40%, transparent);
       }
 
       .icon.svg-wrapper {
         height: 40px;
         width: 40px;
-        color: $purple;
+        color: var(--primary-500);
         background-color: white;
         border-radius: 50%;
         padding: 10px;
@@ -202,18 +186,18 @@ $border-radius-lg: 16px;
 
     &.secondary {
       justify-content: center;
-      background-color: #0B0A21;
-      border: 1px solid $input-border;
-      color: $text-white;
+      background-color: var(--neutral-950);
+      border: 1px solid var(--neutral-700);
+      color: var(--gray-white);
 
       &:hover {
-        border-color: $purple;
+        border-color: var(--primary-500);
       }
 
       .icon.svg-wrapper {
         height: 28px;
         width: 28px;
-        color: $text-white;
+        color: var(--gray-white);
         border-radius: 50%;
         padding: 4px;
       }
@@ -238,7 +222,7 @@ $border-radius-lg: 16px;
     justify-content: center;
     line-height: 20px;
     font-size: 16px;
-    font-weight: 500;
+    font-family: var(--font-medium);
   }
 
 }
