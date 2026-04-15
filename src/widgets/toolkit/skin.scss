@@ -60,8 +60,8 @@
     }
 
     &-content {
-      width: 36px;
-      height: 36px;
+      width: 28px;
+      height: 28px;
       align-content: center;
       justify-content: start;
       align-items: start;
@@ -75,9 +75,9 @@
 
     &-text {
       font-family: var(--font-bold);
-      font-size: 22px;
+      font-size: 20px;
       color: var(--gray-white);
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
     }
   }
 
@@ -87,10 +87,11 @@
   }
 
   &__progress-step {
-    width: 32px;
+    width: 40px;
     height: 4px;
     border-radius: var(--corner-radius-max);
     background: var(--primary-100-5);
+    transition: background 0.3s ease;
 
     &.active {
       background: var(--primary-500);
@@ -106,13 +107,13 @@
     font-family: var(--font-bold);
     font-size: 32px;
     line-height: 40px;
-    color: var(--primary-400);
+    color: var(--gray-white);
   }
 
   &__tips {
     font-family: var(--font-main);
-    font-size: 16px;
-    line-height: 24px;
+    font-size: 15px;
+    line-height: 22px;
     color: var(--neutral-600);
   }
 
@@ -144,7 +145,7 @@
     height: 52px;
     opacity: 1;
     gap: var(--spacer-4);
-    border-radius: var(--corner-radius-4);
+    border-radius: var(--corner-radius-3);
     padding: var(--spacer-3) var(--spacer-5);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -158,11 +159,11 @@
       padding-right: 6px;
       justify-content: center;
       grid-template-columns: 1fr;
-      background: var(--primary-600);
+      background: var(--primary-500);
       color: var(--gray-white);
       align-content: center;
       flex-wrap: wrap;
-      border-radius: var(--corner-radius-4);
+      border-radius: var(--corner-radius-3);
       font-family: var(--font-medium);
 
       &:hover {

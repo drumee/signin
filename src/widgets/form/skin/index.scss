@@ -30,7 +30,7 @@
     height: 52px;
     background: var(--neutral-950);
     border: 1px solid var(--neutral-700);
-    border-radius: var(--corner-radius-4);
+    border-radius: var(--corner-radius-3);
     padding: 0 var(--spacer-5);
     align-items: center;
     gap: var(--spacer-4);
@@ -59,6 +59,8 @@
     height: 100%;
     border: none;
     outline: none;
+    display: flex;
+    align-items: center;
 
     &[data-status="error"] {
       .signin-form__entry-row {
