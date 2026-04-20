@@ -8,7 +8,8 @@
     align-content: center;
     align-items: center;
     justify-content: center;
-    background-color: var(--neutral-950);
+    background-color: var(--normal-bg);
+    color: var(--normal-fg-10);
     overflow: auto;
     font-family: var(--font-main);
     flex-wrap: wrap;
@@ -29,12 +30,12 @@
     align-items: center;
     width: 100%;
     max-width: 520px;
-    gap: var(--spacer-6);
-    background-color: var(--neutral-900);
-    border: 1px solid var(--neutral-800);
-    padding: var(--spacer-10);
-    border-radius: var(--corner-radius-5);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    gap: 32px;
+    background-color: var(--normal-bg-90);
+    border: 1px solid var(--border-muted);
+    padding: 48px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-left-big);
 
     &[data-device="mobile"] {
       top: 0;
@@ -44,7 +45,7 @@
 
   &__header {
     width: 100%;
-    gap: var(--spacer-4);
+    gap: 12px;
   }
 
   &__header-top {
@@ -69,14 +70,14 @@
       svg {
         width: 100%;
         height: 100%;
-        color: var(--primary-500);
+        color: var(--active-border);
       }
     }
 
     &-text {
       font-family: var(--font-bold);
       font-size: 20px;
-      color: var(--gray-white);
+      color: var(--normal-fg-10);
       letter-spacing: -0.3px;
     }
   }
@@ -90,11 +91,11 @@
     width: 40px;
     height: 4px;
     border-radius: var(--corner-radius-max);
-    background: var(--primary-100-5);
+    background: var(--overlay-bg-05);
     transition: background 0.3s ease;
 
     &.active {
-      background: var(--primary-500);
+      background: var(--active-border);
     }
   }
 
@@ -106,15 +107,16 @@
   &__title {
     font-family: var(--font-bold);
     font-size: 32px;
-    line-height: 40px;
-    color: var(--gray-white);
+    line-height: 35px;
+    font-weight: 600;
+    color: var(--normal-fg-10);
   }
 
   &__tips {
     font-family: var(--font-main);
-    font-size: 15px;
-    line-height: 22px;
-    color: var(--neutral-600);
+    font-size: 16px;
+    line-height: 26px;
+    color: var(--normal-fg-50);
   }
 
   &__message {
@@ -123,7 +125,7 @@
     line-height: 22px;
     text-align: center;
     letter-spacing: 1px;
-    color: var(--neutral-600);
+    color: var(--normal-fg-50);
 
     span {
       font-family: var(--font-bold);
@@ -142,11 +144,11 @@
 
 
   &__button-main {
-    height: 52px;
+    height: 56px;
     opacity: 1;
     gap: var(--spacer-4);
-    border-radius: var(--corner-radius-3);
-    padding: var(--spacer-3) var(--spacer-5);
+    border-radius: 4px;
+    padding: 16px 24px;
     cursor: pointer;
     transition: all 0.2s ease;
 
@@ -159,22 +161,24 @@
       padding-right: 6px;
       justify-content: center;
       grid-template-columns: 1fr;
-      background: var(--primary-500);
-      color: var(--gray-white);
+      background: #433CC5;
+      color: #FFFFFF;
       align-content: center;
       flex-wrap: wrap;
-      border-radius: var(--corner-radius-3);
+      border-radius: 4px;
       font-family: var(--font-medium);
+      font-weight: 600;
+      font-size: 16px;
 
       &:hover {
-        background: var(--primary-400);
-        box-shadow: 0 4px 16px color-mix(in srgb, var(--primary-500) 40%, transparent);
+        background: #5950FF;
+        box-shadow: 0 4px 16px rgba(89, 80, 255, 0.4);
       }
 
       .icon.svg-wrapper {
         height: 40px;
         width: 40px;
-        color: var(--primary-500);
+        color: #433CC5;
         background-color: white;
         border-radius: 50%;
         padding: 10px;
@@ -187,18 +191,18 @@
 
     &.secondary {
       justify-content: center;
-      background-color: var(--neutral-950);
-      border: 1px solid var(--neutral-700);
-      color: var(--gray-white);
+      background-color: var(--overlay-bg-05);
+      border: 1px solid var(--border-muted);
+      color: var(--normal-fg-10);
 
       &:hover {
-        border-color: var(--primary-500);
+        border-color: var(--active-border);
       }
 
       .icon.svg-wrapper {
         height: 28px;
         width: 28px;
-        color: var(--gray-white);
+        color: var(--normal-fg-10);
         border-radius: 50%;
         padding: 4px;
       }

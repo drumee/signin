@@ -18,26 +18,26 @@
   }
 
   &__entry-label {
-    font-size: 11px;
+    font-size: 12px;
     font-family: var(--font-medium);
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--neutral-500);
+    color: var(--normal-fg-50);
   }
 
   &__entry-row {
     width: 100%;
-    height: 52px;
-    background: var(--neutral-950);
-    border: 1px solid var(--neutral-700);
-    border-radius: var(--corner-radius-3);
-    padding: 0 var(--spacer-5);
+    height: 45px;
+    background: var(--overlay-bg-05);
+    border: 1px solid var(--border-muted);
+    border-radius: 4px;
+    padding: 0 12px;
     align-items: center;
-    gap: var(--spacer-4);
+    gap: 8px;
     transition: border-color 0.2s;
 
     &:focus-within {
-      border-color: var(--primary-500);
+      border-color: var(--active-border);
     }
   }
 
@@ -45,7 +45,7 @@
     width: 20px;
     height: 20px;
     flex-shrink: 0;
-    color: var(--neutral-600);
+    color: var(--normal-fg-50);
 
     svg {
       width: 100%;
@@ -64,22 +64,27 @@
 
     &[data-status="error"] {
       .signin-form__entry-row {
-        border-color: var(--red-600);
+        border-color: var(--signout-fg, var(--red-600));
       }
     }
 
     input {
       width: 100%;
+      height: auto;
       background: transparent;
       border: none;
       outline: none;
-      color: var(--gray-white);
+      color: var(--normal-fg-10);
       font-size: 15px;
+      line-height: 22px;
       font-family: var(--font-main);
-      padding: 12px 0;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
 
       &::placeholder {
-        color: var(--neutral-600);
+        color: var(--placeholder-fg);
+        line-height: 22px;
       }
 
       &:focus {
@@ -92,10 +97,13 @@
       &:-webkit-autofill:hover,
       &:-webkit-autofill:focus,
       &:-webkit-autofill:active {
-        -webkit-box-shadow: 0 0 0 30px var(--neutral-950) inset !important;
-        -webkit-text-fill-color: var(--gray-white) !important;
+        -webkit-text-fill-color: var(--normal-fg-10) !important;
+        -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+        box-shadow: 0 0 0 1000px transparent inset !important;
+        background-color: transparent !important;
+        background-image: none !important;
         transition: background-color 5000s ease-in-out 0s;
-        caret-color: var(--gray-white);
+        caret-color: var(--normal-fg-10);
       }
     }
 
@@ -123,18 +131,18 @@
 
   &__text {
     font-family: var(--font-main);
-    font-size: 15px;
-    line-height: 22px;
-    color: var(--neutral-600);
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--normal-fg-50);
 
     &.link {
       font-family: var(--font-medium);
-      color: var(--primary-400);
+      color: var(--active-border);
       cursor: pointer;
       transition: color 0.2s;
 
       &:hover {
-        color: var(--primary-300);
+        color: var(--hover-border-40);
       }
     }
   }
@@ -145,7 +153,7 @@
     font-family: var(--font-main);
     font-size: 14px;
     line-height: 20px;
-    color: var(--neutral-600);
+    color: var(--normal-fg-50);
     gap: var(--spacer-5);
 
     &::before,
@@ -153,7 +161,7 @@
       content: " ";
       flex: 1;
       height: 0;
-      border: 1px solid var(--neutral-800);
+      border: 1px solid var(--border-muted);
       margin: auto 0;
     }
   }
@@ -168,7 +176,7 @@
   }
 
   &__error-content {
-    color: var(--red-600);
+    color: var(--signout-fg, var(--red-600));
     font-family: var(--font-main);
     font-size: 14px;
     line-height: 22px;
@@ -189,18 +197,18 @@
     font-family: var(--font-medium);
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--neutral-600);
+    color: var(--normal-fg-50);
     cursor: pointer;
     transition: color 0.2s;
 
     &:hover {
-      color: var(--gray-white);
+      color: var(--normal-fg-10);
     }
   }
 
   &__terms-dot {
     font-size: 12px;
-    color: var(--neutral-600);
+    color: var(--normal-fg-50);
   }
 
   &__wrapper {
@@ -220,16 +228,16 @@
 
   &__step-dot {
     font-size: 10px;
-    color: var(--primary-300);
+    color: var(--active-border);
     line-height: 1;
-    text-shadow: 0 0 8px var(--primary-300);
+    text-shadow: 0 0 8px var(--active-border);
   }
 
   &__step-text {
     font-size: 12px;
     font-family: var(--font-medium);
     letter-spacing: 2px;
-    color: var(--neutral-600);
+    color: var(--normal-fg-50);
     text-transform: uppercase;
   }
 }
