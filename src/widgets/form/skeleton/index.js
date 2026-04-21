@@ -1,4 +1,4 @@
-const { entry, header, button, password, termsAndConditions, stepIndicator } = require("../../toolkit/skeleton")
+const { entry, header, button, password, termsAndConditions } = require("../../toolkit/skeleton")
 
 function __skl_welcome_signup(ui) {
   const fig = ui.fig.family
@@ -81,7 +81,6 @@ function __skl_welcome_signup(ui) {
     className: `${fig}__wrapper`,
     kids: [
       card,
-      stepIndicator(ui, { step: 1, total: 5, label: LOCALE.STEP_IDENTITY_VERIFICATION || "IDENTITY VERIFICATION" })
     ]
   })
 
