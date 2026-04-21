@@ -145,6 +145,21 @@ class signin_form extends Signup {
     const service = args.service || cmd.mget(_a.service);
     let status = cmd.status;
     switch (service) {
+      case "toggle-password-visibility": {
+        const eyePart = cmd;
+        const row = eyePart.el.closest('.signin-form__entry-row');
+        if (!row) break;
+        const input = row.querySelector('input');
+        if (!input) break;
+        const isVisible = input.type === 'text';
+        input.type = isVisible ? 'password' : 'text';
+        const useEl = eyePart.el.querySelector('svg use');
+        if (useEl) {
+          useEl.setAttribute('xlink:href', isVisible ? '#--icon-eye_closed' : '#--icon-eye');
+        }
+        eyePart.el.dataset.state = isVisible ? '0' : '1';
+        break;
+      }
       case _a.input:
         if (![_e.commit, _e.Enter].includes(status)) break;
       case 'signin':

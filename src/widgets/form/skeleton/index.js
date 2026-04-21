@@ -17,25 +17,25 @@ function __skl_welcome_signup(ui) {
     className: `${fig}__form`,
     kids: [
       entry(ui, {
-        label: LOCALE.WORK_EMAIL || "WORK EMAIL",
-        placeholder: LOCALE.EMAIL_PLACEHOLDER || "name@company.com",
+        label: LOCALE.EMAIL || "EMAIL",
+        placeholder: LOCALE.ENTER_YOUR_EMAIL || "Enter your email",
         name: _a.username,
         sys_pn: _a.username,
         service: _a.input,
-        ico: "mail",
+        ico: "mail_input",
         value: ui.mget(_a.username) || ""
       }),
       password(ui, {
         label: LOCALE.PASSWORD_LABEL || "PASSWORD",
-        placeholder: LOCALE.PASSWORD_PLACEHOLDER || "name@company.com",
+        placeholder: LOCALE.ENTER_YOUR_PASSWORD || "Enter your password",
         name: _a.password,
         sys_pn: _a.password,
         service: _a.input,
-        ico: "lock",
+        ico: "",
       }),
       message,
       button(ui, {
-        label: LOCALE.SIGN_IN_TO_WORKSPACE || "Sign In to Workspace",
+        label: LOCALE.LOG_IN_TO_WORKSPACE || "Log In to Workspace",
         service: 'signin',
         type: _a.email,
         sys_pn: "commit-button",
@@ -62,7 +62,7 @@ function __skl_welcome_signup(ui) {
     className: `${fig}__main`,
     debug: __filename,
     kids: [
-      header(ui, LOCALE.WELCOME_TO_DRUMEE || "Welcome to DRUMEE", LOCALE.SIGN_IN_SUBTITLE || "Sign in to your sovereign workspace"),
+      header(ui, LOCALE.WELCOME_TO_DRUMEE || "Welcome to DRUMEE", LOCALE.SIGN_IN_SUBTITLE || "Log in to your sovereign workspace"),
       form,
       Skeletons.Element({ content: LOCALE.OR, className: `${fig}__separator` }),
       buttons,

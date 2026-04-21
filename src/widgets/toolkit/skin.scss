@@ -8,12 +8,26 @@
     align-content: center;
     align-items: center;
     justify-content: center;
-    background-color: var(--normal-bg);
-    color: var(--normal-fg-10);
+    background-color: rgb(242, 242, 247);
+    color: rgb(52, 52, 58);
     overflow: auto;
     font-family: var(--font-main);
     flex-wrap: wrap;
     padding: var(--spacer-10) var(--spacer-7);
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      bottom: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 885px;
+      height: 727px;
+      background: radial-gradient(ellipse at center, rgba(177, 172, 255, 0.35) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
 
     &[data-device="mobile"] {
       padding: 10px;
@@ -31,11 +45,11 @@
     width: 100%;
     max-width: 520px;
     gap: 32px;
-    background-color: var(--normal-bg-90);
-    border: 1px solid var(--border-muted);
+    background-color: rgb(242, 242, 247);
     padding: 48px;
     border-radius: 12px;
-    box-shadow: var(--shadow-left-big);
+    position: relative;
+    z-index: 1;
 
     &[data-device="mobile"] {
       top: 0;
@@ -70,32 +84,33 @@
       svg {
         width: 100%;
         height: 100%;
-        color: var(--active-border);
+        color: rgb(67, 60, 197);
       }
     }
 
     &-text {
       font-family: var(--font-bold);
       font-size: 20px;
-      color: var(--normal-fg-10);
+      color: rgb(52, 52, 58);
       letter-spacing: -0.3px;
     }
   }
 
   &__progress-bar {
-    gap: 6px;
+    gap: 8px;
     align-items: center;
   }
 
   &__progress-step {
-    width: 40px;
-    height: 4px;
-    border-radius: var(--corner-radius-max);
-    background: var(--overlay-bg-05);
+    flex: 1;
+    height: 6px;
+    max-width: 61px;
+    border-radius: 12px;
+    background: rgba(89, 80, 255, 0.1);
     transition: background 0.3s ease;
 
     &.active {
-      background: var(--active-border);
+      background: rgb(89, 80, 255);
     }
   }
 
@@ -109,14 +124,14 @@
     font-size: 32px;
     line-height: 35px;
     font-weight: 600;
-    color: var(--normal-fg-10);
+    color: rgb(67, 60, 197);
   }
 
   &__tips {
     font-family: var(--font-main);
     font-size: 16px;
-    line-height: 26px;
-    color: var(--normal-fg-50);
+    line-height: 22px;
+    color: rgb(101, 101, 108);
   }
 
   &__message {
@@ -125,7 +140,7 @@
     line-height: 22px;
     text-align: center;
     letter-spacing: 1px;
-    color: var(--normal-fg-50);
+    color: rgb(101, 101, 108);
 
     span {
       font-family: var(--font-bold);
@@ -141,7 +156,6 @@
     gap: var(--spacer-4);
     width: 100%;
   }
-
 
   &__button-main {
     height: 56px;
@@ -161,7 +175,7 @@
       padding-right: 6px;
       justify-content: center;
       grid-template-columns: 1fr;
-      background: #433CC5;
+      background: rgb(67, 60, 197);
       color: #FFFFFF;
       align-content: center;
       flex-wrap: wrap;
@@ -171,14 +185,14 @@
       font-size: 16px;
 
       &:hover {
-        background: #5950FF;
+        background: rgb(89, 80, 255);
         box-shadow: 0 4px 16px rgba(89, 80, 255, 0.4);
       }
 
       .icon.svg-wrapper {
         height: 40px;
         width: 40px;
-        color: #433CC5;
+        color: rgb(67, 60, 197);
         background-color: white;
         border-radius: 50%;
         padding: 10px;
@@ -191,18 +205,19 @@
 
     &.secondary {
       justify-content: center;
-      background-color: var(--overlay-bg-05);
-      border: 1px solid var(--border-muted);
-      color: var(--normal-fg-10);
+      background-color: rgba(89, 80, 255, 0.1);
+      border: none;
+      border-radius: 8px;
+      color: rgb(67, 60, 197);
 
       &:hover {
-        border-color: var(--active-border);
+        background-color: rgba(89, 80, 255, 0.15);
       }
 
       .icon.svg-wrapper {
         height: 28px;
         width: 28px;
-        color: var(--normal-fg-10);
+        color: rgb(52, 52, 58);
         border-radius: 50%;
         padding: 4px;
       }
