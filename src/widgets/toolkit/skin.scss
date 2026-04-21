@@ -165,6 +165,7 @@
     padding: 16px 24px;
     cursor: pointer;
     transition: all 0.2s ease;
+    align-items: center;
 
     &[data-haptic="1"] {
       opacity: .6;
@@ -235,10 +236,8 @@
 
   &__button.btn {
     width: auto;
-    height: 100%;
-    align-content: center;
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
     line-height: 20px;
     font-size: 16px;
