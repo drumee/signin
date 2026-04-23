@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "dev": "drumee-ui-devel",
+    "setup": "node node_modules/@drumee/ui-dev-tools/env/write-env.js --type plugin --plugin signin --output devel --base-dir=$(pwd)",
     "stage": "drumee-ui-devel stage",
     "deploy": "drumee-ui-deploy"
   },
