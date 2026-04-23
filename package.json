@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "dev": "drumee-ui-devel",
+    "setup": "node node_modules/@drumee/ui-dev-tools/env/write-env.js --type plugin --plugin signin --output devel --base-dir=$(pwd)",
     "stage": "drumee-ui-devel stage",
     "deploy": "drumee-ui-deploy"
   },
@@ -19,7 +20,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.1",
     "@babel/preset-env": "^7.19.1",
-    "@drumee/ui-dev-tools": "^1.0.16",
+    "@drumee/ui-dev-tools": "^1.0.32",
     "@unocss/preset-wind4": "^66.3.3",
     "@unocss/webpack": "^66.3.3",
     "argparse": "^2.0.1",
