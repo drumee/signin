@@ -172,7 +172,7 @@ export function entry(ui, opt) {
  * @returns 
  */
 export function password(ui, opt) {
-  let { value, name = _a.password, placeholder, label, sys_pn, service = _a.input, autocomplete, ico = "lock" } = opt;
+  let { value, name = _a.password, placeholder, label, sys_pn, service = _a.input, autocomplete, ico } = opt;
   autocomplete = autocomplete || name;
   const pfx = `${ui.fig.family}__entry`;
   let args = {
@@ -210,6 +210,14 @@ export function password(ui, opt) {
     }))
   }
   entryKids.push(Skeletons.Entry(args))
+  entryKids.push(Skeletons.Button.Svg({
+    ico: "eye_closed",
+    className: `${pfx}-eye-toggle`,
+    service: "toggle-password-visibility",
+    uiHandler: [ui],
+    sys_pn: `${name}-eye`,
+    partHandler: [ui],
+  }))
 
   kids.push(Skeletons.Box.X({
     className: `${pfx}-row`,
