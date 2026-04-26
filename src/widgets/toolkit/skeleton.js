@@ -33,6 +33,11 @@ export function button(ui, opt) {
     }
   }
 
+  kids.push(Skeletons.Element({
+    className: `${pfx} spinner`,
+    content: " ",
+  }))
+
   return main({
     className: `${pfx}-main ${priority}`,
     partHandler: [ui],
