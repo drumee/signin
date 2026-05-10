@@ -60,26 +60,26 @@ jobs:
   deploy:
     name: Deploy
     needs: build
-    runs-on: [self-hosted, drumee-liam]
-    timeout-minutes: 5
-    steps:
-      - name: Sync to runtime dir
-        run: sudo rsync -a --delete /tmp/drumee-build/${{ needs.build.outputs.endpoint }}/plugins/signin/signin/ /srv/drumee/runtime/plugins/ui/${{ needs.build.outputs.endpoint }}/signin/
-
-      - name: Restart endpoint
-        run: |
-          sudo /usr/sbin/drumee restart ${{ needs.build.outputs.endpoint }} > /dev/null
-          sudo /usr/sbin/drumee restart ${{ needs.build.outputs.endpoint }}/service > /dev/null
-          echo "Restarted endpoint"
-
-  verify:
-    name: Verify
-    needs: [build, deploy]
-    runs-on: [self-hosted, drumee-liam]
-    timeout-minutes: 3
+    runs-on: self-hosted
+    timeout-minutes: 10
+    env:
+      EP: ${{ needs.build.outputs.endpoint }}
+      RUNTIME_DIR: /srv/drumee/runtime/plugins/ui
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Backup current state
+        run: sudo rsync -a --delete $RUNTIME_DIR/$EP/signin/ $RUNTIME_DIR/$EP/signin.backup/
+
+      - name: Sync to runtime dir
+        run: sudo rsync -a --delete /tmp/drumee-build/$EP/plugins/signin/signin/ $RUNTIME_DIR/$EP/signin/
+
+      - name: Restart endpoint
+        run: |
+          sudo /usr/sbin/drumee restart $EP > /dev/null
+          sudo /usr/sbin/drumee restart $EP/service > /dev/null
+          echo "Restarted endpoint"
 
       - name: Verify deployed commit matches
         run: |
@@ -91,7 +91,18 @@ jobs:
           echo "local    head: $local"
           [ "$deployed" = "$local" ] && exit 0 || exit 1
 
-      - name: Cleanup tmp build dir
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Rolling back to previous version..."
+          sudo rsync -a --delete $RUNTIME_DIR/$EP/signin.backup/ $RUNTIME_DIR/$EP/signin/
+          sudo /usr/sbin/drumee restart $EP > /dev/null
+          sudo /usr/sbin/drumee restart $EP/service > /dev/null
+          echo "Rolled back"
+
+      - name: Cleanup
         if: always()
         continue-on-error: true
-        run: rm -rf /tmp/drumee-build/${{ needs.build.outputs.endpoint }}/plugins/signin/
+        run: |
+          sudo rm -rf $RUNTIME_DIR/$EP/signin.backup/
+          rm -rf /tmp/drumee-build/$EP/plugins/signin/
