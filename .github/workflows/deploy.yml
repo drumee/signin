@@ -81,7 +81,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Sync to runtime dir
-        run: sudo rsync -a --delete /home/liam/build/${{ needs.build.outputs.endpoint }}/plugins/signin/signin/ /srv/drumee/runtime/plugins/ui/${{ needs.build.outputs.endpoint }}/signin/
+        run: sudo rsync -a --delete $HOME/build/${{ needs.build.outputs.endpoint }}/plugins/signin/signin/ /srv/drumee/runtime/plugins/ui/${{ needs.build.outputs.endpoint }}/signin/
 
       - name: Restart endpoint
         run: |
@@ -110,4 +110,4 @@ jobs:
       - name: Cleanup tmp build dir
         if: always()
         continue-on-error: true
-        run: rm -rf /home/liam/build/${{ needs.build.outputs.endpoint }}/plugins/signin/
+        run: rm -rf $HOME/build/${{ needs.build.outputs.endpoint }}/plugins/signin/
