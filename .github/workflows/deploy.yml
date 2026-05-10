@@ -99,7 +99,8 @@ jobs:
 
       - name: Verify deployed commit matches
         run: |
-          deployed=$(sudo cat /srv/drumee/runtime/plugins/ui/${{ needs.build.outputs.endpoint }}/signin/index.json \
+          sleep 5
+          deployed=$(curl -sk ${{ needs.build.outputs.verify_url }} \
             | python3 -c "import sys,json; print(json.load(sys.stdin)['head'])")
           local=$(git log -1 --pretty=format:'%h')
           echo "deployed head: $deployed"
