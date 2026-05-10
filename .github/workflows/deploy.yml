@@ -12,7 +12,7 @@ concurrency:
 jobs:
   build:
     name: Build
-    runs-on: [self-hosted, drumee-liam]
+    runs-on: self-hosted
     timeout-minutes: 15
     outputs:
       endpoint: ${{ steps.ep.outputs.endpoint }}
