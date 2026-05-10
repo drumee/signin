@@ -85,8 +85,9 @@ jobs:
 
       - name: Restart endpoint
         run: |
-          sudo /usr/sbin/drumee restart ${{ needs.build.outputs.endpoint }}
-          sudo /usr/sbin/drumee restart ${{ needs.build.outputs.endpoint }}/service
+          sudo /usr/sbin/drumee restart ${{ needs.build.outputs.endpoint }} > /dev/null
+          sudo /usr/sbin/drumee restart ${{ needs.build.outputs.endpoint }}/service > /dev/null
+          echo "Restarted endpoint"
 
   verify:
     name: Verify
