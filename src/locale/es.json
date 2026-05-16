@@ -67,5 +67,13 @@
   "SIGNUP_COMPLETED": "¡Excelente trabajo!<br>\nEstás listo para sumergirte.",
   "DRUMEEOS_IS_NOW_READY": "DrumeeOS ya está listo.<br>\nComencemos a explorar y a dar forma a tu experiencia.",
   "GO_TO_DRUMEEOS": "Ir a DrumeeOS",
-  "PASSWORD_CONFIRM": "Confirmar contraseña"
+  "PASSWORD_CONFIRM": "Confirmar contraseña",
+  "ENTER_YOUR_EMAIL": "Introduce tu correo electrónico",
+  "ENTER_YOUR_PASSWORD": "Introduce tu contraseña",
+  "I_ACCEPT": "Acepto",
+  "LOG_IN_TO_WORKSPACE": "Iniciar sesión",
+  "NOT_A_BOT": "Por favor, cierra esta ventana para confirmar que no eres un bot",
+  "SERVER_BUSY": "Lo sentimos, nuestro servidor está experimentando mucha carga. Inténtalo de nuevo más tarde.",
+  "SET_NEW_PASSWORD": "Establecer nueva contraseña",
+  "WE_HAVE_SENT_CODE": "Nos enviaremos un código a su dirección {0} para que pueda definir una nueva contraseña."
 }
