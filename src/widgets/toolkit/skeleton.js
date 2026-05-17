@@ -311,6 +311,7 @@ export function termsAndConditions(ui, opt) {
         className: `${pfx}__terms-link`,
         content: LOCALE.PRIVACY_POLICY || "PRIVACY POLICY",
         service: "see-privacy-terms",
+        uiHandler: [ui],
       }),
       Skeletons.Element({
         className: `${pfx}__terms-dot`,
@@ -320,6 +321,7 @@ export function termsAndConditions(ui, opt) {
         className: `${pfx}__terms-link`,
         content: LOCALE.TERM_OF_SERVICE || "TERM OF SERVICE",
         service: "see-services-terms",
+        uiHandler: [ui],
       }),
     ],
   });

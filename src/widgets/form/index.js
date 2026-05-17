@@ -199,30 +199,20 @@ class signin_form extends Signup {
           }
         })
         break;
-      case 'terms-and-conditions':
-        let settings = 'height=800,width=800,left=150,top=90,noopener, noreferrer,toolbar=yes,menubar=yes,location=yes,directories=no,status=yes';
-        const { terms_of_use, privacy_policy } = Platform.get('legals')
-        switch (args.target?.dataset?.service) {
-          case 'see-services-terms':
-            if (terms_of_use) {
-              if (Visitor.device() == _a.mobile) {
-                location.href = terms_of_use;
-              } else {
-                window.open(terms_of_use, 'popUpWindow', settings);
-              }
-            }
-            break;
-          case "see-privacy-terms":
-          case "see-cookies-terms":
-            if (privacy_policy) {
-              if (Visitor.device() == _a.mobile) {
-                location.href = privacy_policy;
-              } else {
-                window.open(privacy_policy, 'popUpWindow', settings);
-              }
-            }
+      case 'see-services-terms':
+      case 'see-privacy-terms':
+      case 'see-cookies-terms': {
+        const { terms_of_use, privacy_policy } = Platform.get('legals') || {};
+        const url = service === 'see-services-terms' ? terms_of_use : privacy_policy;
+        if (!url) break;
+        if (Visitor.device() == _a.mobile) {
+          location.href = url;
+        } else {
+          const settings = 'height=800,width=800,left=150,top=90,noopener,noreferrer,toolbar=yes,menubar=yes,location=yes,directories=no,status=yes';
+          window.open(url, 'popUpWindow', settings);
         }
         break;
+      }
 
     }
   }
