@@ -1,42 +1,54 @@
 /**
- * 
- * @param {*} ui 
- * @param {*} opt 
- * @returns 
+ *
+ * @param {*} ui
+ * @param {*} opt
+ * @returns
  */
 export function button(ui, opt) {
-  let { label, ico, service, sys_pn, className, priority = "primary", type, haptic } = opt;
+  let {
+    label,
+    ico,
+    service,
+    sys_pn,
+    className,
+    priority = "primary",
+    type,
+    haptic,
+  } = opt;
   const pfx = className || `${ui.fig.group}__button`;
-  let kids = []
-  if (label) kids.push(
-    Skeletons.Element({
-      className: `${pfx} btn`,
-      content: label,
-      tagName: _K.tag.span,
-    })
-  )
+  let kids = [];
+  if (label)
+    kids.push(
+      Skeletons.Element({
+        className: `${pfx} btn`,
+        content: label,
+        tagName: _K.tag.span,
+      }),
+    );
   let main = Skeletons.Box.G;
   if (ico) {
     let el = Skeletons.Button.Svg({
       className: `${pfx} icon`,
       ico,
-    })
+    });
     if ([_a.api].includes(type)) {
       kids.unshift(el);
       main = Skeletons.Box.X;
     } else if ([_a.row].includes(type)) {
-      kids.push(el)
+      kids.push(el);
       main = Skeletons.Box.X;
     } else {
-      kids.push(el)
+      kids.push(el);
       main = Skeletons.Box.G;
     }
   }
 
-  kids.push(Skeletons.Element({
-    className: `${pfx} spinner`,
-    content: " ",
-  }))
+  kids.push(
+    Skeletons.Element({
+      className: `${pfx} spinner`,
+      content: " ",
+    }),
+  );
 
   return main({
     className: `${pfx}-main ${priority}`,
@@ -48,14 +60,14 @@ export function button(ui, opt) {
     kidsOpt: {
       active: 0,
     },
-    kids
-  })
+    kids,
+  });
 }
 
 /**
  * Header with drumee logo + progress bar + title + subtitle
- * @param {*} ui 
- * @returns 
+ * @param {*} ui
+ * @returns
  */
 export function header(ui, content, tips) {
   const fig = ui.fig.family;
@@ -67,61 +79,87 @@ export function header(ui, content, tips) {
           className: `${fig}__logo-container`,
           kids: [
             Skeletons.Button.Svg({
-              ico: "raw-logo-drumee-icon",
+              ico: "logo-upload",
               className: `${fig}__logo-content`,
             }),
             Skeletons.Element({
               className: `${fig}__logo-text`,
               content: "drumee",
-            })
-          ]
+            }),
+          ],
         }),
         Skeletons.Box.X({
           className: `${fig}__progress-bar`,
           kids: [
-            Skeletons.Element({ className: `${fig}__progress-step active`, content: ' ' }),
-            Skeletons.Element({ className: `${fig}__progress-step`, content: ' ' }),
-            Skeletons.Element({ className: `${fig}__progress-step`, content: ' ' }),
-            Skeletons.Element({ className: `${fig}__progress-step`, content: ' ' }),
-            Skeletons.Element({ className: `${fig}__progress-step`, content: ' ' }),
-          ]
-        })
-      ]
+            Skeletons.Element({
+              className: `${fig}__progress-step active`,
+              content: " ",
+            }),
+            Skeletons.Element({
+              className: `${fig}__progress-step`,
+              content: " ",
+            }),
+            Skeletons.Element({
+              className: `${fig}__progress-step`,
+              content: " ",
+            }),
+            Skeletons.Element({
+              className: `${fig}__progress-step`,
+              content: " ",
+            }),
+            Skeletons.Element({
+              className: `${fig}__progress-step`,
+              content: " ",
+            }),
+          ],
+        }),
+      ],
     }),
     Skeletons.Box.Y({
       className: `${fig}__text-container`,
       kids: [
         Skeletons.Note({
           className: `${fig}__title`,
-          content
+          content,
         }),
-      ]
-    })
-  ]
+      ],
+    }),
+  ];
 
   if (tips) {
-    kids.push(Skeletons.Note({
-      className: `${fig}__tips`,
-      content: tips,
-    }))
+    kids.push(
+      Skeletons.Note({
+        className: `${fig}__tips`,
+        content: tips,
+      }),
+    );
   }
 
   let a = Skeletons.Box.Y({
     className: `${ui.fig.family}__header`,
     debug: __filename,
-    kids
-  })
+    kids,
+  });
   return a;
 }
 
 /**
- * 
- * @param {*} ui 
- * @param {*} opt 
- * @returns 
+ *
+ * @param {*} ui
+ * @param {*} opt
+ * @returns
  */
 export function entry(ui, opt) {
-  let { value, name, placeholder, label, sys_pn, service = _a.input, autocomplete, ico } = opt;
+  let {
+    value,
+    name,
+    placeholder,
+    label,
+    sys_pn,
+    service = _a.input,
+    autocomplete,
+    ico,
+  } = opt;
   autocomplete = autocomplete || name;
   const pfx = `${ui.fig.family}__entry`;
   let args = {
@@ -135,8 +173,8 @@ export function entry(ui, opt) {
     placeholder,
     uiHandler: [ui],
     autocomplete,
-    radio: ui._id
-  }
+    radio: ui._id,
+  };
   if (sys_pn) {
     args.sys_pn = sys_pn;
     args.partHandler = [ui];
@@ -144,40 +182,55 @@ export function entry(ui, opt) {
 
   let kids = [];
   if (label) {
-    kids.push(Skeletons.Note({
-      className: `${pfx}-label ${name}`,
-      content: label,
-    }))
+    kids.push(
+      Skeletons.Note({
+        className: `${pfx}-label ${name}`,
+        content: label,
+      }),
+    );
   }
 
   let entryKids = [];
   if (ico) {
-    entryKids.push(Skeletons.Button.Svg({
-      ico,
-      className: `${pfx}-ico`,
-    }))
+    entryKids.push(
+      Skeletons.Button.Svg({
+        ico,
+        className: `${pfx}-ico`,
+      }),
+    );
   }
-  entryKids.push(Skeletons.Entry(args))
+  entryKids.push(Skeletons.Entry(args));
 
-  kids.push(Skeletons.Box.X({
-    className: `${pfx}-row`,
-    kids: entryKids
-  }))
+  kids.push(
+    Skeletons.Box.X({
+      className: `${pfx}-row`,
+      kids: entryKids,
+    }),
+  );
 
   return Skeletons.Box.Y({
     className: `${pfx}-main`,
-    kids
-  })
+    kids,
+  });
 }
 
 /**
  * Password entry - uses same pattern as entry() with Skeletons.Entry
- * @param {*} ui 
- * @param {*} opt 
- * @returns 
+ * @param {*} ui
+ * @param {*} opt
+ * @returns
  */
 export function password(ui, opt) {
-  let { value, name = _a.password, placeholder, label, sys_pn, service = _a.input, autocomplete, ico } = opt;
+  let {
+    value,
+    name = _a.password,
+    placeholder,
+    label,
+    sys_pn,
+    service = _a.input,
+    autocomplete,
+    ico,
+  } = opt;
   autocomplete = autocomplete || name;
   const pfx = `${ui.fig.family}__entry`;
   let args = {
@@ -193,7 +246,7 @@ export function password(ui, opt) {
     autocomplete,
     radio: ui._id,
     type: _a.password,
-  }
+  };
   if (sys_pn) {
     args.sys_pn = sys_pn;
     args.partHandler = [ui];
@@ -201,67 +254,74 @@ export function password(ui, opt) {
 
   let kids = [];
   if (label) {
-    kids.push(Skeletons.Note({
-      className: `${pfx}-label ${name}`,
-      content: label,
-    }))
+    kids.push(
+      Skeletons.Note({
+        className: `${pfx}-label ${name}`,
+        content: label,
+      }),
+    );
   }
 
   let entryKids = [];
   if (ico) {
-    entryKids.push(Skeletons.Button.Svg({
-      ico,
-      className: `${pfx}-ico`,
-    }))
+    entryKids.push(
+      Skeletons.Button.Svg({
+        ico,
+        className: `${pfx}-ico`,
+      }),
+    );
   }
-  entryKids.push(Skeletons.Entry(args))
-  entryKids.push(Skeletons.Button.Svg({
-    ico: "eye_closed",
-    className: `${pfx}-eye-toggle`,
-    service: "toggle-password-visibility",
-    uiHandler: [ui],
-    sys_pn: `${name}-eye`,
-    partHandler: [ui],
-  }))
+  entryKids.push(Skeletons.Entry(args));
+  entryKids.push(
+    Skeletons.Button.Svg({
+      ico: "eye_closed",
+      className: `${pfx}-eye-toggle`,
+      service: "toggle-password-visibility",
+      uiHandler: [ui],
+      sys_pn: `${name}-eye`,
+      partHandler: [ui],
+    }),
+  );
 
-  kids.push(Skeletons.Box.X({
-    className: `${pfx}-row`,
-    kids: entryKids
-  }))
+  kids.push(
+    Skeletons.Box.X({
+      className: `${pfx}-row`,
+      kids: entryKids,
+    }),
+  );
 
   return Skeletons.Box.Y({
     className: `${pfx}-main`,
-    kids
-  })
-};
-
+    kids,
+  });
+}
 
 /**
- * 
- * @param {*} ui 
- * @param {*} opt 
- * @returns 
+ *
+ * @param {*} ui
+ * @param {*} opt
+ * @returns
  */
 export function termsAndConditions(ui, opt) {
-  const pfx = ui.fig.family
+  const pfx = ui.fig.family;
   return Skeletons.Box.X({
     className: `${pfx}__terms-container`,
     kids: [
       Skeletons.Note({
         className: `${pfx}__terms-link`,
         content: LOCALE.PRIVACY_POLICY || "PRIVACY POLICY",
-        service: "see-privacy-terms"
+        service: "see-privacy-terms",
       }),
       Skeletons.Element({
         className: `${pfx}__terms-dot`,
-        content: "•"
+        content: "•",
       }),
       Skeletons.Note({
         className: `${pfx}__terms-link`,
         content: LOCALE.TERM_OF_SERVICE || "TERM OF SERVICE",
-        service: "see-services-terms"
+        service: "see-services-terms",
       }),
-    ]
+    ],
   });
 }
 
@@ -277,12 +337,12 @@ export function stepIndicator(ui, opt = {}) {
     kids: [
       Skeletons.Element({
         className: `${pfx}__step-dot`,
-        content: "●"
+        content: "●",
       }),
       Skeletons.Element({
         className: `${pfx}__step-text`,
         content: `STEP ${step} OF ${total}: ${label}`,
       }),
-    ]
+    ],
   });
 }

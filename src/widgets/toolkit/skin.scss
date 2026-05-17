@@ -1,7 +1,6 @@
-@use '@drumee/ui-styles/src/mixins';
+@use "@drumee/ui-styles/src/mixins";
 
 @mixin signin-main {
-
   &__ui {
     width: 100vw;
     height: 100vh;
@@ -24,7 +23,11 @@
       transform: translateX(-50%);
       width: 885px;
       height: 727px;
-      background: radial-gradient(ellipse at center, rgba(177, 172, 255, 0.35) 0%, transparent 70%);
+      background: radial-gradient(
+        ellipse at center,
+        rgba(177, 172, 255, 0.35) 0%,
+        transparent 70%
+      );
       pointer-events: none;
       z-index: 0;
     }
@@ -70,13 +73,13 @@
 
   &__logo {
     &-container {
-      align-items: center;
-      gap: var(--spacer-3);
+      align-items: end;
+      gap: var(--spacer-2);
     }
 
     &-content {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       align-content: center;
       justify-content: start;
       align-items: start;
@@ -91,8 +94,9 @@
     &-text {
       font-family: var(--font-bold);
       font-size: 20px;
-      color: rgb(52, 52, 58);
+      color: var(--primary-90);
       letter-spacing: -0.3px;
+      font-weight: bold;
     }
   }
 
@@ -147,11 +151,9 @@
       cursor: pointer;
     }
   }
-
 }
 
 @mixin signin-button {
-
   &__buttons {
     gap: var(--spacer-4);
     width: 100%;
@@ -169,7 +171,7 @@
     position: relative;
 
     &[data-haptic="1"] {
-      opacity: .8;
+      opacity: 0.8;
       pointer-events: none;
 
       .btn,
@@ -187,7 +189,7 @@
       justify-content: center;
       grid-template-columns: 1fr;
       background: rgb(67, 60, 197);
-      color: #FFFFFF;
+      color: #ffffff;
       align-content: center;
       flex-wrap: wrap;
       border-radius: 4px;
@@ -267,7 +269,6 @@
     border-radius: 50%;
     animation: signin-spin 0.8s linear infinite;
   }
-
 }
 
 @keyframes signin-spin {
