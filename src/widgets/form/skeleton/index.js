@@ -86,7 +86,14 @@ function __skl_welcome_signup(ui) {
           Skeletons.Element({
             content: LOCALE.START_FREE || "Start free →",
             className: `${fig}__text link`,
-            href: "#/welcome/signup",
+            on_click: () => {
+              try { history.replaceState(null, '', '#/welcome/signup'); } catch (e) {}
+              if (window.Welcome && _.isFunction(Welcome.loadSignup)) {
+                Welcome.loadSignup();
+              } else {
+                location.hash = "#/welcome/signup";
+              }
+            },
           }),
         ],
       }),
