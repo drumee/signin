@@ -61,6 +61,14 @@ function __skl_welcome_signup(ui) {
         priority: "secondary",
         haptic,
       }),
+      button(ui, {
+        label: LOCALE.CONTINUE_WITH_APPLEID,
+        service: "use-apple",
+        type: _a.api,
+        ico: "logo-apple",
+        priority: "secondary",
+        haptic,
+      }),
     ],
   });
 

@@ -69,6 +69,16 @@ class signin_form extends Signup {
       case "INCOMPLETE_SIGNUP":
         this.triggerHandlers({ service: "onboarding" })
         return
+      case "EMAIL_NOT_VERIFIED": {
+        // Account exists but its email hasn't been verified yet. The server
+        // refused the session; send the user to the signup app's "Check your
+        // inbox" screen (carrying the email) so they can click / resend the
+        // verification link.
+        const email = data.email || (this.getData() || {}).username || "";
+        const q = email ? `?email=${encodeURIComponent(email)}&pending=1` : `?pending=1`;
+        location.hash = `#/welcome/signup${q}`;
+        return;
+      }
       case "BLOCKED":
       case "ARCHIVED":
         return this.renderMessage(LOCALE.BLOCKED_ACCOUNT);
