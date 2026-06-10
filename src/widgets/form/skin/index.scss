@@ -391,6 +391,7 @@
     line-height: 1.1;
     color: rgb(67, 60, 197);
     width: 100%;
+    justify-content: center;
   }
 
   &__inbox-subtext {
@@ -407,6 +408,7 @@
     line-height: 1.4;
     color: #000000;
     width: 100%;
+    justify-content: center;
   }
 
   &__inbox-email {
@@ -417,6 +419,7 @@
     color: rgb(52, 52, 58);
     width: 100%;
     word-break: break-word;
+    justify-content: center;
   }
 
   &__inbox-footer {
