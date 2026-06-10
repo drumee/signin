@@ -39,6 +39,17 @@ function __skl_welcome_signup(ui) {
         service: _a.input,
         ico: "",
       }),
+      Skeletons.Box.X({
+        className: `${fig}__forgot-row`,
+        kids: [
+          Skeletons.Note({
+            className: `${fig}__forgot-link`,
+            content: LOCALE.FORGOT_PASSWORD || "Forgot Password →",
+            service: "reset-password",
+            uiHandler: [ui],
+          }),
+        ],
+      }),
       message,
       button(ui, {
         label: LOCALE.LOG_IN_TO_WORKSPACE || "Log In to Workspace",

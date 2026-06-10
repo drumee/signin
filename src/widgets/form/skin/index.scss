@@ -197,6 +197,27 @@
     }
   }
 
+  &__forgot-row {
+    width: 100%;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: -2px;
+  }
+
+  &__forgot-link {
+    font-family: var(--font-main);
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgb(52, 52, 58);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: rgb(67, 60, 197);
+    }
+  }
+
   &__error-container {
     width: 100%;
     height: auto;
