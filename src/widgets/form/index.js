@@ -135,15 +135,16 @@ class signin_form extends Signup {
     this._counting = false;
     this.ensurePart('resend-button').then((b) => {
       const label = b.el.querySelector('.btn');
-      if (label) label.textContent = LOCALE.RESEND_CODE || "Resend code";
+      if (label) label.textContent = LOCALE.RESEND_EMAIL || "Resend email";
       delete b.el.dataset.counting;
     });
   }
 
   /**
-   * Validate the forgot-password form then send a reset code.
+   * Validate the forgot-password form then email the reset-link template.
    * Validation: (1) value is a well-formed email, (2) the email is
-   * registered in the database. Only then hand off to the OTP flow.
+   * registered in the database. Only then send the reset-password email
+   * (otp.send_link) and move to the check-inbox view.
   */
   submitForgot() {
     let { username } = this.getData();
@@ -159,7 +160,7 @@ class signin_form extends Signup {
     this.setItemStatus(_a.username, "", _a.status);
     this.setItemStatus('forgot-button', "1", "haptic");
 
-    // (2) Must exist in the database before we send a reset code.
+    // (2) Must exist in the database before we send the reset email.
     this.postService(SERVICE.yp.email_exists, { value: username }).then((res) => {
       if (!res || !res.id) {
         this.setItemStatus(_a.username, _a.error, _a.status);
@@ -167,7 +168,8 @@ class signin_form extends Signup {
         this.renderMessage(LOCALE.OOPS_EMAIL_NOT_FOUND || "No account found with this email", 3000);
         return;
       }
-      return this.postService(SERVICE.otp.send, { email: username }).then((data) => {
+      // Email the styled "Reset your Drumee password" link template.
+      return this.postService(SERVICE.otp.send_link, { email: username }).then((data) => {
         this.setItemStatus('forgot-button', "0", "haptic");
         if (data.sent) {
           this.mset({ email: username });
@@ -179,7 +181,7 @@ class signin_form extends Signup {
       });
     }).catch((e) => {
       this.setItemStatus('forgot-button', "0", "haptic");
-      this.warn("submitForgot: error validating/sending reset code", e);
+      this.warn("submitForgot: error validating/sending reset email", e);
     });
   }
 
@@ -310,13 +312,15 @@ class signin_form extends Signup {
         this.submitForgot();
         break;
       case 'back-to-signin':
+        clearInterval(this._tick);
+        this._counting = false;
         this.showSignin();
         break;
       case 'resend-email':
         // Ignore clicks while the cooldown is running.
         if (this._counting) break;
         this.setItemStatus('resend-button', "1", "haptic"); // loading spinner
-        this.postService(SERVICE.otp.send, { email: this.mget(_a.email) || "" }).then((data) => {
+        this.postService(SERVICE.otp.send_link, { email: this.mget(_a.email) || "" }).then((data) => {
           this.setItemStatus('resend-button', "0", "haptic");
           if (data && data.sent) {
             this._startCooldown(COOLDOWN_SEC);
@@ -325,7 +329,7 @@ class signin_form extends Signup {
           }
         }).catch((e) => {
           this.setItemStatus('resend-button', "0", "haptic");
-          this.warn("resend-email: error resending reset code", e);
+          this.warn("resend-email: error resending reset email", e);
         });
         break;
       case 'cancel-verify':

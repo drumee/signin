@@ -2,9 +2,9 @@ const { button } = require("../../toolkit/skeleton");
 
 /**
  * Check-inbox view shown after the forgot-password form is submitted.
- * Tells the user a reset code was emailed, with a resend button (on a
- * countdown cooldown — see ../index.js) and a cancel button that returns
- * to the forgot-password form.
+ * Tells the user a reset link was emailed, with a resend button (on a
+ * countdown cooldown — see ../index.js, which re-sends the reset-password
+ * email template via otp.send_link) and a "Log in now" link back to sign in.
  */
 function __skl_check_inbox(ui) {
   const fam = ui.fig.family;
@@ -34,30 +34,53 @@ function __skl_check_inbox(ui) {
             kids: [
               Skeletons.Element({
                 className: `${fam}__inbox-sent`,
-                content: LOCALE.WE_SENT_CODE_TO || "We sent a password reset code to",
+                content: LOCALE.WE_SENT_LINK_TO || "We've sent a password reset link to",
               }),
               Skeletons.Element({ className: `${fam}__inbox-email`, content: email }),
             ],
           }),
         ],
       }),
-      // Actions
+      // Actions: resend button + "Remember password? Log in now →"
       Skeletons.Box.Y({
         className: `${fam}__inbox-actions`,
         kids: [
           button(ui, {
-            label: LOCALE.RESEND_CODE || "Resend code",
+            label: LOCALE.RESEND_EMAIL || "Resend email",
             service: "resend-email",
             ico: "refresh-view",
             type: _a.api,
             sys_pn: "resend-button",
             priority: "primary",
           }),
-          button(ui, {
-            label: LOCALE.CANCEL || "Cancel",
-            service: "cancel-verify",
-            sys_pn: "cancel-button",
-            priority: "secondary",
+          Skeletons.Box.X({
+            className: `${fam}__links`,
+            kids: [
+              Skeletons.Element({
+                className: `${fam}__text`,
+                content: LOCALE.REMEMBER_PASSWORD || "Remember password?",
+              }),
+              Skeletons.Note({
+                className: `${fam}__text link`,
+                content: LOCALE.LOG_IN_NOW || "Log in now →",
+                service: "back-to-signin",
+                uiHandler: [ui],
+              }),
+            ],
+          }),
+        ],
+      }),
+      // Footer note
+      Skeletons.Box.Y({
+        className: `${fam}__inbox-footer`,
+        kids: [
+          Skeletons.Element({
+            className: `${fam}__inbox-note`,
+            content: LOCALE.LINK_EXPIRES_NOTE || "Link expires in 1 hour.",
+          }),
+          Skeletons.Element({
+            className: `${fam}__inbox-note`,
+            content: LOCALE.CHECK_SPAM_NOTE || "Check your spam folder if you don't see it.",
           }),
         ],
       }),

@@ -343,13 +343,19 @@
   &__check-inbox {
     align-items: center;
     text-align: center;
+    gap: 32px;
+    padding: 33px;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow: 0 1px 11px rgba(0, 0, 0, 0.13);
   }
 
   &__inbox-icon {
     width: 72px;
-    height: 72px;
+    height: 73px;
     padding: 12px;
-    border-radius: 50%;
+    border-radius: 100px;
     background-color: rgba(89, 80, 255, 0.1);
     align-items: center;
     justify-content: center;
@@ -374,7 +380,8 @@
     align-items: center;
     text-align: center;
     gap: 12px;
-    width: 100%;
+    width: 306px;
+    max-width: 100%;
   }
 
   &__inbox-title {
@@ -383,6 +390,7 @@
     font-size: 32px;
     line-height: 1.1;
     color: rgb(67, 60, 197);
+    width: 100%;
   }
 
   &__inbox-subtext {
@@ -395,18 +403,36 @@
   &__inbox-sent {
     font-family: var(--font-main);
     font-weight: 400;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.4;
-    color: rgb(101, 101, 108);
+    color: #000000;
+    width: 100%;
   }
 
   &__inbox-email {
     font-family: var(--font-bold);
     font-weight: 600;
-    font-size: 18px;
-    line-height: 1.2;
+    font-size: 20px;
+    line-height: 1.1;
     color: rgb(52, 52, 58);
+    width: 100%;
     word-break: break-word;
+  }
+
+  &__inbox-footer {
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  &__inbox-note {
+    font-family: var(--font-main);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.4;
+    color: rgb(52, 52, 58);
+    width: 100%;
+    justify-content: center;
   }
 
   &__inbox-actions {
