@@ -169,9 +169,11 @@ class signin_form extends Signup {
         return;
       }
       // Email the styled "Reset your Drumee password" link template.
-      return this.postService(SERVICE.otp.send_link, { email: username }).then((data) => {
+      // send_link requires socket_id (server verifies the socket is bound to
+      // this session), so pass the current websocket id.
+      return this.postService(SERVICE.otp.send_link, { email: username, socket_id: Visitor.get(_a.socket_id) }).then((data) => {
         this.setItemStatus('forgot-button', "0", "haptic");
-        if (data.sent) {
+        if (data && data.sent) {
           this.mset({ email: username });
           this.showCheckInbox();
         } else {
@@ -320,7 +322,7 @@ class signin_form extends Signup {
         // Ignore clicks while the cooldown is running.
         if (this._counting) break;
         this.setItemStatus('resend-button', "1", "haptic"); // loading spinner
-        this.postService(SERVICE.otp.send_link, { email: this.mget(_a.email) || "" }).then((data) => {
+        this.postService(SERVICE.otp.send_link, { email: this.mget(_a.email) || "", socket_id: Visitor.get(_a.socket_id) }).then((data) => {
           this.setItemStatus('resend-button', "0", "haptic");
           if (data && data.sent) {
             this._startCooldown(COOLDOWN_SEC);
