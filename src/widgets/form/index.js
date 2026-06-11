@@ -7,6 +7,8 @@
 const Signup = require("..")
 require('./skin');
 const RECONNECT = 'reconnect';
+// Resend cooldown for the check-inbox screen, in seconds.
+const COOLDOWN_SEC = 20;
 
 class signin_form extends Signup {
 
@@ -54,7 +56,164 @@ class signin_form extends Signup {
    *
   */
   onDomRefresh() {
+    this.showSignin();
+  }
+
+  /**
+   * Render the sign-in view (default).
+  */
+  showSignin() {
     this.feed(require('./skeleton').default(this));
+  }
+
+  /**
+   * Render the forgot-password view (email input + submit button).
+  */
+  showForgot() {
+    this.feed(require('./skeleton/forgot').default(this));
+  }
+
+  /**
+   * Render the check-inbox view (shown after a reset code is sent) and
+   * start the resend cooldown.
+  */
+  showCheckInbox() {
+    this.feed(require('./skeleton/check-inbox').default(this));
+    this._startCooldown(COOLDOWN_SEC);
+    // If the reset link is completed in another tab (the welcome/reset module
+    // shows its success screen and writes this flag), disable the resend button
+    // here — there's nothing left to resend. `storage` events fire in OTHER
+    // same-origin tabs, which is exactly the email-link-in-new-tab case.
+    if (!this._onResetDone) {
+      this._onResetDone = (e) => {
+        if (e && e.key === 'drumee:password-reset:done') {
+          this._disableResend();
+        }
+      };
+      window.addEventListener('storage', this._onResetDone);
+    }
+  }
+
+  /**
+   * Permanently disable the resend button (reset already completed elsewhere).
+  */
+  _disableResend() {
+    clearInterval(this._tick);
+    this._counting = true; // the resend-email handler ignores clicks while set
+    this.ensurePart('resend-button').then((b) => {
+      if (!b || !b.el) return;
+      delete b.el.dataset.counting;
+      b.el.dataset.disabled = '1';
+    });
+  }
+
+  /**
+   * Clean up the running cooldown timer and cross-tab listener.
+  */
+  onDestroy() {
+    clearInterval(this._tick);
+    if (this._onResetDone) {
+      window.removeEventListener('storage', this._onResetDone);
+      this._onResetDone = null;
+    }
+  }
+
+  /**
+   * Format seconds as mm:ss for the resend countdown.
+   * @param {number} sec
+  */
+  _fmt(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  /**
+   * Put the resend button on cooldown for `seconds`: disable it and replace
+   * its label with a live mm:ss countdown. `seconds <= 0` enables it at once.
+   * @param {number} seconds
+  */
+  _startCooldown(seconds) {
+    clearInterval(this._tick);
+    if (!(seconds > 0)) {
+      this._endCooldown();
+      return;
+    }
+    this._counting = true;
+    this.ensurePart('resend-button').then((b) => {
+      b.el.dataset.counting = '1'; // hides the icon; the label shows the timer
+      const label = b.el.querySelector('.btn');
+      let remain = seconds;
+      if (label) label.textContent = this._fmt(remain);
+      this._tick = setInterval(() => {
+        remain--;
+        if (remain <= 0) {
+          this._endCooldown();
+          return;
+        }
+        if (label) label.textContent = this._fmt(remain);
+      }, 1000);
+    });
+  }
+
+  /**
+   * End the cooldown: restore the resend button's label and re-enable it.
+  */
+  _endCooldown() {
+    clearInterval(this._tick);
+    this._counting = false;
+    this.ensurePart('resend-button').then((b) => {
+      const label = b.el.querySelector('.btn');
+      if (label) label.textContent = LOCALE.RESEND_EMAIL || "Resend email";
+      delete b.el.dataset.counting;
+    });
+  }
+
+  /**
+   * Validate the forgot-password form then email the reset-link template.
+   * Validation: (1) value is a well-formed email, (2) the email is
+   * registered in the database. Only then send the reset-password email
+   * (otp.send_link) and move to the check-inbox view.
+  */
+  submitForgot() {
+    let { username } = this.getData();
+    username = (username || "").trim();
+
+    // (1) Must be a valid email format.
+    if (!username || !username.isEmail()) {
+      this.setItemStatus(_a.username, _a.error, _a.status);
+      this.setItemStatus('forgot-button', "0", "haptic");
+      this.renderMessage(LOCALE.INVALID_EMAIL || "Please enter a valid email address", 3000);
+      return;
+    }
+    this.setItemStatus(_a.username, "", _a.status);
+    this.setItemStatus('forgot-button', "1", "haptic");
+
+    // (2) Must exist in the database before we send the reset email.
+    this.postService(SERVICE.yp.email_exists, { value: username }).then((res) => {
+      if (!res || !res.id) {
+        this.setItemStatus(_a.username, _a.error, _a.status);
+        this.setItemStatus('forgot-button', "0", "haptic");
+        this.renderMessage(LOCALE.OOPS_EMAIL_NOT_FOUND || "No account found with this email", 3000);
+        return;
+      }
+      // Email the styled "Reset your Drumee password" link template.
+      // send_link requires socket_id (server verifies the socket is bound to
+      // this session), so pass the current websocket id.
+      return this.postService(SERVICE.otp.send_link, { email: username, socket_id: Visitor.get(_a.socket_id) }).then((data) => {
+        this.setItemStatus('forgot-button', "0", "haptic");
+        if (data && data.sent) {
+          this.mset({ email: username });
+          this.showCheckInbox();
+        } else {
+          this.setItemStatus(_a.username, _a.error, _a.status);
+          this.renderMessage(LOCALE.OOPS_EMAIL_NOT_FOUND || "No account found with this email", 3000);
+        }
+      });
+    }).catch((e) => {
+      this.setItemStatus('forgot-button', "0", "haptic");
+      this.warn("submitForgot: error validating/sending reset email", e);
+    });
   }
 
   /**
@@ -176,22 +335,39 @@ class signin_form extends Signup {
         this.commitForm();
         break;
       case 'reset-password':
-        this.debug("AAA:88 Navigating to reset password", this.getData())
-        let { username } = this.getData();
-        if (!username || !username.isEmail()) {
-          this.setItemStatus(_a.username, _a.error, _a.status)
-        } else {
-          this.setItemStatus(_a.username, "", _a.status);
-          this.postService(SERVICE.otp.send, { email: username }).then((data) => {
-            if (data.sent) {
-              this.triggerHandlers({ data, service: 'otp-sent' })
-            } else {
-              this.renderMessage(LOCALE.OOPS_EMAIL_NOT_FOUND, 3000);
-            }
-          }).catch((e) => {
-            this.warn("AAA:104 Error sending OTP", e)
-          })
-        }
+        this.showForgot();
+        break;
+      case 'forgot-input':
+        if (![_e.commit, _e.Enter].includes(status)) break;
+      case 'forgot-submit':
+        this.submitForgot();
+        break;
+      case 'back-to-signin':
+        clearInterval(this._tick);
+        this._counting = false;
+        this.showSignin();
+        break;
+      case 'resend-email':
+        // Ignore clicks while the cooldown is running.
+        if (this._counting) break;
+        this.setItemStatus('resend-button', "1", "haptic"); // loading spinner
+        this.postService(SERVICE.otp.send_link, { email: this.mget(_a.email) || "", socket_id: Visitor.get(_a.socket_id) }).then((data) => {
+          this.setItemStatus('resend-button', "0", "haptic");
+          if (data && data.sent) {
+            this._startCooldown(COOLDOWN_SEC);
+          } else {
+            this.renderMessage(LOCALE.OOPS_EMAIL_NOT_FOUND || "No account found with this email", 3000);
+          }
+        }).catch((e) => {
+          this.setItemStatus('resend-button', "0", "haptic");
+          this.warn("resend-email: error resending reset email", e);
+        });
+        break;
+      case 'cancel-verify':
+        // Back to the forgot-password form.
+        clearInterval(this._tick);
+        this._counting = false;
+        this.showForgot();
         break;
       case 'use-apple':
         this.postService(SERVICE.apple.initiate, {}).then((data) => {
