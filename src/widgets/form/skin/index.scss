@@ -458,6 +458,13 @@
       }
     }
 
+    // Resend permanently disabled: the reset was already completed in another
+    // tab (welcome/reset success), so there's nothing left to resend.
+    .signin__button-main[data-disabled="1"] {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
     // Resend (primary): plain white glyph, not the default white-circle icon.
     .signin__button-main.primary .icon.svg-wrapper {
       width: 24px;

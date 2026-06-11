@@ -80,13 +80,42 @@ class signin_form extends Signup {
   showCheckInbox() {
     this.feed(require('./skeleton/check-inbox').default(this));
     this._startCooldown(COOLDOWN_SEC);
+    // If the reset link is completed in another tab (the welcome/reset module
+    // shows its success screen and writes this flag), disable the resend button
+    // here — there's nothing left to resend. `storage` events fire in OTHER
+    // same-origin tabs, which is exactly the email-link-in-new-tab case.
+    if (!this._onResetDone) {
+      this._onResetDone = (e) => {
+        if (e && e.key === 'drumee:password-reset:done') {
+          this._disableResend();
+        }
+      };
+      window.addEventListener('storage', this._onResetDone);
+    }
   }
 
   /**
-   * Clean up the running cooldown timer.
+   * Permanently disable the resend button (reset already completed elsewhere).
+  */
+  _disableResend() {
+    clearInterval(this._tick);
+    this._counting = true; // the resend-email handler ignores clicks while set
+    this.ensurePart('resend-button').then((b) => {
+      if (!b || !b.el) return;
+      delete b.el.dataset.counting;
+      b.el.dataset.disabled = '1';
+    });
+  }
+
+  /**
+   * Clean up the running cooldown timer and cross-tab listener.
   */
   onDestroy() {
     clearInterval(this._tick);
+    if (this._onResetDone) {
+      window.removeEventListener('storage', this._onResetDone);
+      this._onResetDone = null;
+    }
   }
 
   /**
