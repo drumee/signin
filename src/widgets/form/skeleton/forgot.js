@@ -40,16 +40,19 @@ function __skl_welcome_forgot(ui) {
     ],
   });
 
-  // Plain email input — no label, no icon. The (initially empty) error
-  // message sits tight beneath it so it doesn't add an extra gap slot.
+  // Labelled email input with the app-mail icon (matches the sign-in form).
+  // The (initially empty) error message sits tight beneath it so it doesn't
+  // add an extra gap slot.
   const field = Skeletons.Box.Y({
     className: `${fig}__forgot-field`,
     kids: [
       entry(ui, {
+        label: LOCALE.EMAIL || "EMAIL",
         placeholder: LOCALE.ENTER_YOUR_EMAIL || "Enter your email",
         name: _a.username,
         sys_pn: _a.username,
         service: "forgot-input",
+        ico: "app-mail",
         value: ui.mget(_a.username) || "",
       }),
       message,
