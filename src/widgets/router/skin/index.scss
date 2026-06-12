@@ -6,6 +6,20 @@
     height: 100%;
     overflow: auto;
     background-color: var(--normal-bg);
+
+    // The OTP step embeds the shared dtk_otp widget. Its skin offsets __main
+    // by 180px (intended for the standalone full-page layout), which shows
+    // here as a large empty margin on top. Drop the offset and center the
+    // widget on screen.
+    .dtk-otp__ui {
+      justify-content: center;
+      align-items: center;
+      align-content: center;
+    }
+
+    .dtk-otp__main {
+      top: 0;
+    }
   }
 }
 
