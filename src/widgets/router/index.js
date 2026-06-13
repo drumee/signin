@@ -114,9 +114,26 @@ class signin_router extends LetcBox {
     if (otp.el) otp.el.dataset.resending = '1';
 
     const payload = otp.mget('payload') || {};
-    const { email, method } = payload;
+    const method = payload.method || 'otp';
+    // Defense in depth: the post-login payload now carries the email (set by
+    // the signin form), but fall back to Visitor so resend can never silently
+    // fire with an empty email — the failure that made it "work only after a
+    // page refresh".
+    const email = payload.email || (Visitor.profile() || {}).email || Visitor.get('email');
     const api = otp.mget('resendApi') || SERVICE.otp.send;
-    this.postService(api, { email, method }).then((data) => {
+    // otp.send verifies the caller's websocket in the pre-auth signin context
+    // (same as otp.send_link in the form). Without socket_id the server rejects
+    // the resend with INVALID_SOCKET.
+    const vars = { email, method, socket_id: Visitor.get(_a.socket_id) };
+    this.postService(api, vars).then((data) => {
+      // The server returns errors in-band (e.g. INVALID_SOCKET) rather than
+      // rejecting — surface them instead of falsely reporting "code resent".
+      if (!data || data.error) {
+        if (typeof otp.displayMessage === 'function') {
+          otp.displayMessage(LOCALE.UNKNOWN_ERROR, 1);
+        }
+        return;
+      }
       // Merge (not replace) so id/uid/method survive; overlay the new secret.
       otp.mset({ payload: { ...payload, ...data } });
       // Wipe the boxes so checkForm doesn't immediately resubmit the old code.
