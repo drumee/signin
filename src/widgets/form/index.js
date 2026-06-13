@@ -272,7 +272,13 @@ class signin_form extends Signup {
         return this.renderMessage(LOCALE.INVALID_CODE);
     }
     if (data.secret) {
-      this.triggerHandlers({ service: "verify-signin-otp", data })
+      // The yp.signin response doesn't reliably echo `email` back (same as the
+      // EMAIL_NOT_VERIFIED branch above). The OTP screen needs it for both the
+      // "sent to {email}" message and Resend (otp.send keys off email), so fall
+      // back to the typed username — which is the email at sign-in. Without
+      // this, resend only works after a page refresh, when Visitor supplies it.
+      const email = data.email || (this.getData() || {}).username || "";
+      this.triggerHandlers({ service: "verify-signin-otp", data: { ...data, email } })
       // this.prompt_otp(data);
       return;
     }
