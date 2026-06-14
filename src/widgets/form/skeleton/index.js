@@ -39,6 +39,17 @@ function __skl_welcome_signup(ui) {
         service: _a.input,
         ico: "",
       }),
+      Skeletons.Box.X({
+        className: `${fig}__forgot-row`,
+        kids: [
+          Skeletons.Note({
+            className: `${fig}__forgot-link`,
+            content: LOCALE.FORGOT_PASSWORD || "Forgot Password →",
+            service: "reset-password",
+            uiHandler: [ui],
+          }),
+        ],
+      }),
       message,
       button(ui, {
         label: LOCALE.LOG_IN_TO_WORKSPACE || "Log In to Workspace",
@@ -58,6 +69,14 @@ function __skl_welcome_signup(ui) {
         service: "use-google",
         type: _a.api,
         ico: "logo-google",
+        priority: "secondary",
+        haptic,
+      }),
+      button(ui, {
+        label: LOCALE.CONTINUE_WITH_APPLEID,
+        service: "use-apple",
+        type: _a.api,
+        ico: "logo-apple",
         priority: "secondary",
         haptic,
       }),

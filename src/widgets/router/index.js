@@ -61,8 +61,10 @@ class signin_router extends LetcBox {
         email,
         title: "Multi factor athentication",
         message: "We have sent a code to {0} validate you connection".format(email),
+        resendService: 'resend-signin-otp',
         service: 'otp-signined'
       });
+      this._otp = this.children.last()
       return
     }
     let { main_domain, protocol, endpoint } = bootstrap()
@@ -97,9 +99,71 @@ class signin_router extends LetcBox {
   }
 
   /**
-   * 
-   * @param {*} cmd 
-   * @param {*} args 
+   * Host-driven OTP resend, delegated from the dtk_otp widget via its
+   * `resendService`. The widget itself only fires the service (it does no
+   * network work when `resendService` is set), so we own the request here —
+   * which lets us show a loading state on the card while otp.send is in
+   * flight. On success we swap in the fresh secret and clear the digit boxes
+   * for re-entry; on failure we surface the error in the widget's tips line.
+   */
+  _resendSigninOtp() {
+    const otp = this._otp;
+    if (!otp || this._resending) return;
+    this._resending = true;
+    // The router skin renders a spinner on the resend link while this is set.
+    if (otp.el) otp.el.dataset.resending = '1';
+
+    const payload = otp.mget('payload') || {};
+    const method = payload.method || 'otp';
+    // Defense in depth: the post-login payload now carries the email (set by
+    // the signin form), but fall back to Visitor so resend can never silently
+    // fire with an empty email — the failure that made it "work only after a
+    // page refresh".
+    const email = payload.email || (Visitor.profile() || {}).email || Visitor.get('email');
+    const api = otp.mget('resendApi') || SERVICE.otp.send;
+    // otp.send verifies the caller's websocket in the pre-auth signin context
+    // (same as otp.send_link in the form). Without socket_id the server rejects
+    // the resend with INVALID_SOCKET.
+    const vars = { email, method, socket_id: Visitor.get(_a.socket_id) };
+    this.postService(api, vars).then((data) => {
+      // The server returns errors in-band (e.g. INVALID_SOCKET) rather than
+      // rejecting — surface them instead of falsely reporting "code resent".
+      if (!data || data.error) {
+        if (typeof otp.displayMessage === 'function') {
+          otp.displayMessage(LOCALE.UNKNOWN_ERROR, 1);
+        }
+        return;
+      }
+      // Merge (not replace) so id/uid/method survive; overlay the new secret.
+      otp.mset({ payload: { ...payload, ...data } });
+      // Wipe the boxes so checkForm doesn't immediately resubmit the old code.
+      otp.ensurePart('digits').then((p) => {
+        const boxes = p.children.toArray();
+        for (const c of boxes) {
+          if (typeof c.setValue === 'function') c.setValue('');
+        }
+        if (boxes[0] && typeof boxes[0].focus === 'function') boxes[0].focus();
+      });
+      if (typeof otp.displayMessage === 'function') {
+        const msg = LOCALE.NEW_CODE_RESENT ||
+          "We have sent a new code to {0}".format(email);
+        otp.displayMessage(msg);
+      }
+    }).catch((e) => {
+      this.warn("Resend signin OTP failed", e);
+      if (typeof otp.displayMessage === 'function') {
+        otp.displayMessage(LOCALE.UNKNOWN_ERROR, 1);
+      }
+    }).finally(() => {
+      this._resending = false;
+      if (otp.el) otp.el.dataset.resending = '0';
+    });
+  }
+
+  /**
+   *
+   * @param {*} cmd
+   * @param {*} args
    */
   async onUiEvent(cmd, args = {}) {
     const service = args.service || cmd.get(_a.service);
@@ -183,10 +247,15 @@ class signin_router extends LetcBox {
           api: SERVICE.yp.login_top,
           title: "Multi factor athentication",
           message: "We have sent a code to {0} validate you connection".format(args.data.email),
+          resendService: 'resend-signin-otp',
           service: 'otp-signined'
         });
         this._otp = this.children.last()
         return
+      case 'resend-signin-otp':
+        this._resendSigninOtp();
+        return;
+
       case 'otp-signined':
         location.reload();
         return;

@@ -197,6 +197,97 @@
     }
   }
 
+  &__forgot-row {
+    width: 100%;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: -2px;
+  }
+
+  &__forgot-link {
+    font-family: var(--font-main);
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgb(52, 52, 58);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: rgb(67, 60, 197);
+    }
+  }
+
+  &__back-link {
+    font-family: var(--font-medium);
+    font-size: 14px;
+    line-height: 20px;
+    color: rgb(89, 80, 255);
+    cursor: pointer;
+    transition: color 0.2s;
+
+    &:hover {
+      color: rgb(67, 60, 197);
+    }
+  }
+
+  // ---- Forgot-password view ("Enter Email") ----
+  &__forgot {
+    align-items: center;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 8px 32px rgba(11, 10, 33, 0.06);
+  }
+
+  &__forgot-head {
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+  }
+
+  &__forgot-field {
+    width: 100%;
+    gap: 8px;
+  }
+
+  &__forgot-logo {
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  &__forgot-logo-icon {
+    width: 72px;
+    height: 60px;
+    color: #433CC5;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__forgot-title {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1.1;
+    color: rgb(67, 60, 197);
+    text-align: center;
+    width: 100%;
+    justify-content: center;
+  }
+
+  &__forgot-actions {
+    width: 100%;
+    align-items: center;
+    gap: 16px;
+
+    .signin__button-main {
+      width: 100%;
+    }
+  }
+
   &__error-container {
     width: 100%;
     height: auto;
@@ -247,5 +338,143 @@
     max-width: 520px;
     align-items: center;
     gap: 0;
+  }
+
+  // ---- Check-inbox view (shown after submitting the forgot form) ----
+  &__check-inbox {
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+    padding: 33px;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow: 0 1px 11px rgba(0, 0, 0, 0.13);
+  }
+
+  &__inbox-icon {
+    width: 72px;
+    height: 73px;
+    padding: 12px;
+    border-radius: 100px;
+    background-color: rgba(89, 80, 255, 0.1);
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+
+  &__envelope {
+    width: 24px;
+    height: 24px;
+    color: rgb(89, 80, 255);
+    fill: rgb(89, 80, 255);
+
+    svg {
+      width: 100%;
+      height: 100%;
+      color: rgb(89, 80, 255);
+      fill: rgb(89, 80, 255);
+    }
+  }
+
+  &__inbox-heading {
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    width: 306px;
+    max-width: 100%;
+  }
+
+  &__inbox-title {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 32px;
+    line-height: 1.1;
+    color: rgb(67, 60, 197);
+    width: 100%;
+    justify-content: center;
+  }
+
+  &__inbox-subtext {
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    width: 100%;
+  }
+
+  &__inbox-sent {
+    font-family: var(--font-main);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.4;
+    color: #000000;
+    width: 100%;
+    justify-content: center;
+  }
+
+  &__inbox-email {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.1;
+    color: rgb(52, 52, 58);
+    width: 100%;
+    word-break: break-word;
+    justify-content: center;
+  }
+
+  &__inbox-footer {
+    align-items: center;
+    text-align: center;
+    width: 100%;
+  }
+
+  &__inbox-note {
+    font-family: var(--font-main);
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.4;
+    color: rgb(52, 52, 58);
+    width: 100%;
+    justify-content: center;
+  }
+
+  &__inbox-actions {
+    gap: 12px;
+    width: 100%;
+
+    .signin__button-main {
+      width: 100%;
+    }
+
+    // Resend on cooldown: the label shows the countdown, so hide the icon
+    // and make the button read as disabled.
+    .signin__button-main[data-counting="1"] {
+      pointer-events: none;
+      opacity: 0.6;
+
+      .icon {
+        display: none;
+      }
+    }
+
+    // Resend permanently disabled: the reset was already completed in another
+    // tab (welcome/reset success), so there's nothing left to resend.
+    .signin__button-main[data-disabled="1"] {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    // Resend (primary): plain white glyph, not the default white-circle icon.
+    .signin__button-main.primary .icon.svg-wrapper {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border-radius: 0;
+      background: none;
+      background-color: transparent;
+      color: #ffffff;
+      fill: #ffffff;
+    }
   }
 }
