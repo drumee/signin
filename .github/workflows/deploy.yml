@@ -2,18 +2,18 @@ name: CD - deploy signin
 
 on:
   push:
-    branches: [test]
+    branches: [test, preview]
   workflow_dispatch:
     inputs:
       target:
         description: "Deploy target environment"
         type: choice
-        options: [TEST, PROD]
+        options: [TEST, UAT, PROD]
         default: TEST
 
 concurrency:
-  # Repo-wide: TEST and PROD use different working trees but share the
-  # container; serialize all deploys for this plugin to be safe.
+  # Repo-wide: TEST uses the .test tree, UAT/PROD share the main tree;
+  # serialize all deploys for this plugin to avoid clobbering working trees.
   group: cd-signin
   cancel-in-progress: false
 
@@ -35,18 +35,24 @@ jobs:
         id: target
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            TARGET=TEST
+            case "${{ github.ref_name }}" in
+              test)    TARGET=TEST ;;
+              preview) TARGET=UAT ;;
+              *) echo "Unsupported push branch: ${{ github.ref_name }}"; exit 1 ;;
+            esac
           else
             TARGET="${{ github.event.inputs.target || 'TEST' }}"
           fi
           case "$TARGET" in
-            TEST) SRC=/usr/src/drumee.test/$REPO; BRANCH=test;    EP=test; VPATH=/-/test/plugins/$UI_NAME ;;
-            PROD) SRC=/usr/src/drumee/$REPO;      BRANCH=preview; EP=main; VPATH=/-/plugins/$UI_NAME ;;
+            TEST) SRC=/usr/src/drumee.test/$REPO; BRANCH=test;    EP=test;    ENVARG="";        VPATH=/-/test/plugins/$UI_NAME ;;
+            UAT)  SRC=/usr/src/drumee/$REPO;      BRANCH=preview; EP=preview; ENVARG="preview"; VPATH=/-/preview/plugins/$UI_NAME ;;
+            PROD) SRC=/usr/src/drumee/$REPO;      BRANCH=preview; EP=main;    ENVARG="";        VPATH=/-/plugins/$UI_NAME ;;
             *) echo "Unsupported target: $TARGET"; exit 1 ;;
           esac
           echo "src=$SRC"       >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "ep=$EP"         >> "$GITHUB_OUTPUT"
+          echo "envarg=$ENVARG" >> "$GITHUB_OUTPUT"
           echo "vpath=$VPATH"   >> "$GITHUB_OUTPUT"
           echo "::notice::Target $TARGET -> $UI_NAME on $EP (branch $BRANCH, dir $SRC)"
 
@@ -78,6 +84,7 @@ jobs:
         env:
           SRC: ${{ steps.target.outputs.src }}
           EP: ${{ steps.target.outputs.ep }}
+          ENVARG: ${{ steps.target.outputs.envarg }}
         run: |
           ssh "$SGP_USER@$SGP_HOST" "sudo docker exec -i $CONTAINER bash -s" <<EOSSH
           set -euo pipefail
@@ -85,7 +92,7 @@ jobs:
           if ! npm install --no-audit --no-fund > $LOG_FILE 2>&1; then
             echo "::error::npm install failed. Tail:"; tail -50 $LOG_FILE; exit 1
           fi
-          if ! NO_WATCH=yes npm run deploy >> $LOG_FILE 2>&1; then
+          if ! NO_WATCH=yes npm run deploy ${ENVARG:+-- }$ENVARG >> $LOG_FILE 2>&1; then
             echo "::error::Build/deploy failed. Tail:"; tail -60 $LOG_FILE; exit 1
           fi
           echo "Built and deployed $UI_NAME to ui/$EP"
@@ -133,13 +140,14 @@ jobs:
           PREV: ${{ steps.fetch.outputs.prev }}
           SRC: ${{ steps.target.outputs.src }}
           EP: ${{ steps.target.outputs.ep }}
+          ENVARG: ${{ steps.target.outputs.envarg }}
         run: |
           ssh "$SGP_USER@$SGP_HOST" "sudo docker exec -i $CONTAINER bash -s" <<EOSSH
           set -uo pipefail
           cd $SRC
           echo "::warning::Rolling back to ${PREV:0:8}"
           git reset --hard $PREV --quiet
-          NO_WATCH=yes npm run deploy >> $LOG_FILE 2>&1 || true
+          NO_WATCH=yes npm run deploy ${ENVARG:+-- }$ENVARG >> $LOG_FILE 2>&1 || true
           /usr/sbin/drumee restart $EP >> $LOG_FILE 2>&1 || true
           /usr/sbin/drumee restart $EP/service >> $LOG_FILE 2>&1 || true
           echo "Rolled back"
