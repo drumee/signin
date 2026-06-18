@@ -42,9 +42,43 @@ class signin_router extends LetcBox {
   }
 
   /**
+   * Parse an OAuth 2FA hand-off from the URL. After a Google/Apple sign-in by a
+   * 2FA-enabled user, loby bounces the browser back to
+   * `#/welcome/signin?oauth_mfa=1&email=...` with the session left pending. The
+   * query string lives inside the hash fragment.
+   * @returns {{email:string}|null}
+   */
+  _oauthMfaParams() {
+    const hash = location.hash || '';
+    const qi = hash.indexOf('?');
+    if (qi < 0) return null;
+    const params = new URLSearchParams(hash.slice(qi + 1));
+    if (params.get('oauth_mfa') !== '1') return null;
+    return { email: params.get('email') || '' };
+  }
+
+  /**
     *
     */
   async onDomRefresh() {
+    // OAuth 2FA hand-off: render the OTP screen pointed at oauth.verify_otp,
+    // which finalizes the pending session (no client-side secret).
+    const mfa = this._oauthMfaParams();
+    if (mfa) {
+      await Kind.waitFor('dtk_otp');
+      this.feed({
+        payload: { email: mfa.email, method: 'oauth' },
+        kind: 'dtk_otp',
+        api: SERVICE.oauth.verify_otp,
+        resendApi: SERVICE.oauth.resend_otp,
+        title: "Multi factor authentication",
+        message: "We have sent a code to {0} to validate your connection".format(mfa.email),
+        resendService: 'resend-signin-otp',
+        service: 'otp-signined'
+      });
+      this._otp = this.children.last();
+      return;
+    }
     if (Visitor.get('connection') == 'otp') {
       let { email } = Visitor.profile()
       await Kind.waitFor('dtk_otp');
