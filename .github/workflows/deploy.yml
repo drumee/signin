@@ -17,6 +17,9 @@ concurrency:
   group: cd-signin
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     name: Deploy
@@ -49,15 +52,70 @@ jobs:
             PROD) SRC=/usr/src/drumee/$REPO;      BRANCH=preview; EP=main;    ENVARG="";        VPATH=/-/plugins/$UI_NAME ;;
             *) echo "Unsupported target: $TARGET"; exit 1 ;;
           esac
+          # loc=stage -> build+deploy locally on the runner host (drumee.in) `main`
+          # loc=container -> build+deploy into the prod box (sgp) docker container
+          LOC=container; [ "$TARGET" = "TEST" ] && LOC=stage
           echo "src=$SRC"       >> "$GITHUB_OUTPUT"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
           echo "ep=$EP"         >> "$GITHUB_OUTPUT"
           echo "envarg=$ENVARG" >> "$GITHUB_OUTPUT"
           echo "vpath=$VPATH"   >> "$GITHUB_OUTPUT"
-          echo "::notice::Target $TARGET -> $UI_NAME on $EP (branch $BRANCH, dir $SRC)"
+          echo "loc=$LOC"       >> "$GITHUB_OUTPUT"
+          echo "::notice::Target $TARGET -> $UI_NAME on $EP (branch $BRANCH, loc $LOC)"
 
+      # ---------------- TEST: build + deploy plugin to drumee.in (stage) `main` ----------------
+      - name: Deploy to stage main (TEST)
+        id: stage
+        if: steps.target.outputs.loc == 'stage'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          REPO_DIR=/usr/src/drumee/$REPO
+          AUTH="https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
+          [ -d "$REPO_DIR/.git" ] || sudo git init -q "$REPO_DIR"
+          PREV=$(sudo git -C "$REPO_DIR" rev-parse HEAD 2>/dev/null || echo "")
+          echo "prev=$PREV" >> "$GITHUB_OUTPUT"
+          sudo git -C "$REPO_DIR" fetch --depth 1 "$AUTH" test
+          sudo git -C "$REPO_DIR" checkout -f -B test FETCH_HEAD
+          sudo git -C "$REPO_DIR" reset --hard FETCH_HEAD
+          sudo git -C "$REPO_DIR" clean -fd -e .dev-tools.rc || true
+          NEW=$(sudo git -C "$REPO_DIR" rev-parse --short HEAD)
+          echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          echo "Building $NEW ($UI_NAME) for stage main"
+          sudo bash -c "cd '$REPO_DIR' && npm install --no-audit --no-fund"
+          sudo bash -c "cd '$REPO_DIR' && NO_WATCH=yes npm run deploy -- deploy"
+
+      - name: Verify stage main plugin (TEST)
+        if: steps.target.outputs.loc == 'stage'
+        env:
+          EXPECTED: ${{ steps.stage.outputs.new }}
+        run: |
+          set -euo pipefail
+          sleep 4
+          URL="https://localhost/-/plugins/${UI_NAME}/index.json"
+          CODE=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 -H 'Host: drumee.in' "$URL" || echo 000)
+          BODY=$(curl -sk --max-time 10 -H 'Host: drumee.in' "$URL" || echo "")
+          HEAD=$(echo "$BODY" | python3 -c "import sys,json;print(json.load(sys.stdin).get('head',''))" 2>/dev/null || echo "")
+          echo "HTTP=$CODE deployed-head=$HEAD expected=$(echo "$EXPECTED" | cut -c1-7)"
+          [[ "$CODE" =~ ^2[0-9][0-9]$ ]] || { echo "::error::stage plugin verify non-2xx ($CODE)"; exit 1; }
+          echo "Verified stage main plugin $UI_NAME"
+
+      - name: Rollback stage (on failure)
+        if: failure() && steps.target.outputs.loc == 'stage' && steps.stage.outputs.prev != ''
+        env:
+          PREV: ${{ steps.stage.outputs.prev }}
+        run: |
+          set -uo pipefail
+          REPO_DIR=/usr/src/drumee/$REPO
+          echo "::warning::Rolling back stage $UI_NAME to ${PREV:0:8}"
+          sudo git -C "$REPO_DIR" reset --hard "$PREV"
+          sudo bash -c "cd '$REPO_DIR' && NO_WATCH=yes npm run deploy -- deploy" || true
+
+      # ---------------- UAT / PROD: build + deploy into prod box (sgp) container ----------------
       - name: Fetch and reset working tree
         id: fetch
+        if: steps.target.outputs.loc == 'container'
         env:
           SRC: ${{ steps.target.outputs.src }}
           BRANCH: ${{ steps.target.outputs.branch }}
@@ -81,6 +139,7 @@ jobs:
           echo "Previous: ${PREV:0:8}  New: ${NEW:0:8}"
 
       - name: Build and deploy
+        if: steps.target.outputs.loc == 'container'
         env:
           SRC: ${{ steps.target.outputs.src }}
           EP: ${{ steps.target.outputs.ep }}
@@ -99,6 +158,7 @@ jobs:
           EOSSH
 
       - name: Restart endpoint
+        if: steps.target.outputs.loc == 'container'
         env:
           EP: ${{ steps.target.outputs.ep }}
         run: |
@@ -111,6 +171,7 @@ jobs:
           EOSSH
 
       - name: Verify (HTTP + head)
+        if: steps.target.outputs.loc == 'container'
         env:
           EXPECTED: ${{ steps.fetch.outputs.new }}
           EP: ${{ steps.target.outputs.ep }}
@@ -135,7 +196,7 @@ jobs:
           EOSSH
 
       - name: Rollback (on failure)
-        if: failure() && steps.fetch.outputs.prev != ''
+        if: failure() && steps.target.outputs.loc == 'container' && steps.fetch.outputs.prev != ''
         env:
           PREV: ${{ steps.fetch.outputs.prev }}
           SRC: ${{ steps.target.outputs.src }}
