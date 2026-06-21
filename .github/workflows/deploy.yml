@@ -12,8 +12,8 @@ on:
         default: TEST
 
 concurrency:
-  # Repo-wide: TEST uses the .test tree, UAT/PROD share the main tree;
-  # serialize all deploys for this plugin to avoid clobbering working trees.
+  # Repo-wide: TEST deploys to drumee.in (stage) main, UAT/PROD to the sgp
+  # container; serialize all deploys for this plugin to avoid clobbering trees.
   group: cd-signin
   cancel-in-progress: false
 
