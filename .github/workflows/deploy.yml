@@ -85,6 +85,9 @@ jobs:
           echo "Building $NEW ($UI_NAME) for stage main"
           sudo bash -c "cd '$REPO_DIR' && npm install --no-audit --no-fund"
           sudo bash -c "cd '$REPO_DIR' && NO_WATCH=yes npm run deploy -- deploy"
+          # reload endpoint so the page server picks up the new plugin build (mirrors container "Restart endpoint")
+          sudo /usr/sbin/drumee restart main
+          sudo /usr/sbin/drumee restart main/service
 
       - name: Verify stage main plugin (TEST)
         if: steps.target.outputs.loc == 'stage'
