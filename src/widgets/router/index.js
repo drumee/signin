@@ -77,6 +77,7 @@ class signin_router extends LetcBox {
         service: 'otp-signined'
       });
       this._otp = this.children.last();
+      this._attachOtpSubmitSpinner(this._otp);
       return;
     }
     if (Visitor.get('connection') == 'otp') {
@@ -99,6 +100,7 @@ class signin_router extends LetcBox {
         service: 'otp-signined'
       });
       this._otp = this.children.last()
+      this._attachOtpSubmitSpinner(this._otp);
       return
     }
     let { main_domain, protocol, endpoint } = bootstrap()
@@ -195,6 +197,42 @@ class signin_router extends LetcBox {
   }
 
   /**
+   * Wrap the dtk_otp instance's verify POST so the code-check round-trip shows a
+   * spinner and locks input — the signin OTP screen otherwise gives no feedback
+   * while yp.login_top is in flight. Mirrors the otp-gate widget's submit
+   * spinner. The widget self-POSTs to its `api`; resend POSTs elsewhere and
+   * keeps its own [data-resending] state, so only `api` is gated. The router
+   * skin renders the loader on [data-submitting="1"]. Idempotent and
+   * best-effort: if the instance has no postService the screen simply runs
+   * without a submit spinner.
+   * @param {LetcBox} otp  the dtk_otp instance (this._otp)
+   */
+  _attachOtpSubmitSpinner(otp) {
+    if (!otp || otp._signinSubmitWrapped || typeof otp.postService !== 'function') return;
+    const api = otp.mget('api');
+    if (!api) return;
+    otp._signinSubmitWrapped = true;
+    const post = otp.postService.bind(otp);
+    otp.postService = function (service, ...rest) {
+      // Resend (and any non-verify POST) keeps the stock behaviour.
+      if (service !== api) return post(service, ...rest);
+      if (this.el) this.el.dataset.submitting = '1';
+      let p;
+      try {
+        p = post(service, ...rest);
+      } catch (e) {
+        if (this.el) this.el.dataset.submitting = '0';
+        throw e;
+      }
+      return Promise.resolve(p).finally(() => {
+        // On success the screen swaps out; on a rejected code dtk_otp clears the
+        // boxes for re-entry — either way the inputs unlock here.
+        if (this.el) this.el.dataset.submitting = '0';
+      });
+    };
+  }
+
+  /**
    *
    * @param {*} cmd
    * @param {*} args
@@ -285,6 +323,7 @@ class signin_router extends LetcBox {
           service: 'otp-signined'
         });
         this._otp = this.children.last()
+        this._attachOtpSubmitSpinner(this._otp);
         return
       case 'resend-signin-otp':
         this._resendSigninOtp();
