@@ -221,9 +221,16 @@ class signin_form extends Signup {
    * @param {*} data 
    */
   checkLoginStatus(data) {
-    setTimeout(() => {
-      this.setItemStatus('commit-button', "0", "haptic");
-    }, 500)
+    // Keep the commit-button spinner running on the 2FA path (data.secret): the
+    // router then dynamically imports + renders the OTP card, and the spinner is
+    // cleared naturally when that card replaces this form. Releasing it on a
+    // fixed timer leaves a dead, feedback-less gap on the old form meanwhile.
+    // Every other path (no secret) releases the button so the user can retry.
+    if (!data.secret) {
+      setTimeout(() => {
+        this.setItemStatus('commit-button', "0", "haptic");
+      }, 500)
+    }
     switch (data.status) {
       case "INCOMPLETE_SIGNUP":
         this.triggerHandlers({ service: "onboarding" })

@@ -14,7 +14,9 @@ if [ "$dest_host" != "" ]; then
   if [ -f "$IGNORE_FILE" ]; then
     OPT=--exclude-from="$IGNORE_FILE"
   fi
-
+  if [ "$BUILD_TARGET" != "" ]; then
+    src_path="$src_path/$BUILD_TARGET"
+  fi
   if [ -z $src_path ]; then 
     echo UI_BUILD_PATH env variable must be set
     exit 1
@@ -22,8 +24,9 @@ if [ "$dest_host" != "" ]; then
 
   target="${dest_user}@${dest_host}:${dest_path}"
 
+  echo rsync -avrp --delete --delete-excluded  $OPT $src_path/ $target/
   echo "*******************************************************"
-  echo "*SYNCING files on remote location: $src_path -> $target " 
+  echo "*SYNCING files on remote location: $src_path/ -> $target/ " 
   echo "*******************************************************"	
   export banner_shown=shown
   echo OPTION: $OPT

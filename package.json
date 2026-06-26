@@ -21,7 +21,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.1",
     "@babel/preset-env": "^7.19.1",
-    "@drumee/ui-dev-tools": "^1.0.36",
+    "@drumee/ui-dev-tools": "^1.0.44",
     "@unocss/preset-wind4": "^66.3.3",
     "@unocss/webpack": "^66.3.3",
     "argparse": "^2.0.1",
