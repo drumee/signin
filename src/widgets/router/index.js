@@ -65,25 +65,20 @@ class signin_router extends LetcBox {
     // which finalizes the pending session (no client-side secret).
     const mfa = this._oauthMfaParams();
     if (mfa) {
-      await Kind.waitFor('dtk_otp');
-      this.feed({
+      await this._mountOtp({
         payload: { email: mfa.email, method: 'oauth' },
-        kind: 'dtk_otp',
         api: SERVICE.oauth.verify_otp,
         resendApi: SERVICE.oauth.resend_otp,
         title: "Multi factor authentication",
         message: "We have sent a code to {0} to validate your connection".format(mfa.email),
         resendService: 'resend-signin-otp',
         service: 'otp-signined'
-      });
-      this._otp = this.children.last();
-      this._attachOtpSubmitSpinner(this._otp);
+      }, true);
       return;
     }
     if (Visitor.get('connection') == 'otp') {
       let { email } = Visitor.profile()
-      await Kind.waitFor('dtk_otp');
-      this.feed({
+      await this._mountOtp({
         payload: {
           uid: Visitor.id,
           id: Visitor.id,
@@ -91,16 +86,13 @@ class signin_router extends LetcBox {
           email,
           method: 'otp'
         },
-        kind: 'dtk_otp',
         api: SERVICE.yp.login_top,
         email,
         title: "Multi factor athentication",
         message: "We have sent a code to {0} validate you connection".format(email),
         resendService: 'resend-signin-otp',
         service: 'otp-signined'
-      });
-      this._otp = this.children.last()
-      this._attachOtpSubmitSpinner(this._otp);
+      }, true);
       return
     }
     let { main_domain, protocol, endpoint } = bootstrap()
@@ -233,6 +225,84 @@ class signin_router extends LetcBox {
   }
 
   /**
+   * Abandon a pending OAuth 2FA sign-in and return to the sign-in form — the
+   * "Back to sign in" action on the OTP screen.
+   *
+   * After an OAuth (Google/Apple) sign-in by a 2FA user, loby leaves an
+   * `otp_pending` cookie and bounces the browser to the OTP screen. Until that
+   * cookie is cleared the signin page keeps landing on the OTP screen, so a
+   * soft view-swap (or a plain reload) gets bounced straight back. session
+   * logout can't clear it either: session_logout matches the cookie by uid,
+   * which a not-yet-authenticated pending session doesn't have. We therefore
+   * call oauth.cancel_otp, which deletes the pending cookie by session id, then
+   * set a clean hash and synchronously reload so the page boots on a fresh
+   * sign-in form at a clean #/welcome/signin URL (no oauth_mfa/email left
+   * behind). Best-effort: regular (non-OAuth) 2FA has no pending cookie, so the
+   * call is a harmless no-op there.
+   */
+  _backToSignin() {
+    const goSignin = () => {
+      location.hash = '#/welcome/signin';
+      location.reload();
+    };
+    const cancel = SERVICE.oauth && SERVICE.oauth.cancel_otp;
+    if (!cancel) return goSignin();
+    this.postService(cancel, {}, { async: 1 })
+      .then(goSignin)
+      .catch((e) => {
+        this.warn('back-to-signin: cancel OTP failed', e);
+        goSignin();
+      });
+  }
+
+  /**
+   * Mount the OTP screen inside a single bordered, rounded card that wraps BOTH
+   * the dtk_otp widget and (for 2FA sign-in screens) the "← Back to sign in"
+   * link. The card is the only child of the router root, so the router skin can
+   * center it on the gradient page background. The back link lives inside the
+   * card — alongside, but outside, the dtk_otp widget — and bubbles the
+   * `back-to-signin` service handled in onUiEvent.
+   *
+   * @param {object} opt  dtk_otp options (payload/api/title/message/…); `kind`
+   *                      is supplied here.
+   * @param {boolean} withBack  append the back-to-sign-in link (2FA screens).
+   * @returns {Promise<LetcBox>} the dtk_otp instance.
+   */
+  async _mountOtp(opt, withBack = false) {
+    const fig = this.fig.family;
+    await Kind.waitFor('dtk_otp');
+    this.feed(Skeletons.Box.Y({
+      className: `${fig}__card`,
+      sys_pn: 'card',
+      partHandler: [this],
+      kids: [],
+    }));
+    const card = await this.ensurePart('card');
+    // The OTP widget now sits inside the card (not directly under the router),
+    // so route its services (otp-signined, resend-signin-otp, …) to the router
+    // explicitly rather than relying on the immediate-parent handler chain.
+    card.feed({ kind: 'dtk_otp', uiHandler: [this], ...opt });
+    this._otp = card.children.last();
+    this._attachOtpSubmitSpinner(this._otp);
+    if (withBack) {
+      card.append(
+        Skeletons.Box.X({
+          className: `${fig}__backlink-row`,
+          kids: [
+            Skeletons.Note({
+              className: `${fig}__backlink`,
+              content: LOCALE.BACK_TO_SIGN_IN,
+              service: 'back-to-signin',
+              uiHandler: [this],
+            }),
+          ],
+        })
+      );
+    }
+    return this._otp;
+  }
+
+  /**
    *
    * @param {*} cmd
    * @param {*} args
@@ -287,7 +357,7 @@ class signin_router extends LetcBox {
         return location.reload();
 
       case 'otp-failed':
-        return this.feed({ kind: 'dtk_otp', api: SERVICE.otp.verify, service: 'otp-verified' });
+        return this._mountOtp({ api: SERVICE.otp.verify, service: 'otp-verified' });
 
       case 'otp-verified':
         if (!data || !data.secret) {
@@ -312,18 +382,14 @@ class signin_router extends LetcBox {
         if (!data || !data.secret) {
           return
         }
-        await Kind.waitFor('dtk_otp');
-        this.feed({
+        await this._mountOtp({
           payload: { id: data.id, uid: data.id, email: data.email, method: "otp", secret: data.secret },
-          kind: 'dtk_otp',
           api: SERVICE.yp.login_top,
           title: "Multi factor athentication",
           message: "We have sent a code to {0} validate you connection".format(args.data.email),
           resendService: 'resend-signin-otp',
           service: 'otp-signined'
-        });
-        this._otp = this.children.last()
-        this._attachOtpSubmitSpinner(this._otp);
+        }, true);
         return
       case 'resend-signin-otp':
         this._resendSigninOtp();
@@ -340,16 +406,13 @@ class signin_router extends LetcBox {
         });
         return;
       case 'otp-sent':
-        await Kind.waitFor('dtk_otp');
-        this.feed({
+        await this._mountOtp({
           payload: args.data,
-          kind: 'dtk_otp',
           api: SERVICE.otp.verify,
           title: LOCALE.Q_FORGOT_PASSWORD,
           message: LOCALE.WE_HAVE_SENT_CODE.format(args.data.email),
           service: 'otp-verified'
         });
-        this._otp = this.children.last()
         return
 
       case _a.error:
@@ -365,6 +428,9 @@ class signin_router extends LetcBox {
         this.feed({ message: args.message, buttons, kind: 'dtk_dialog', service: _a.home, title: "Ooop!" })
         break;
 
+      case 'back-to-signin':
+        this._backToSignin();
+        return;
       case _a.home:
         this.feed({ kind: 'signin_form' });
         break;

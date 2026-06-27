@@ -12,39 +12,76 @@ $otp-font: var(--font-main);
     width: 100vw;
     height: 100vh;
     overflow: auto;
-    background-color: var(--normal-bg);
+    // Gradient page background per Figma (node 5-73985): a light grey base with
+    // a soft brand-purple glow rising from the bottom-centre.
+    background-color: #f2f2f7;
+    background-image: radial-gradient(
+      120% 62% at 50% 116%,
+      rgba(89, 80, 255, 0.45) 0%,
+      rgba(89, 80, 255, 0.12) 34%,
+      rgba(242, 242, 247, 0) 68%
+    );
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    // The router root centres the single card on the page.
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    box-sizing: border-box;
 
-    // Transparent centering wrapper — the page provides the background.
+    // The card: a single bordered, rounded container wrapping the OTP widget
+    // and the back-to-sign-in link. This is the only visible surface — the
+    // dtk_otp's own __main card styling is neutralised below.
+    .signin-router__card {
+      position: relative;
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 450px;
+      max-width: calc(100vw - 32px);
+      padding: 32px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 12px;
+      box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.13),
+        0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      font-family: $otp-font;
+    }
+
+    // Transparent wrapper inside the card — no longer a card itself.
     .dtk-otp__ui {
       width: 100%;
-      height: 100%;
+      height: auto;
+      flex: 0 0 auto;
       background: transparent;
       justify-content: center;
       align-items: center;
       align-content: center;
-      padding: 16px;
+      padding: 0;
       gap: 16px;
-      overflow: auto;
       font-family: $otp-font;
     }
 
-    // __main IS the card. top: 0 drops the base skin's full-page offset.
+    // __main is now just the OTP content stack — the card chrome lives on
+    // .signin-router__card, so strip the white box/shadow/border/padding here.
     .dtk-otp__main {
       position: relative;
       flex: 0 0 auto;
       top: 0;
-      width: 450px;
-      max-width: calc(100vw - 32px);
-      padding: 32px;
+      width: 100%;
+      padding: 0;
       gap: 16px;
       justify-content: center;
       align-items: center;
       text-align: center;
-      background: #ffffff;
+      background: transparent;
       border: none;
-      border-radius: 12px;
-      box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.13),
-        0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border-radius: 0;
+      box-shadow: none;
       font-family: $otp-font;
     }
 
@@ -235,7 +272,7 @@ $otp-font: var(--font-main);
     }
 
     @media (max-width: 560px) {
-      .dtk-otp__main {
+      .signin-router__card {
         width: calc(100vw - 24px);
         padding: 24px;
       }
@@ -250,10 +287,45 @@ $otp-font: var(--font-main);
       }
     }
   }
+
+  // "← Back to sign in" link, inside the card but outside the dtk_otp widget.
+  // A hairline divider separates it from the OTP content above. Mirrors the
+  // onboarding "Skip this step" link treatment.
+  &__backlink-row {
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  &__backlink {
+    font-family: $otp-font;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    color: #65656c;
+    text-align: center;
+    cursor: pointer;
+    padding: 12px 24px;
+    border-radius: 4px;
+    transition: color 120ms ease;
+
+    &:hover {
+      color: #433cc5;
+    }
+  }
 }
 
-html[data-theme="dark"] .signin-router__ui .dtk-otp__main {
+html[data-theme="dark"] .signin-router__ui .signin-router__card {
   background: var(--normal-bg-elevated, #1b1b1f);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .signin-router__ui .signin-router__backlink-row {
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 @keyframes dtk-otp-spin {
