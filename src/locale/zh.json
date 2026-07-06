@@ -92,5 +92,8 @@
   "NOT_A_BOT": "请关闭此窗口以确认您不是机器人",
   "SERVER_BUSY": "抱歉，我们的服务器目前负载过重。请稍后重试。",
   "SET_NEW_PASSWORD": "设置新密码",
-  "WE_HAVE_SENT_CODE": "我们已向您的地址 {0} 发送验证码，以便您可以设置新密码。"
+  "WE_HAVE_SENT_CODE": "我们已向您的地址 {0} 发送验证码，以便您可以设置新密码。",
+  "EMAIL_NOT_VERIFIED_TITLE": "Email not verified",
+  "EMAIL_NOT_VERIFIED_TEXT": "Please verify your email address to continue signing in.",
+  "VERIFY_EMAIL": "Verify email"
 }

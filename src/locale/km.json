@@ -92,5 +92,8 @@
   "NOT_A_BOT": "សូមបិទបង្អួចនេះ ដើម្បីបញ្ជាក់ថាអ្នកមិនមែនជា bot ទេ។",
   "SERVER_BUSY": "យើងសុំទោស ម៉ាស៊ីនមេរបស់យើងកំពុងជួបប្រទះនឹងបន្ទុកធ្ងន់។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។",
   "SET_NEW_PASSWORD": "កំណត់ពាក្យសម្ងាត់ថ្មី",
-  "WE_HAVE_SENT_CODE": "យើងបានផ្ញើលេខកូដទៅកាន់អាសយដ្ឋានរបស់អ្នក {0} ដើម្បីឱ្យអ្នកអាចកំណត់ពាក្យសម្ងាត់ថ្មី។"
+  "WE_HAVE_SENT_CODE": "យើងបានផ្ញើលេខកូដទៅកាន់អាសយដ្ឋានរបស់អ្នក {0} ដើម្បីឱ្យអ្នកអាចកំណត់ពាក្យសម្ងាត់ថ្មី។",
+  "EMAIL_NOT_VERIFIED_TITLE": "Email not verified",
+  "EMAIL_NOT_VERIFIED_TEXT": "Please verify your email address to continue signing in.",
+  "VERIFY_EMAIL": "Verify email"
 }

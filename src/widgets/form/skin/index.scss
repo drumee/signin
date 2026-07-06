@@ -305,6 +305,34 @@
     text-align: center;
   }
 
+  // "Email not verified" banner shown after an unverified login attempt.
+  &__verify-banner {
+    width: 100%;
+    gap: 6px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(250, 133, 64, 0.10);
+    border: 1px solid rgba(250, 133, 64, 0.35);
+  }
+
+  &__verify-banner-title {
+    font-family: var(--font-main);
+    font-size: 13px;
+    font-weight: 600;
+    color: rgb(200, 90, 30);
+  }
+
+  &__verify-banner-text {
+    font-family: var(--font-main);
+    font-size: 12px;
+    line-height: 18px;
+    color: rgb(120, 90, 70);
+  }
+
+  &__verify-cta {
+    margin-top: 6px;
+  }
+
   &__terms-container {
     width: 100%;
     justify-content: center;
