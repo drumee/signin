@@ -39,7 +39,6 @@ function __skl_welcome_signup(ui) {
           button(ui, {
             label: LOCALE.VERIFY_EMAIL || "Verify email",
             service: "go-verify",
-            className: `${fig}__verify-cta`,
             priority: "primary",
           }),
         ],
