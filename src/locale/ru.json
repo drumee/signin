@@ -92,5 +92,8 @@
   "NOT_A_BOT": "Пожалуйста, закройте это окно, чтобы подтвердить, что вы не бот.",
   "SERVER_BUSY": "К сожалению, наш сервер сейчас испытывает большую нагрузку. Попробуйте позже.",
   "SET_NEW_PASSWORD": "Установить новый пароль",
-  "WE_HAVE_SENT_CODE": "Мы отправили код на ваш адрес {0}, чтобы вы могли установить новый пароль."
+  "WE_HAVE_SENT_CODE": "Мы отправили код на ваш адрес {0}, чтобы вы могли установить новый пароль.",
+  "EMAIL_NOT_VERIFIED_TITLE": "Email not verified",
+  "EMAIL_NOT_VERIFIED_TEXT": "Please verify your email address to continue signing in.",
+  "VERIFY_EMAIL": "Verify email"
 }

@@ -92,5 +92,8 @@
   "NOT_A_BOT": "Por favor, cierra esta ventana para confirmar que no eres un bot",
   "SERVER_BUSY": "Lo sentimos, nuestro servidor está experimentando mucha carga. Inténtalo de nuevo más tarde.",
   "SET_NEW_PASSWORD": "Establecer nueva contraseña",
-  "WE_HAVE_SENT_CODE": "Nos enviaremos un código a su dirección {0} para que pueda definir una nueva contraseña."
+  "WE_HAVE_SENT_CODE": "Nos enviaremos un código a su dirección {0} para que pueda definir una nueva contraseña.",
+  "EMAIL_NOT_VERIFIED_TITLE": "Email not verified",
+  "EMAIL_NOT_VERIFIED_TEXT": "Please verify your email address to continue signing in.",
+  "VERIFY_EMAIL": "Verify email"
 }

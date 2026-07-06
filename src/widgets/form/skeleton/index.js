@@ -19,6 +19,26 @@ function __skl_welcome_signup(ui) {
       }),
     ],
   });
+  // Inline "email not verified" banner + CTA. Rendered only after a login attempt
+  // on an unverified account (checkLoginStatus sets ui._unverifiedEmail on the
+  // EMAIL_NOT_VERIFIED status). The CTA fires `go-verify` → Check-your-inbox.
+  const verifyBanner = ui._unverifiedEmail
+    ? Skeletons.Box.X({
+        className: `${fig}__verify-row`,
+        kids: [
+          Skeletons.Note({
+            className: `${fig}__text`,
+            content: `${LOCALE.EMAIL_NOT_VERIFIED_TITLE || "Email not verified"}.`,
+          }),
+          Skeletons.Note({
+            className: `${fig}__text link`,
+            content: `${LOCALE.VERIFY_EMAIL || "Verify email"} →`,
+            service: "go-verify",
+            uiHandler: [ui],
+          }),
+        ],
+      })
+    : null;
   const form = Skeletons.Box.Y({
     className: `${fig}__form`,
     kids: [
@@ -51,6 +71,7 @@ function __skl_welcome_signup(ui) {
         ],
       }),
       message,
+      verifyBanner,
       button(ui, {
         label: LOCALE.LOG_IN_TO_WORKSPACE || "Log In to Workspace",
         service: "signin",
@@ -58,7 +79,7 @@ function __skl_welcome_signup(ui) {
         sys_pn: "commit-button",
         haptic,
       }),
-    ],
+    ].filter(Boolean),
   });
 
   const buttons = Skeletons.Box.Y({

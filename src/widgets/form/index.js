@@ -236,13 +236,16 @@ class signin_form extends Signup {
         this.triggerHandlers({ service: "onboarding" })
         return
       case "EMAIL_NOT_VERIFIED": {
-        // Account exists but its email hasn't been verified yet. The server
-        // refused the session; send the user to the signup app's "Check your
-        // inbox" screen (carrying the email) so they can click / resend the
-        // verification link.
-        const email = data.email || (this.getData() || {}).username || "";
-        const q = email ? `?email=${encodeURIComponent(email)}&pending=1` : `?pending=1`;
-        location.hash = `#/welcome/signup${q}`;
+        // Account exists but its email hasn't been verified yet. Rather than
+        // jumping straight to the verify screen, stay on the sign-in layout and
+        // surface an inline "email not verified" banner + a "Verify email" CTA
+        // (rendered by the skeleton when _unverifiedEmail is set). Clicking the
+        // CTA fires `go-verify`, which moves the user to the Check-your-inbox /
+        // resend-activation screen. Re-feed so the banner appears; keep the
+        // typed email in the field (the skeleton reads _a.username).
+        this._unverifiedEmail = data.email || (this.getData() || {}).username || "";
+        this.mset({ [_a.username]: this._unverifiedEmail });
+        this.feed(require('./skeleton').default(this));
         return;
       }
       case "BLOCKED":
@@ -350,6 +353,18 @@ class signin_form extends Signup {
       case 'reset-password':
         this.showForgot();
         break;
+      case 'go-verify': {
+        // CTA on the "email not verified" banner: move to the signup app's
+        // Check-your-inbox / resend-activation screen, carrying the email.
+        // reload() is REQUIRED: signup is a separate page-plugin and the host
+        // welcome router only dispatches loadSignup() from route() on boot, so a
+        // bare same-module hash change would not re-route.
+        const email = this._unverifiedEmail || (this.getData() || {}).username || "";
+        const q = email ? `?email=${encodeURIComponent(email)}&pending=1` : `?pending=1`;
+        location.hash = `#/welcome/signup${q}`;
+        location.reload();
+        break;
+      }
       case 'forgot-input':
         if (![_e.commit, _e.Enter].includes(status)) break;
       case 'forgot-submit':

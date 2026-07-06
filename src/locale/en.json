@@ -92,5 +92,8 @@
   "NOT_A_BOT": "Please, close this window to confirm you're not a bot",
   "SERVER_BUSY": "We're sorry, our server is currently experiencing heavy load. Please try again later.",
   "SET_NEW_PASSWORD": "Set new password",
-  "WE_HAVE_SENT_CODE": "We have sent a code to your address {0} so that you can set a new password."
+  "WE_HAVE_SENT_CODE": "We have sent a code to your address {0} so that you can set a new password.",
+  "EMAIL_NOT_VERIFIED_TITLE": "Email not verified",
+  "EMAIL_NOT_VERIFIED_TEXT": "Please verify your email address to continue signing in.",
+  "VERIFY_EMAIL": "Verify email"
 }

@@ -305,6 +305,16 @@
     text-align: center;
   }
 
+  // "Email not verified. Verify email →" — same visual language as the
+  // "Don't have an account? Start free →" row (reuses __text / __text.link).
+  &__verify-row {
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
   &__terms-container {
     width: 100%;
     justify-content: center;
