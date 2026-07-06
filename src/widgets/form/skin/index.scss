@@ -305,46 +305,14 @@
     text-align: center;
   }
 
-  // "Email not verified" banner shown after an unverified login attempt.
-  &__verify-banner {
+  // "Email not verified. Verify email →" — same visual language as the
+  // "Don't have an account? Start free →" row (reuses __text / __text.link).
+  &__verify-row {
     width: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 6px;
-    padding: 12px 14px;
-    border-radius: 10px;
-    background: rgba(250, 133, 64, 0.10);
-    border: 1px solid rgba(250, 133, 64, 0.35);
-  }
-
-  &__verify-banner-title {
-    font-family: var(--font-main);
-    font-size: 13px;
-    font-weight: 600;
-    color: rgb(200, 90, 30);
-  }
-
-  &__verify-banner-text {
-    font-family: var(--font-main);
-    font-size: 12px;
-    line-height: 18px;
-    color: rgb(120, 90, 70);
-    margin-bottom: 2px;
-  }
-
-  // Text hyperlink CTA (matches __forgot-link / __back-link). Uses the system
-  // primary text color for consistency with the design system.
-  &__verify-link {
-    width: fit-content;
-    font-family: var(--font-medium);
-    font-size: 13px;
-    line-height: 1.4;
-    color: rgb(67, 60, 197);
-    text-decoration: underline;
-    cursor: pointer;
-    transition: color 0.2s ease;
-
-    &:hover {
-      color: rgb(89, 80, 255);
-    }
   }
 
   &__terms-container {

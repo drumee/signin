@@ -23,21 +23,15 @@ function __skl_welcome_signup(ui) {
   // on an unverified account (checkLoginStatus sets ui._unverifiedEmail on the
   // EMAIL_NOT_VERIFIED status). The CTA fires `go-verify` → Check-your-inbox.
   const verifyBanner = ui._unverifiedEmail
-    ? Skeletons.Box.Y({
-        className: `${fig}__verify-banner`,
+    ? Skeletons.Box.X({
+        className: `${fig}__verify-row`,
         kids: [
           Skeletons.Note({
-            className: `${fig}__verify-banner-title`,
-            content: LOCALE.EMAIL_NOT_VERIFIED_TITLE || "Email not verified",
+            className: `${fig}__text`,
+            content: `${LOCALE.EMAIL_NOT_VERIFIED_TITLE || "Email not verified"}.`,
           }),
           Skeletons.Note({
-            className: `${fig}__verify-banner-text`,
-            content:
-              LOCALE.EMAIL_NOT_VERIFIED_TEXT ||
-              "Please verify your email address to continue signing in.",
-          }),
-          Skeletons.Note({
-            className: `${fig}__verify-link`,
+            className: `${fig}__text link`,
             content: `${LOCALE.VERIFY_EMAIL || "Verify email"} →`,
             service: "go-verify",
             uiHandler: [ui],
