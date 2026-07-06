@@ -330,20 +330,20 @@
     margin-bottom: 2px;
   }
 
-  // Text hyperlink CTA (matches __forgot-link), tinted to the banner accent so
-  // it sits harmoniously inside the orange "not verified" panel.
+  // Text hyperlink CTA (matches __forgot-link / __back-link). Uses the system
+  // primary text color for consistency with the design system.
   &__verify-link {
     width: fit-content;
     font-family: var(--font-medium);
     font-size: 13px;
     line-height: 1.4;
-    color: rgb(200, 90, 30);
+    color: rgb(67, 60, 197);
     text-decoration: underline;
     cursor: pointer;
     transition: color 0.2s ease;
 
     &:hover {
-      color: rgb(250, 133, 64);
+      color: rgb(89, 80, 255);
     }
   }
 
