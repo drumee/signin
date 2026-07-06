@@ -240,9 +240,16 @@ class signin_form extends Signup {
         // refused the session; send the user to the signup app's "Check your
         // inbox" screen (carrying the email) so they can click / resend the
         // verification link.
+        // reload() is REQUIRED: signup lives in a separate page-plugin, and the
+        // host welcome router only dispatches loadSignup() from its route() on
+        // boot (onDomRefresh) — a bare same-module hash change (signin->signup)
+        // does not re-route, so without the reload the URL changes but the
+        // Check-your-inbox screen never renders. Mirrors the 'ok'/onboarding/
+        // back-to-signin paths, which all reload after setting the hash.
         const email = data.email || (this.getData() || {}).username || "";
         const q = email ? `?email=${encodeURIComponent(email)}&pending=1` : `?pending=1`;
         location.hash = `#/welcome/signup${q}`;
+        location.reload();
         return;
       }
       case "BLOCKED":
