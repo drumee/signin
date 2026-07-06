@@ -36,10 +36,11 @@ function __skl_welcome_signup(ui) {
               LOCALE.EMAIL_NOT_VERIFIED_TEXT ||
               "Please verify your email address to continue signing in.",
           }),
-          button(ui, {
-            label: LOCALE.VERIFY_EMAIL || "Verify email",
+          Skeletons.Note({
+            className: `${fig}__verify-link`,
+            content: `${LOCALE.VERIFY_EMAIL || "Verify email"} →`,
             service: "go-verify",
-            priority: "primary",
+            uiHandler: [ui],
           }),
         ],
       })
