@@ -32,12 +32,19 @@
     }
 
     &[data-device="mobile"] {
-      padding: 10px;
-      height: auto;
-      align-content: start;
+      padding: var(--spacer-5) var(--spacer-4);
+      // Fill the viewport at minimum (so the page background never collapses
+      // to content height and leaves an unpainted band below on tall tablet
+      // screens), but still grow + scroll when the form is taller than the
+      // viewport. `height: auto` was the root cause of the iPad break.
+      min-height: 100vh;
+      // Centre the card horizontally (it was pinned left on iPad); keep the
+      // vertical flow top-anchored so a form taller than the screen scrolls
+      // from the top instead of being clipped.
+      align-content: center;
+      align-items: center;
       justify-content: flex-start;
-      align-items: flex-start;
-      justify-items: flex-start;
+      justify-items: center;
     }
   }
 
