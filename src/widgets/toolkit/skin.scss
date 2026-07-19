@@ -7,12 +7,11 @@
     align-content: center;
     align-items: center;
     justify-content: center;
-    background-color: rgb(242, 242, 247);
     color: rgb(52, 52, 58);
     overflow: auto;
     font-family: var(--font-main);
     flex-wrap: wrap;
-    padding: var(--spacer-10) var(--spacer-7);
+    padding: var(--spacer-7) var(--spacer-7);
     position: relative;
 
     &::before {
@@ -47,12 +46,13 @@
     align-items: center;
     width: 100%;
     max-width: 520px;
-    gap: 32px;
-    background-color: rgb(242, 242, 247);
-    padding: 48px;
+    gap: 20px;
+    background-color: var(--white);
+    padding: 24px 40px;
     border-radius: 12px;
     position: relative;
     z-index: 1;
+    border: 1px solid var(--border-default);
 
     &[data-device="mobile"] {
       top: 0;
@@ -78,8 +78,8 @@
     }
 
     &-content {
-      width: 32px;
-      height: 32px;
+      width: 48px;
+      height: 48px;
       align-content: center;
       justify-content: start;
       align-items: start;
@@ -93,7 +93,7 @@
 
     &-text {
       font-family: var(--font-bold);
-      font-size: 20px;
+      font-size: 30px;
       color: var(--primary-90);
       letter-spacing: -0.3px;
       font-weight: bold;
