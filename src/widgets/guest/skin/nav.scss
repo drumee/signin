@@ -29,14 +29,21 @@
   &__nav-logo {
     height: 32px;
     flex: 0 0 auto;
-    align-items: center;
-    gap: 8px;
+    align-items: end;
+    gap: 4px;
   }
 
+  // The sprite build strips logo-upload's own fill, so the mark inherits — `fill`
+  // is what reaches the <use> shadow tree, `color` only helps if a path opts in via
+  // fill="currentColor". Both are set so either sprite build colours it.
+  // --primary-50 comes from the host app (ui-team revamp.scss), hence the fallback
+  // for a standalone signin build.
   &__nav-logo-ico {
     width: 40px;
     height: 32px;
     flex: 0 0 auto;
+    color: var(--primary-50, #433cc5);
+    fill: var(--primary-50, #433cc5);
 
     svg {
       width: 100%;
@@ -48,7 +55,6 @@
     font-family: var(--font-bold);
     font-weight: 600;
     font-size: 26px;
-    line-height: 32px;
     letter-spacing: -0.5px;
     color: #0b0a21;
   }

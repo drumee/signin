@@ -170,21 +170,19 @@
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
 
-  // app-eye-off bakes fill="black" onto its paths, so the fill has to be overridden
-  // at path level (CSS beats the presentation attribute) — `color` alone would not
-  // tint it.
+  // The sprite build strips app-eye-off's fill, so the glyph inherits and would
+  // paint black. `fill` here inherits into the <use> shadow tree; a `svg path`
+  // selector cannot reach inside it. `color` covers a future currentColor build.
   &__card-ico {
     width: 44px;
     height: 37px;
     flex: 0 0 auto;
+    color: #d65f59;
+    fill: #d65f59;
 
     svg {
       width: 100%;
       height: 100%;
-    }
-
-    svg path {
-      fill: #d65f59;
     }
   }
 

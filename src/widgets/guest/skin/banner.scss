@@ -46,11 +46,14 @@
     justify-content: center;
   }
 
-  // app-lightning already ships fill="white", which is what the purple tile wants.
+  // The source ships fill="white" but the sprite build strips it, so set `fill`
+  // (which inherits into the <use> shadow tree) or the bolt paints black on purple.
   &__banner-tile-ico {
     width: 16px;
     height: 20px;
     flex: 0 0 auto;
+    color: var(--white);
+    fill: var(--white);
 
     svg {
       width: 100%;
