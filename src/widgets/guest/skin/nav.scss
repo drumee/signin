@@ -1,0 +1,95 @@
+// Top app bar — Figma 1602:77032.
+
+.signin-guest {
+  &__nav {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    width: 100%;
+    flex: 0 0 auto;
+    justify-content: center;
+    background-color: rgba(242, 242, 247, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  &__nav-inner {
+    width: 100%;
+    max-width: 1440px;
+    padding: 16px 32px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  &__nav-logo {
+    width: 161px;
+    height: 32px;
+    flex: 0 0 auto;
+    background: url('../assets/logo-drumee.svg') no-repeat center / contain;
+  }
+
+  &__nav-links {
+    align-items: center;
+    gap: 32px;
+  }
+
+  &__nav-link {
+    align-items: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  &__nav-link-label {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #0b0a21;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+
+  &__nav-actions {
+    align-items: center;
+    gap: 20px;
+    flex: 0 0 auto;
+  }
+
+  &__nav-login {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #0b0a21;
+    white-space: nowrap;
+    cursor: pointer;
+    padding: 8px 0;
+    transition: color 0.2s;
+  }
+
+  &__nav-join {
+    padding: 6px 24px;
+    border-radius: 4px;
+    background-color: #433cc5;
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: #ffffff;
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+}
+
+.signin-guest__nav-link:hover .signin-guest__nav-link-label,
+.signin-guest__nav-login:hover {
+  color: #433cc5;
+}
+
+.signin-guest__nav-join:hover {
+  background-color: #2f28a8;
+}

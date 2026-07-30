@@ -58,9 +58,30 @@ class signin_router extends LetcBox {
   }
 
   /**
+   * Read a `view` selector out of the hash query — the query string lives inside
+   * the hash fragment, same as the OAuth hand-off above.
+   * `#/welcome/signin?view=guest` → 'guest'.
+   * @returns {string} the requested view, or '' when none was asked for.
+   */
+  _viewParam() {
+    const hash = location.hash || '';
+    const qi = hash.indexOf('?');
+    if (qi < 0) return '';
+    return new URLSearchParams(hash.slice(qi + 1)).get('view') || '';
+  }
+
+  /**
     *
     */
   async onDomRefresh() {
+    // Anonymous guest landing page. Checked FIRST: the sign-in paths below end by
+    // rewriting location.hash to a bare "#/welcome/signin", which would drop the
+    // ?view=guest selector.
+    if (this._viewParam() === 'guest') {
+      await Kind.waitFor('signin_guest');
+      this.feed({ kind: 'signin_guest' });
+      return;
+    }
     // OAuth 2FA hand-off: render the OTP screen pointed at oauth.verify_otp,
     // which finalizes the pending session (no client-side secret).
     const mfa = this._oauthMfaParams();
