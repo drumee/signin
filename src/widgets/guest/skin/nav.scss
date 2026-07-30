@@ -23,11 +23,34 @@
     gap: 24px;
   }
 
+  // Sprite mark + wordmark. The mark keeps the sprite's own brand purple
+  // (logo-upload carries a baked #b251fb fill) so it matches the logo everywhere
+  // else in the app.
   &__nav-logo {
-    width: 161px;
     height: 32px;
     flex: 0 0 auto;
-    background: url('../assets/logo-drumee.svg') no-repeat center / contain;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__nav-logo-ico {
+    width: 40px;
+    height: 32px;
+    flex: 0 0 auto;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__nav-logo-text {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 32px;
+    letter-spacing: -0.5px;
+    color: #0b0a21;
   }
 
   &__nav-links {

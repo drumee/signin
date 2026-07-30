@@ -12,9 +12,9 @@
 // Primary/100 #0b0a21, Primary/50 #433cc5, Primary/10 #e4e3ff,
 // Signal/Restricted #d65f59.
 //
-// Glyphs are exported Figma assets under ../assets and inlined by webpack's
-// url-loader; the icon sprite has no slashed-eye variant, so nothing here depends
-// on the sprite.
+// The logo, header folder, card eye-off and banner bolt come from the icon sprite
+// (Skeletons.Button.Svg) and are styled as inline <svg>. The remaining glyphs are
+// exported Figma assets under ../assets, inlined by webpack's url-loader.
 
 .signin-guest {
   &__ui {

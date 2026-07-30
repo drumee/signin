@@ -9,9 +9,20 @@ const DRUMEE_SITE = "https://drumee.com/";
 function __skl_signin_guest_top_nav(ui) {
   const fig = ui.fig.family;
 
-  const logo = Skeletons.Element({
+  // Sprite mark + wordmark, the same pairing the toolkit's header() helper uses,
+  // rather than a flattened logo image.
+  const logo = Skeletons.Box.X({
     className: `${fig}__nav-logo`,
-    content: " ",
+    kids: [
+      Skeletons.Button.Svg({
+        ico: "logo-upload",
+        className: `${fig}__nav-logo-ico`,
+      }),
+      Skeletons.Element({
+        className: `${fig}__nav-logo-text`,
+        content: "drumee",
+      }),
+    ],
   });
 
   // Marketing links are real anchors (href => the builder renders an <a>), so they

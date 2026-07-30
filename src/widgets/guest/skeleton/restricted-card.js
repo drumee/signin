@@ -1,7 +1,5 @@
 /**
  * The "Content Restricted" card, centred over the redacted file grid.
- * The eye-slash glyph is an exported Figma asset (skin: __card-ico) — the icon
- * sprite has no slashed-eye variant.
  * @param {LetcBox} ui
  */
 function __skl_signin_guest_restricted_card(ui) {
@@ -11,9 +9,9 @@ function __skl_signin_guest_restricted_card(ui) {
     className: `${fig}__card`,
     debug: __filename,
     kids: [
-      Skeletons.Element({
+      Skeletons.Button.Svg({
+        ico: "app-eye-off",
         className: `${fig}__card-ico`,
-        content: " ",
       }),
       Skeletons.Note({
         className: `${fig}__card-title`,

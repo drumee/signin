@@ -53,8 +53,9 @@ Class prefix is `signin-guest__*` (`fig.family`); the root element also carries
 Root `.signin-guest__ui` → `__page` (column, `min-height:100vh`, `#f2f2f7`).
 
 - **`__nav`** — sticky top, `backdrop-filter: blur(12px)`, inner max-width 1440, px32/py16.
-  Logo 161×32 · Product / Features / Pricing (SemiBold 14/20, `#0b0a21`, gap 32) · Login
-  text button + Join Workspace pill (`#433cc5`, radius 4, px24/py6).
+  Sprite mark + "drumee" wordmark (26px, 32px tall) · Product / Features / Pricing
+  (SemiBold 14/20, `#0b0a21`, gap 32) · Login text button + Join Workspace pill
+  (`#433cc5`, radius 4, px24/py6).
 - **`__header`** — px32/py24, space-between. Left: 40×40 tile `rgba(214,95,89,.2)` radius 8
   + folder glyph, title SemiBold 24/1.1, subline lock + "Restricted Guest Access" 14/1.4.
   Right: breadcrumb pill (white, radius 6, blur 6, px16/py8, gap 16) — parent `#aeaeb2`,
@@ -127,14 +128,22 @@ From widget options, with localized fallbacks and no API calls:
 
 ## Assets
 
-No sprite dependency: the 12 glyphs are exported from Figma, committed under
+The four glyphs that carry brand or meaning come from the icon sprite via
+`Skeletons.Button.Svg`, so they track the rest of the app:
+
+| Element | `ico` | Tinting |
+|---|---|---|
+| `__nav-logo-ico` (+ a "drumee" wordmark) | `logo-upload` | none — keeps the sprite's baked `#b251fb`, so the mark matches every other Drumee logo. Not the frame's `#433cc5`. |
+| `__header-tile-ico` | `folder-header` | `color: #d65f59` (the glyph paints with `currentColor`) |
+| `__card-ico` | `app-eye-off` | `svg path { fill: #d65f59 }` — the glyph bakes `fill="black"`, which `color` cannot override |
+| `__banner-tile-ico` | `app-lightning` | none — already ships `fill="white"`, which is what the purple tile wants |
+
+The remaining eight glyphs (lock, grid/list toggles, the three tile glyphs, paperclip, send)
+have no clear sprite equivalent, so they are exported from Figma, committed under
 `src/widgets/guest/assets/`, and referenced from SCSS as `background-image` — the project's
 `url-loader` rule inlines `.svg` as a data URI. Fills are baked in by the export and match
-the design tokens.
-
-The sprite has no eye-slash: `eye_closed` is a lidded eye, `apps-eye` and
-`desktop_hidepassword` are open eyes — verified by rendering all three. Hence the exported
-asset for the card glyph, and for consistency, exports for the rest.
+the design tokens. Six of the eight sit inside the blurred decoration, where the exact glyph
+is not perceptible anyway.
 
 ## i18n
 

@@ -45,9 +45,9 @@ function __skl_signin_guest_header(ui) {
       Skeletons.Box.X({
         className: `${fig}__header-tile`,
         kids: [
-          Skeletons.Element({
+          Skeletons.Button.Svg({
+            ico: "folder-header",
             className: `${fig}__header-tile-ico`,
-            content: " ",
           }),
         ],
       }),

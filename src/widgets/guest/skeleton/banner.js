@@ -13,9 +13,9 @@ function __skl_signin_guest_banner(ui) {
       Skeletons.Box.X({
         className: `${fig}__banner-tile`,
         kids: [
-          Skeletons.Element({
+          Skeletons.Button.Svg({
+            ico: "app-lightning",
             className: `${fig}__banner-tile-ico`,
-            content: " ",
           }),
         ],
       }),
