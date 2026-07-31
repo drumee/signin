@@ -88,23 +88,42 @@ function windowBar(ui) {
   });
 }
 
-/** Files / Chat / Tasks. Files is the active tab; none of them are clickable. */
+/**
+ * Files / Chat / Tasks. Same shape as the real folder window's tab bar
+ * (ui-team window/skeleton/toolkit tabBar → folderTab): a tabs group holding
+ * icon + label per item, the active one outlined in the area accent. Files is
+ * active; none of them are clickable for a guest.
+ */
 function tabs(ui) {
   const fig = ui.fig.family;
   const items = [
-    { label: LOCALE.FILES || "Files", active: 1 },
-    { label: LOCALE.CHAT || "Chat" },
-    { label: LOCALE.TASKS || "Tasks" },
+    { ico: "app-file", label: LOCALE.FILES || "Files", active: 1 },
+    { ico: "meet-chat-dots", label: LOCALE.CHAT || "Chat" },
+    { ico: "app-task", label: LOCALE.TASKS || "Tasks" },
   ];
   return Skeletons.Box.X({
     className: `${fig}__ext-tabs`,
     attrOpt: { "aria-hidden": "true" },
-    kids: items.map((t) =>
-      Skeletons.Note({
-        className: `${fig}__ext-tab${t.active ? " active" : ""}`,
-        content: t.label,
-      })
-    ),
+    kids: [
+      Skeletons.Box.X({
+        className: `${fig}__ext-tab-group`,
+        kids: items.map((t) =>
+          Skeletons.Box.X({
+            className: `${fig}__ext-tab${t.active ? " active" : ""}`,
+            kids: [
+              Skeletons.Button.Svg({
+                ico: t.ico,
+                className: `${fig}__ext-tab-icon`,
+              }),
+              Skeletons.Note({
+                className: `${fig}__ext-tab-label`,
+                content: t.label,
+              }),
+            ],
+          })
+        ),
+      }),
+    ],
   });
 }
 

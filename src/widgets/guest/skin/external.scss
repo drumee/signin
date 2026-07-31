@@ -48,12 +48,17 @@
   }
 
   // ---- Title bar ----
+  // Mirrors ui-team's real folder window: .window-folder-topbar__container
+  // (builtins/window/folder/skin/index.scss) — 61px tall, 0 21.9px padding,
+  // Grey/30 background. The var() names are the host app's own, so the plugin
+  // tracks its theme; the fallbacks are the light-theme values so the page still
+  // renders correctly outside the app.
   &__ext-bar {
     flex: 0 0 auto;
-    height: 56px;
+    height: 61px;
     padding: 0 21.9px;
     box-sizing: border-box;
-    background-color: #e5e5ea;
+    background-color: var(--normal-bg-80, #e5e5ea);
     align-items: center;
     justify-content: space-between;
   }
@@ -160,36 +165,70 @@
   }
 
   // ---- Tabs ----
+  // Mirrors .window-folder__tab-bar-wrapper / -tabs / -item. The active tab is
+  // outlined in the area accent, which for a shared workspace is --area-share.
   &__ext-tabs {
     flex: 0 0 auto;
-    padding: 8.76px 17.52px 9.3px;
+    padding: 8px 16px 8.5px;
     box-sizing: border-box;
-    gap: 17.52px;
     align-items: center;
-    background-color: #f2f2f7;
-    border-bottom: 1.095px solid rgba(0, 0, 0, 0.05);
+    justify-content: space-between;
+    gap: 10px;
+    background-color: var(--normal-bg-90, #f2f2f7);
+    border-bottom: 1px solid var(--border-muted, rgba(0, 0, 0, 0.2));
     pointer-events: none;
+  }
+
+  &__ext-tab-group {
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
   }
 
   &__ext-tab {
     flex: 0 0 auto;
-    height: 35.04px;
-    padding: 0 18.6px;
+    height: 32px;
+    min-width: 84px;
+    padding: 8px 16px;
     box-sizing: border-box;
-    display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid transparent;
     border-radius: 6px;
     background-color: rgba(0, 0, 0, 0.05);
-    font-family: var(--font-bold);
-    font-weight: 600;
-    font-size: 13.14px;
-    color: #0b0a21;
+    font-family: "Geist", var(--font-bold), sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--normal-fg-10, #0b0a21);
     white-space: nowrap;
 
     &.active {
-      background-color: transparent;
-      border: 1.095px solid #ffa8dc;
+      border-color: var(--area-share, #ffa8dc);
     }
+  }
+
+  &__ext-tab-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: currentColor;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      fill: currentColor;
+    }
+  }
+
+  &__ext-tab-label {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    pointer-events: none;
   }
 
   // ---- Content: file explorer | conversation ----
@@ -206,29 +245,36 @@
     background-color: #f2f2f7;
   }
 
+  // Mirrors .window-folder__filter-bar / __filter-tab-main: an underline in the
+  // area accent marks the active type, not a pill.
   &__ext-filters {
     flex: 0 0 auto;
-    gap: 26.28px;
-    padding: 8.76px 26.28px 9.3px;
+    gap: 24px;
+    padding: 8px 24px 8.5px;
     box-sizing: border-box;
     align-items: center;
-    border-bottom: 1.095px solid rgba(0, 0, 0, 0.05);
+    background: var(--normal-bg-90, #f2f2f7);
+    border-bottom: 1px solid var(--border-default, #d1d1d6);
     pointer-events: none;
   }
 
   &__ext-filter {
     flex: 0 0 auto;
-    padding-bottom: 4.38px;
-    font-family: var(--font-bold);
-    font-weight: 600;
-    font-size: 13.14px;
-    color: #0b0a21;
+    min-height: 24px;
+    padding: 0 0 4px;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    font-family: "Geist", var(--font-bold), sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--normal-fg-10, #0b0a21);
     white-space: nowrap;
 
     &.active {
-      font-size: 14.39px;
-      padding-bottom: 6.57px;
-      border-bottom: 2.19px solid #ffa8dc;
+      border-bottom-color: var(--area-share, #ffa8dc);
     }
   }
 
