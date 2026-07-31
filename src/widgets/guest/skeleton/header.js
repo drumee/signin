@@ -13,14 +13,15 @@ function __skl_signin_guest_header(ui) {
   const external = ui.isExternal();
 
   const name = ui.mget(_a.title) || ui.mget(_a.name) || "";
-  // External reads as an invitation to a shared space; internal states a
-  // restriction. Figma 1602:77081 vs 1602:76946.
+  // The title names the workspace's scope: "Internal Workspace: <name>" for a
+  // private one, "External Workspace <name>" for a shared one. With no name
+  // passed it degrades to the scope on its own.
   const prefix = external
-    ? LOCALE.GUEST_SHARED_PROJECT || "Shared Project:"
-    : LOCALE.GUEST_RESTRICTED_PROJECT || "Restricted Project:";
+    ? LOCALE.GUEST_SHARED_PROJECT || "External Workspace"
+    : LOCALE.GUEST_RESTRICTED_PROJECT || "Internal Workspace:";
   const fallback = external
-    ? LOCALE.GUEST_SHARED_TITLE || "Shared workspace"
-    : LOCALE.GUEST_RESTRICTED_TITLE || "Restricted workspace";
+    ? LOCALE.GUEST_SHARED_TITLE || "External workspace"
+    : LOCALE.GUEST_RESTRICTED_TITLE || "Internal workspace";
   const title = name ? `${prefix} ${name}` : fallback;
 
   const titleBlock = Skeletons.Box.Y({
