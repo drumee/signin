@@ -58,9 +58,46 @@ class signin_router extends LetcBox {
   }
 
   /**
+   * Read the hash query — it lives inside the hash fragment, same as the OAuth
+   * hand-off above. `#/welcome/signin?view=guest&name=Alpha` → URLSearchParams.
+   * @returns {URLSearchParams} empty when the hash carries no query.
+   */
+  _hashParams() {
+    const hash = location.hash || '';
+    const qi = hash.indexOf('?');
+    return new URLSearchParams(qi < 0 ? '' : hash.slice(qi + 1));
+  }
+
+  /**
+   * Read a `view` selector out of the hash query.
+   * `#/welcome/signin?view=guest` → 'guest'.
+   * @returns {string} the requested view, or '' when none was asked for.
+   */
+  _viewParam() {
+    return this._hashParams().get('view') || '';
+  }
+
+  /**
     *
     */
   async onDomRefresh() {
+    // Anonymous guest landing page. Checked FIRST: the sign-in paths below end by
+    // rewriting location.hash to a bare "#/welcome/signin", which would drop the
+    // ?view=guest selector.
+    if (this._viewParam() === 'guest') {
+      const params = this._hashParams();
+      await Kind.waitFor('signin_guest');
+      // `name` comes from the invite email's CTA (server: _guestLandingLink) so the
+      // header shows the real workspace instead of its generic fallback. Absent or
+      // empty is fine — the widget falls back on its own.
+      this.feed({
+        kind: 'signin_guest',
+        title: params.get('name') || '',
+        parent_name: params.get('parent') || '',
+        current_name: params.get('current') || '',
+      });
+      return;
+    }
     // OAuth 2FA hand-off: render the OTP screen pointed at oauth.verify_otp,
     // which finalizes the pending session (no client-side secret).
     const mfa = this._oauthMfaParams();
