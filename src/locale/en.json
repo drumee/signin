@@ -127,5 +127,11 @@
   "TYPE_A_MESSAGE": "Type a message...",
   "GUEST_BANNER_HEADLINE": "Shared via Drumee — Get your own workspace →",
   "GUEST_BANNER_SUBLINE": "Join 2,000+ creators curating their best work.",
-  "SIGNUP_FOR_FREE_CTA": "Sign Up Free"
+  "SIGNUP_FOR_FREE_CTA": "Sign Up Free",
+  "INTERNAL": "Internal",
+  "EXTERNAL": "External",
+  "TASK": "Task",
+  "MEETING": "Meeting",
+  "NEW": "New",
+  "CHAT": "Chat"
 }

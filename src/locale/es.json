@@ -127,5 +127,11 @@
   "TYPE_A_MESSAGE": "Escribe un mensaje…",
   "GUEST_BANNER_HEADLINE": "Compartido con Drumee — Crea tu propio espacio de trabajo →",
   "GUEST_BANNER_SUBLINE": "Únete a más de 2000 creadores que reúnen sus mejores trabajos.",
-  "SIGNUP_FOR_FREE_CTA": "Regístrate gratis"
+  "SIGNUP_FOR_FREE_CTA": "Regístrate gratis",
+  "INTERNAL": "Interno",
+  "EXTERNAL": "Externo",
+  "TASK": "Tarea",
+  "MEETING": "Reunión",
+  "NEW": "Nuevo",
+  "CHAT": "Chat"
 }

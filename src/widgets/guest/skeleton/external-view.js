@@ -31,6 +31,7 @@ const FILE_ICO = {
  */
 function windowBar(ui) {
   const fig = ui.fig.family;
+  const external = ui.isExternal();
 
   const left = Skeletons.Box.X({
     className: `${fig}__ext-bar-left`,
@@ -39,46 +40,40 @@ function windowBar(ui) {
         ico: "folder-header",
         className: `${fig}__ext-bar-ico`,
       }),
+      // The workspace's own name, like the folder window's topbar title —
+      // never a static "Shared Folder".
       Skeletons.Note({
         className: `${fig}__ext-bar-title`,
-        content: LOCALE.SHARED_FOLDER || "Shared Folder",
+        content: ui.workspaceName(),
       }),
+      // Badge follows the SAME scope flag the layout does, so it can never
+      // disagree with the page it labels.
       Skeletons.Note({
         className: `${fig}__ext-bar-badge`,
-        content: LOCALE.SHARED || "Shared",
+        content: external
+          ? LOCALE.EXTERNAL || "External"
+          : LOCALE.INTERNAL || "Internal",
       }),
     ],
   });
 
-  // Figma draws three kinds of control: a bare icon pill (camera), two labelled
-  // pills (Upload, + Add new), then three bare glyphs (gear, split, close).
-  const iconPill = (ico) =>
-    Skeletons.Box.X({
-      className: `${fig}__ext-bar-pill ${ico}`,
-      kids: [
-        Skeletons.Button.Svg({ ico, className: `${fig}__ext-bar-btn` }),
-      ],
-    });
-
-  const labelPill = (ico, label, variant) =>
-    Skeletons.Box.X({
-      className: `${fig}__ext-bar-pill labelled ${variant}`,
-      kids: [
-        Skeletons.Button.Svg({ ico, className: `${fig}__ext-bar-btn` }),
-        Skeletons.Note({ className: `${fig}__ext-bar-label`, content: label }),
-      ],
-    });
-
+  // Same order and glyphs as the folder window's right cluster
+  // (ui-team folder/skeleton/topbar.js): share/link, settings, zoom, minimize,
+  // close. Upload and Add-new are NOT here — the folder window moved them into
+  // the Files toolbar's "+ New", and so does this view (see filesToolbar).
+  //
+  // Minimize is a Note carrying U+2212, not an icon: the bundled
+  // window-minimize glyph renders as a heavy bar, which is why the folder
+  // window draws it as text too.
   const right = Skeletons.Box.X({
     className: `${fig}__ext-bar-right`,
     attrOpt: { "aria-hidden": "true" },
     kids: [
-      iconPill("meet-camera"),
-      labelPill("app-upload", LOCALE.UPLOAD || "Upload", "upload"),
-      labelPill("plus-header", LOCALE.ADD_NEW || "Add new", "add-new"),
-      ...["gear-header", "square-split-horizontal", "cross"].map((ico) =>
-        Skeletons.Button.Svg({ ico, className: `${fig}__ext-bar-btn bare` })
-      ),
+      Skeletons.Button.Svg({ ico: "app-share", className: `${fig}__ext-bar-btn link` }),
+      Skeletons.Button.Svg({ ico: "gear-header", className: `${fig}__ext-bar-btn settings` }),
+      Skeletons.Button.Svg({ ico: "desktop_fullview", className: `${fig}__ext-bar-btn zoom` }),
+      Skeletons.Note({ className: `${fig}__ext-bar-minimize`, content: "−" }),
+      Skeletons.Button.Svg({ ico: "cross", className: `${fig}__ext-bar-btn close` }),
     ],
   });
 
@@ -96,10 +91,13 @@ function windowBar(ui) {
  */
 function tabs(ui) {
   const fig = ui.fig.family;
+  // Files / Chat / Task / Meeting — the folder window's full set, with the
+  // singular "Task" label it uses (LOCALE.TASK, not TASKS).
   const items = [
     { ico: "app-file", label: LOCALE.FILES || "Files", active: 1 },
     { ico: "meet-chat-dots", label: LOCALE.CHAT || "Chat" },
-    { ico: "app-task", label: LOCALE.TASKS || "Tasks" },
+    { ico: "app-task", label: LOCALE.TASK || "Task" },
+    { ico: "folder-meeting", label: LOCALE.MEETING || "Meeting" },
   ];
   return Skeletons.Box.X({
     className: `${fig}__ext-tabs`,
@@ -127,8 +125,13 @@ function tabs(ui) {
   });
 }
 
-/** All / Docs / PDF / Images / Other — display only, "All" underlined. */
-function filters(ui) {
+/**
+ * Files toolbar — the folder window's fileTypeFilterBar: the type filters on the
+ * left, then fileFilterControls on the right holding "+ New" and the list/grid
+ * view toggle. Both of those live here rather than in the header, matching where
+ * the folder window moved them.
+ */
+function filesToolbar(ui) {
   const fig = ui.fig.family;
   const items = [
     { label: LOCALE.ALL || "All", active: 1 },
@@ -137,15 +140,54 @@ function filters(ui) {
     { label: LOCALE.IMAGES || "Images" },
     { label: LOCALE.OTHER || "Other" },
   ];
+
+  const filterTabs = items.map((f) =>
+    Skeletons.Note({
+      className: `${fig}__ext-filter${f.active ? " active" : ""}`,
+      content: f.label,
+    })
+  );
+
+  // Two segments with a check glyph each, exactly like fileViewToggle; the
+  // active one is marked by the wrapper's state, so the skin shows one check.
+  const viewSegment = (mode, ico) =>
+    Skeletons.Box.X({
+      className: `${fig}__ext-view-seg ${mode}`,
+      kids: [
+        Skeletons.Button.Svg({ ico: "account_check", className: `${fig}__ext-view-check` }),
+        Skeletons.Button.Svg({ ico, className: `${fig}__ext-view-glyph` }),
+      ],
+    });
+
+  const controls = Skeletons.Box.X({
+    className: `${fig}__ext-file-controls`,
+    kids: [
+      Skeletons.Box.X({
+        className: `${fig}__ext-new-ctrl`,
+        kids: [
+          Skeletons.Button.Svg({ ico: "plus-header", className: `${fig}__ext-new-ico` }),
+          Skeletons.Note({
+            className: `${fig}__ext-new-label`,
+            content: LOCALE.NEW || "New",
+          }),
+        ],
+      }),
+      Skeletons.Box.X({
+        className: `${fig}__ext-view-toggle`,
+        // Grid is the view this page renders.
+        attrOpt: { "data-state": "0" },
+        kids: [viewSegment("list", "view-list"), viewSegment("grid", "view-grid")],
+      }),
+    ],
+  });
+
   return Skeletons.Box.X({
     className: `${fig}__ext-filters`,
     attrOpt: { "aria-hidden": "true" },
-    kids: items.map((f) =>
-      Skeletons.Note({
-        className: `${fig}__ext-filter${f.active ? " active" : ""}`,
-        content: f.label,
-      })
-    ),
+    kids: [
+      Skeletons.Box.X({ className: `${fig}__ext-filter-tabs`, kids: filterTabs }),
+      controls,
+    ],
   });
 }
 
@@ -267,12 +309,28 @@ function conversation(ui, messages) {
   return Skeletons.Box.Y({
     className: `${fig}__ext-chat`,
     kids: [
+      // Same shape as the toolkit's chatHeaderBar: title on the left, then the
+      // 3-dot thread menu and search on the right (that order).
       Skeletons.Box.X({
         className: `${fig}__ext-chat-head`,
         kids: [
           Skeletons.Note({
             className: `${fig}__ext-chat-title`,
-            content: LOCALE.CONVERSATION || "Conversation",
+            content: LOCALE.TEAM_CHAT || "Team chat",
+          }),
+          Skeletons.Box.X({
+            className: `${fig}__ext-chat-actions`,
+            attrOpt: { "aria-hidden": "true" },
+            kids: [
+              Skeletons.Button.Svg({
+                ico: "apps-dots-vertical",
+                className: `${fig}__ext-chat-btn`,
+              }),
+              Skeletons.Button.Svg({
+                ico: "magnifying-glass",
+                className: `${fig}__ext-chat-btn`,
+              }),
+            ],
           }),
         ],
       }),
@@ -292,7 +350,7 @@ function __skl_signin_guest_external(ui) {
   const filesPanel = Skeletons.Box.Y({
     className: `${fig}__ext-files`,
     kids: [
-      filters(ui),
+      filesToolbar(ui),
       Skeletons.Box.Y({
         className: `${fig}__ext-grid`,
         kids: [

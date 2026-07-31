@@ -110,58 +110,37 @@
   // chrome: no pointer, no hover.
   &__ext-bar-right {
     align-items: center;
-    gap: 13.14px;
+    gap: 13px;
     flex: 0 0 auto;
     pointer-events: none;
   }
 
-  // Bare glyph (gear / split / close) and the icon inside a pill share this.
+  // Header controls: link, settings, zoom, close — all bare 20px glyphs, as the
+  // folder window's __control-icon / zoom / close cluster renders them.
   &__ext-bar-btn {
-    width: 13.14px;
-    height: 13.14px;
+    width: 20px;
+    height: 20px;
     flex: 0 0 auto;
-    color: #0b0a21;
-    fill: #0b0a21;
+    color: var(--normal-fg-10, #0b0a21);
+    fill: var(--normal-fg-10, #0b0a21);
 
     svg {
       width: 100%;
       height: 100%;
     }
-
-    &.bare {
-      width: 20px;
-      height: 20px;
-    }
   }
 
-  &__ext-bar-pill {
+  // Minimize is text (U+2212), matching .window-folder__minimize-btn.
+  &__ext-bar-minimize {
+    width: 20px;
+    height: 20px;
     flex: 0 0 auto;
+    display: flex;
     align-items: center;
-    gap: 6.57px;
-    height: 30.66px;
-    padding: 0 13.14px;
-    box-sizing: border-box;
-    border-radius: 6px;
-    background-color: #f2f2f7;
-
-    &.meet-camera {
-      padding: 0 8px;
-      height: 28px;
-      border-radius: 6px;
-    }
-
-    // "+ Add new" is the one accented control in the bar (Primary/20).
-    &.add-new {
-      background-color: #b1adff;
-    }
-  }
-
-  &__ext-bar-label {
-    font-family: var(--font-bold);
-    font-weight: 600;
-    font-size: 13.14px;
-    color: #0b0a21;
-    white-space: nowrap;
+    justify-content: center;
+    font-size: 18px;
+    line-height: 1;
+    color: var(--normal-fg-10, #0b0a21);
   }
 
   // ---- Tabs ----
@@ -253,9 +232,98 @@
     padding: 8px 24px 8.5px;
     box-sizing: border-box;
     align-items: center;
+    justify-content: space-between;
     background: var(--normal-bg-90, #f2f2f7);
     border-bottom: 1px solid var(--border-default, #d1d1d6);
     pointer-events: none;
+  }
+
+  &__ext-filter-tabs {
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 24px;
+    min-width: 0;
+  }
+
+  // "+ New" + the list/grid toggle, right-aligned — fileFilterControls.
+  &__ext-file-controls {
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__ext-new-ctrl {
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    background-color: var(--area-share, #ffa8dc);
+    font-family: "Geist", var(--font-bold), sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--normal-fg-10, #0b0a21);
+    white-space: nowrap;
+  }
+
+  &__ext-new-ico {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    color: currentColor;
+    fill: currentColor;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // Segmented list/grid control: the active segment shows its check, the other
+  // hides it — the same two-glyph segment fileViewToggle builds.
+  &__ext-view-toggle {
+    align-items: center;
+    height: 32px;
+    padding: 2px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &__ext-view-seg {
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 28px;
+    padding: 0 10px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    color: var(--normal-fg-10, #0b0a21);
+  }
+
+  &__ext-view-check {
+    width: 12px;
+    height: 12px;
+    flex: 0 0 12px;
+    display: none;
+    color: currentColor;
+    fill: currentColor;
+
+    svg { width: 100%; height: 100%; display: block; }
+  }
+
+  &__ext-view-glyph {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    color: currentColor;
+    fill: currentColor;
+
+    svg { width: 100%; height: 100%; display: block; }
   }
 
   &__ext-filter {
@@ -430,6 +498,26 @@
     box-sizing: border-box;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  // 3-dot then search, as chatHeaderBar orders them.
+  &__ext-chat-actions {
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  &__ext-chat-btn {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    color: var(--normal-fg-20, #65656c);
+    fill: var(--normal-fg-20, #65656c);
+
+    svg { width: 100%; height: 100%; display: block; }
   }
 
   &__ext-chat-title {

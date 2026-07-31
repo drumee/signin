@@ -50,6 +50,20 @@ class signin_guest extends LetcBox {
   }
 
   /**
+   * The workspace's display name, as the window title and the header both show
+   * it. Falls back to the generic scope wording when the caller passed no name,
+   * so the title bar is never blank.
+   * @returns {string}
+   */
+  workspaceName() {
+    const name = (this.mget(_a.title) || this.mget(_a.name) || '').trim();
+    if (name) return name;
+    return this.isExternal()
+      ? LOCALE.GUEST_SHARED_TITLE || 'External workspace'
+      : LOCALE.GUEST_RESTRICTED_TITLE || 'Internal workspace';
+  }
+
+  /**
    * Rows the external layout renders: { folders, files, messages }.
    *
    * Supplied through options so the view stays a pure function of its data —
