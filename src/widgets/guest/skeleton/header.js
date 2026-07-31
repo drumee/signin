@@ -17,8 +17,8 @@ function __skl_signin_guest_header(ui) {
   // private one, "External Workspace <name>" for a shared one. With no name
   // passed it degrades to the scope on its own.
   const prefix = external
-    ? LOCALE.GUEST_SHARED_PROJECT || "External Workspace"
-    : LOCALE.GUEST_RESTRICTED_PROJECT || "Internal Workspace:";
+    ? LOCALE.GUEST_EXTERNAL_WORKSPACE || "External Workspace:"
+    : LOCALE.GUEST_INTERNAL_WORKSPACE || "Internal Workspace:";
   const fallback = external
     ? LOCALE.GUEST_SHARED_TITLE || "External workspace"
     : LOCALE.GUEST_RESTRICTED_TITLE || "Internal workspace";
