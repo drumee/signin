@@ -10,11 +10,18 @@
  */
 function __skl_signin_guest_header(ui) {
   const fig = ui.fig.family;
+  const external = ui.isExternal();
 
   const name = ui.mget(_a.title) || ui.mget(_a.name) || "";
-  const title = name
-    ? `${LOCALE.GUEST_RESTRICTED_PROJECT || "Restricted Project:"} ${name}`
-    : (LOCALE.GUEST_RESTRICTED_TITLE || "Restricted workspace");
+  // External reads as an invitation to a shared space; internal states a
+  // restriction. Figma 1602:77081 vs 1602:76946.
+  const prefix = external
+    ? LOCALE.GUEST_SHARED_PROJECT || "Shared Project:"
+    : LOCALE.GUEST_RESTRICTED_PROJECT || "Restricted Project:";
+  const fallback = external
+    ? LOCALE.GUEST_SHARED_TITLE || "Shared workspace"
+    : LOCALE.GUEST_RESTRICTED_TITLE || "Restricted workspace";
+  const title = name ? `${prefix} ${name}` : fallback;
 
   const titleBlock = Skeletons.Box.Y({
     className: `${fig}__header-titles`,
@@ -26,13 +33,22 @@ function __skl_signin_guest_header(ui) {
       Skeletons.Box.X({
         className: `${fig}__header-subline`,
         kids: [
-          Skeletons.Element({
-            className: `${fig}__header-lock`,
-            content: " ",
-          }),
+          // A shared workspace is reached BY the link, so it shows the link
+          // glyph; a restricted one shows the padlock.
+          external
+            ? Skeletons.Button.Svg({
+                ico: "apps-link-simple",
+                className: `${fig}__header-link`,
+              })
+            : Skeletons.Element({
+                className: `${fig}__header-lock`,
+                content: " ",
+              }),
           Skeletons.Note({
             className: `${fig}__header-sublabel`,
-            content: LOCALE.GUEST_RESTRICTED_ACCESS || "Restricted Guest Access",
+            content: external
+              ? LOCALE.SHARED_BY_LINK || "Shared by link"
+              : LOCALE.GUEST_RESTRICTED_ACCESS || "Restricted Guest Access",
           }),
         ],
       }),

@@ -1,0 +1,559 @@
+// EXTERNAL (shared) workspace view — Figma 1602:77081.
+//
+// The accent is Signal/Link share #ffa8dc throughout, where the internal layout
+// uses Signal/Restricted #d65f59. Everything here is scoped under
+// [data-scope="external"] so the two layouts cannot bleed into each other.
+
+.signin-guest__ui[data-scope="external"] {
+  // Shared workspaces recolour the header tile + breadcrumb from red to pink.
+  .signin-guest__header-tile {
+    background-color: rgba(255, 168, 220, 0.15);
+  }
+
+  .signin-guest__header-tile-ico {
+    color: #ffa8dc;
+    fill: #ffa8dc;
+  }
+
+  .signin-guest__crumb.current {
+    color: #ffa8dc;
+  }
+
+  .signin-guest__header-link {
+    width: 8px;
+    height: 10.5px;
+    flex: 0 0 auto;
+    color: #0b0a21;
+    fill: #0b0a21;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.signin-guest {
+  // ---- The window card ----
+  &__ext {
+    width: 100%;
+    max-width: 1376px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background-color: #f2f2f7;
+    box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.13);
+    align-items: stretch;
+  }
+
+  // ---- Title bar ----
+  &__ext-bar {
+    flex: 0 0 auto;
+    height: 56px;
+    padding: 0 21.9px;
+    box-sizing: border-box;
+    background-color: #e5e5ea;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__ext-bar-left {
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  &__ext-bar-ico {
+    width: 20px;
+    height: 16px;
+    flex: 0 0 auto;
+    color: #ffa8dc;
+    fill: #ffa8dc;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__ext-bar-title {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 24px;
+    color: #0b0a21;
+    white-space: nowrap;
+  }
+
+  &__ext-bar-badge {
+    flex: 0 0 auto;
+    padding: 4px 8px;
+    border-radius: 2px;
+    background-color: #ffa8dc;
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #b43481;
+    white-space: nowrap;
+  }
+
+  // Inert window controls — a guest cannot act on any of them, so they read as
+  // chrome: no pointer, no hover.
+  &__ext-bar-right {
+    align-items: center;
+    gap: 13.14px;
+    flex: 0 0 auto;
+    pointer-events: none;
+  }
+
+  // Bare glyph (gear / split / close) and the icon inside a pill share this.
+  &__ext-bar-btn {
+    width: 13.14px;
+    height: 13.14px;
+    flex: 0 0 auto;
+    color: #0b0a21;
+    fill: #0b0a21;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    &.bare {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &__ext-bar-pill {
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 6.57px;
+    height: 30.66px;
+    padding: 0 13.14px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    background-color: #f2f2f7;
+
+    &.meet-camera {
+      padding: 0 8px;
+      height: 28px;
+      border-radius: 6px;
+    }
+
+    // "+ Add new" is the one accented control in the bar (Primary/20).
+    &.add-new {
+      background-color: #b1adff;
+    }
+  }
+
+  &__ext-bar-label {
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 13.14px;
+    color: #0b0a21;
+    white-space: nowrap;
+  }
+
+  // ---- Tabs ----
+  &__ext-tabs {
+    flex: 0 0 auto;
+    padding: 8.76px 17.52px 9.3px;
+    box-sizing: border-box;
+    gap: 17.52px;
+    align-items: center;
+    background-color: #f2f2f7;
+    border-bottom: 1.095px solid rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+  }
+
+  &__ext-tab {
+    flex: 0 0 auto;
+    height: 35.04px;
+    padding: 0 18.6px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.05);
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 13.14px;
+    color: #0b0a21;
+    white-space: nowrap;
+
+    &.active {
+      background-color: transparent;
+      border: 1.095px solid #ffa8dc;
+    }
+  }
+
+  // ---- Content: file explorer | conversation ----
+  &__ext-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  &__ext-files {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: stretch;
+    background-color: #f2f2f7;
+  }
+
+  &__ext-filters {
+    flex: 0 0 auto;
+    gap: 26.28px;
+    padding: 8.76px 26.28px 9.3px;
+    box-sizing: border-box;
+    align-items: center;
+    border-bottom: 1.095px solid rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+  }
+
+  &__ext-filter {
+    flex: 0 0 auto;
+    padding-bottom: 4.38px;
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 13.14px;
+    color: #0b0a21;
+    white-space: nowrap;
+
+    &.active {
+      font-size: 14.39px;
+      padding-bottom: 6.57px;
+      border-bottom: 2.19px solid #ffa8dc;
+    }
+  }
+
+  &__ext-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 26.28px;
+    box-sizing: border-box;
+    gap: 26.28px;
+    align-items: stretch;
+  }
+
+  &__ext-folder-row,
+  &__ext-file-row {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: flex-start;
+    align-content: flex-start;
+  }
+
+  // ---- Folder tile ----
+  &__ext-folder {
+    width: 120px;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__ext-folder-art {
+    width: 99px;
+    height: 79.5px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__ext-folder-ico {
+    width: 99px;
+    height: 79.5px;
+    color: #ffa8dc;
+    fill: #ffa8dc;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__ext-folder-name {
+    width: 100%;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #65656c;
+    text-align: center;
+    justify-content: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // ---- File tile ----
+  &__ext-file {
+    width: 120px;
+    flex: 0 0 auto;
+    align-items: stretch;
+  }
+
+  &__ext-file-art {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.05);
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Figma tints each file kind differently; the sprite glyphs paint with
+  // currentColor / an inherited fill, so `color` + `fill` both get set.
+  &__ext-file-ico {
+    width: 60px;
+    height: 60px;
+    flex: 0 0 auto;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__ext-file-art.doc &__ext-file-ico,
+  &__ext-file-art.note &__ext-file-ico {
+    color: #847eff;
+    fill: #847eff;
+  }
+
+  &__ext-file-meta {
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  &__ext-file-name {
+    min-width: 0;
+    font-family: var(--font-bold);
+    font-weight: 600;
+    font-size: 12px;
+    color: #0b0a21;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__ext-file-kebab {
+    width: 2px;
+    height: 8px;
+    flex: 0 0 auto;
+    margin: 0 4px;
+    color: #65656c;
+    fill: #65656c;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__ext-file-date {
+    width: 100%;
+    padding-top: 2px;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #65656c;
+    white-space: nowrap;
+  }
+
+  // ---- Conversation panel ----
+  &__ext-chat {
+    flex: 0 0 auto;
+    width: 362px;
+    min-width: 202px;
+    box-sizing: border-box;
+    background-color: #f2f2f7;
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
+    align-items: stretch;
+  }
+
+  &__ext-chat-head {
+    flex: 0 0 auto;
+    padding: 16px 16px 17px;
+    box-sizing: border-box;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    align-items: center;
+  }
+
+  &__ext-chat-title {
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: #0b0a21;
+  }
+
+  &__ext-chat-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  &__ext-msg {
+    width: 100%;
+
+    &.out {
+      align-items: flex-end;
+    }
+
+    &.in {
+      align-items: flex-start;
+      gap: 4px;
+    }
+  }
+
+  &__ext-msg-author {
+    font-family: var(--font-bold);
+    font-weight: 700;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #0b0a21;
+  }
+
+  // display:block so the inline filename span flows with the text instead of
+  // becoming a sibling flex item.
+  &__ext-bubble {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    padding: 12px;
+    box-sizing: border-box;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #0b0a21;
+
+    &.out {
+      background-color: #ffa8dc;
+      border-radius: 16px 0 16px 16px;
+    }
+
+    &.in {
+      background-color: #ffffff;
+      border-radius: 0 16px 16px 16px;
+    }
+  }
+
+  &__ext-msg-time {
+    padding-top: 4px;
+    font-size: 8px;
+    line-height: 1.4;
+    color: #84848c;
+  }
+
+  // ---- Composer (inert: a guest has no session to post with) ----
+  &__ext-composer {
+    flex: 0 0 auto;
+    padding: 16px;
+    box-sizing: border-box;
+    background-color: #f2f2f7;
+    pointer-events: none;
+  }
+
+  &__ext-composer-field {
+    width: 100%;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    background-color: #ffffff;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__ext-composer-left {
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__ext-composer-clip {
+    width: 15px;
+    height: 16px;
+    flex: 0 0 auto;
+    color: #aeaeb2;
+    fill: #aeaeb2;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__ext-composer-placeholder {
+    font-size: 10px;
+    line-height: 1.4;
+    color: #aeaeb2;
+    white-space: nowrap;
+  }
+
+  &__ext-composer-send {
+    width: 14.25px;
+    height: 12px;
+    flex: 0 0 auto;
+    color: #847eff;
+    fill: #847eff;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.signin-guest__ext-bubble.out .signin-guest__ext-bubble-file {
+  color: #0b0a21;
+  text-decoration: underline;
+}
+
+.signin-guest__ext-bubble.in .signin-guest__ext-bubble-file {
+  color: #b43481;
+  text-decoration: underline;
+}
+
+// ---- Responsive ----
+// The window is one card, so the split collapses rather than the panel dropping.
+@media (max-width: 1023px) {
+  .signin-guest__ext-chat {
+    display: none;
+  }
+
+  .signin-guest__ext-grid {
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 599px) {
+  .signin-guest__ext-bar-right,
+  .signin-guest__ext-filters {
+    display: none;
+  }
+
+  .signin-guest__ext-folder,
+  .signin-guest__ext-file {
+    width: calc((100% - 16px) / 2);
+  }
+
+  .signin-guest__ext-folder-art,
+  .signin-guest__ext-folder-ico {
+    width: 100%;
+    height: 64px;
+  }
+}
