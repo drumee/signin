@@ -71,12 +71,13 @@ class signin_guest extends LetcBox {
    * With nothing passed it returns the sample set from the Figma frame, which is
    * what the direct #/plugins entry point shows.
    *
-   * NOT wired to the share API yet. Doing that needs the anonymous session the
-   * dmz module establishes (SERVICE.dmz.login with the share token, then
-   * SERVICE.media.show_node_by for the listing) — see ui-team dmz/sharebox. The
-   * token already reaches this widget as the `token` option; hub_id does not,
-   * and dmz.login wants it (it tolerates "" and resolves by token). Deliberately
-   * left as this seam rather than a half-tested session flow.
+   * Precedence: an explicit `content` option, then whatever _loadShare() fetched
+   * with the token, then the Figma sample.
+   *
+   * The sample is used ONLY when there is no token — i.e. the demo
+   * #/plugins entry point. Once a token is present the page shows the real share
+   * or nothing: presenting sample files as if they were someone's actual
+   * workspace would be worse than an empty folder.
    *
    * @returns {{folders: Array, files: Array, messages: Array}}
    */
@@ -89,7 +90,79 @@ class signin_guest extends LetcBox {
         messages: opt.messages || [],
       };
     }
+    if (this._shareContent) return this._shareContent;
+    if (this._shareToken()) return { folders: [], files: [], messages: [] };
     return require('./sample-content');
+  }
+
+  /**
+   * The share token from the invite link, external scope only.
+   * @returns {string}
+   */
+  _shareToken() {
+    if (!this.isExternal()) return '';
+    return String(this.mget('token') || '').trim();
+  }
+
+  /**
+   * Resolve a service path from the host's SERVICE map, falling back to the
+   * conventional dotted name. The map is assembled at runtime by the host, so a
+   * plugin cannot assume a given branch is present.
+   * @param {string} group
+   * @param {string} name
+   * @returns {string}
+   */
+  _svc(group, name) {
+    const g = (typeof SERVICE !== 'undefined' && SERVICE && SERVICE[group]) || null;
+    return (g && g[name]) || `${group}.${name}`;
+  }
+
+  /**
+   * Load the real shared folder using the token the invite link carried.
+   *
+   * Two calls, the same pair ui-team's dmz/sharebox makes:
+   *   dmz.login          redeems the token and opens the anonymous session the
+   *                      next call needs; returns the shared node (nid, name).
+   *                      hub_id is optional — the server resolves it from the
+   *                      token, which is why the link needn't carry one.
+   *   media.show_node_by lists that node's children ({nid, page}).
+   *
+   * The server decides what a token may see (its privilege is clamped to the
+   * share's caps server-side), so nothing here widens access; this only renders
+   * what the session is already allowed to list.
+   *
+   * Anything unexpected — no token, an error, a gated share (dmz.login answers
+   * with a `status` such as REQUIRED_PASSWORD) — leaves the page on empty rows
+   * rather than falling back to the sample.
+   */
+  async _loadShare() {
+    const token = this._shareToken();
+    if (!token) return;
+    let content = { folders: [], files: [], messages: [] };
+    try {
+      const info = await this.postService(this._svc('dmz', 'login'), {
+        token,
+        hub_id: this.mget('hub_id') || '',
+      });
+      if (!info || info.error || info.error_code || info.status) {
+        this.warn('[signin_guest] share not readable', (info && (info.status || info.error)) || 'no response');
+      } else {
+        // The share knows its own name; prefer it over the one on the URL.
+        const name = info.title || info.filename || info.name;
+        if (name) this.mset({ title: name });
+        const rows = await this.postService(this._svc('media', 'show_node_by'), {
+          nid: info.nid,
+          page: 1,
+        });
+        const { mapListing } = require('./share-content');
+        content = { ...mapListing(rows), messages: [] };
+      }
+    } catch (e) {
+      this.warn('[signin_guest] share load failed', e && (e.reason || e.message));
+    }
+    this._shareContent = content;
+    // Re-render with what came back (or with empty rows on failure).
+    this.feed(require('./skeleton').default(this));
   }
 
   /**
@@ -102,6 +175,10 @@ class signin_guest extends LetcBox {
       this.el.dataset.scope = this.isExternal() ? 'external' : 'internal';
     }
     this.feed(require('./skeleton').default(this));
+    // Render first, then fill in: the chrome is useful immediately and the
+    // listing re-feeds when it arrives. No token (internal, or the demo entry
+    // point) → this returns straight away and the page never makes a request.
+    this._loadShare();
   }
 
   /**
