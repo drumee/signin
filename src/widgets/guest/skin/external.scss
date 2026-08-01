@@ -34,6 +34,7 @@
   &__ext {
     width: 100%;
     max-width: 1376px;
+    max-height: 600px;
     flex: 1 1 auto;
     min-height: 0;
     overflow: hidden;
@@ -361,6 +362,10 @@
     }
   }
 
+  // Scrolls, but without a visible bar: the grid sits inside the window card and
+  // a track down its edge cuts across the card's rounded corner. Wheel, trackpad,
+  // touch and keyboard all still work — only the bar is hidden, so `overflow`
+  // stays `auto` rather than becoming `hidden`.
   &__ext-grid {
     flex: 1 1 auto;
     min-height: 0;
@@ -369,6 +374,14 @@
     box-sizing: border-box;
     gap: 26.28px;
     align-items: stretch;
+    scrollbar-width: none;        // Firefox
+    -ms-overflow-style: none;     // legacy Edge / IE
+
+    &::-webkit-scrollbar {        // Chrome, Safari, current Edge
+      width: 0;
+      height: 0;
+      display: none;
+    }
   }
 
   &__ext-folder-row,
