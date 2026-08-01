@@ -20,12 +20,36 @@ const isFolder = (row) => {
   return t === "folder" || t === "hub";
 };
 
-/** "Oct 12, 2023" from a unix-seconds timestamp; "" when there isn't one. */
+/**
+ * The tile's date line, exactly as media/grid/template/index.js writes it:
+ * anything under a week old reads as an age ("3 days ago"), older reads as a
+ * date ("Oct 12, 2023"), and ctime wins over mtime.
+ *
+ * The grid gets the age wording from Dayjs.fromNow(); dayjs is not on the
+ * guest page, so its relativeTime thresholds are reproduced below. Only the
+ * sub-week ones can ever be reached from here.
+ *
+ * @returns {string} "" when the row carries no usable timestamp
+ */
 function formatDate(row) {
-  const ts = Number(row.mtime || row.ctime || 0);
+  const ts = Number(row.ctime || row.mtime || 0);
   if (!ts) return "";
   try {
-    return new Date(ts * 1000).toLocaleDateString("en-US", {
+    const then = new Date(ts * 1000);
+    const secs = Math.round((Date.now() - then.getTime()) / 1000);
+    const days = Math.floor(secs / 86400);
+    if (secs >= 0 && days < 7) {
+      const mins = Math.round(secs / 60);
+      const hours = Math.round(secs / 3600);
+      if (secs < 45) return "a few seconds ago";
+      if (secs < 90) return "a minute ago";
+      if (mins < 45) return `${mins} minutes ago`;
+      if (mins < 90) return "an hour ago";
+      if (hours < 22) return `${hours} hours ago`;
+      if (hours < 36) return "a day ago";
+      return `${Math.round(secs / 86400)} days ago`;
+    }
+    return then.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",

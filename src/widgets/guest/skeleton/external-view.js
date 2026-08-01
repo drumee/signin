@@ -241,15 +241,33 @@ function fileArt(ui, file) {
   }
 
   const preview = previewIcon(file);
-  return preview.ext
-    ? Skeletons.Note({
-        className: `${fig}__ext-file-ext`,
-        content: String(preview.ext).toUpperCase(),
-      })
-    : Skeletons.Button.Svg({
-        ico: preview.ico,
-        className: `${fig}__ext-file-ico`,
-      });
+  if (!preview.ext) {
+    return Skeletons.Button.Svg({
+      ico: preview.ico,
+      className: `${fig}__ext-file-ico`,
+    });
+  }
+
+  // Extension badge — a .txt, or any document whose extension has no icon of
+  // its own. The grid draws this with Template.SvgText: a document outline
+  // with the extension on a chip across it, NOT bare text. Template is a host
+  // global (window.Template, set in the app core bundle), so use the real one
+  // rather than keeping a second copy of the shape in step with it.
+  const label = String(preview.ext).toLowerCase();
+  if (typeof Template !== "undefined" && Template && Template.SvgText) {
+    return Skeletons.Element({
+      tagName: "div",
+      className: `${fig}__ext-file-ext`,
+      // Rendered as markup (the element's content is assigned to innerHTML).
+      content: Template.SvgText(label, `${fig}__ext-file-ext-svg`),
+    });
+  }
+  // No host Template (the widget rendered standalone) — the label alone still
+  // says which kind of file this is.
+  return Skeletons.Note({
+    className: `${fig}__ext-file-ext`,
+    content: label.toUpperCase(),
+  });
 }
 
 /**
@@ -267,22 +285,30 @@ function fileTile(ui, file) {
         className: `${fig}__ext-file-art ${file.kind || "doc"}`,
         kids: [art],
       }),
-      Skeletons.Box.X({
+      // media-grid__meta-row: a column holding the name+kebab line and the
+      // date beneath it, so the name can run to two lines and push the date
+      // down instead of the two competing for one fixed row.
+      Skeletons.Box.Y({
         className: `${fig}__ext-file-meta`,
         kids: [
-          Skeletons.Note({
-            className: `${fig}__ext-file-name`,
-            content: file.name,
+          Skeletons.Box.X({
+            className: `${fig}__ext-file-meta-top`,
+            kids: [
+              Skeletons.Note({
+                className: `${fig}__ext-file-name`,
+                content: file.name,
+              }),
+              Skeletons.Button.Svg({
+                ico: "bold-dot-vertical",
+                className: `${fig}__ext-file-kebab`,
+              }),
+            ],
           }),
-          Skeletons.Button.Svg({
-            ico: "bold-dot-vertical",
-            className: `${fig}__ext-file-kebab`,
+          Skeletons.Note({
+            className: `${fig}__ext-file-date`,
+            content: file.date || "",
           }),
         ],
-      }),
-      Skeletons.Note({
-        className: `${fig}__ext-file-date`,
-        content: file.date || "",
       }),
     ],
   });
