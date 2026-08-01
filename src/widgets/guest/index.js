@@ -152,6 +152,10 @@ class signin_guest extends LetcBox {
         this.warn('[signin_guest] share not listable:', (res && (res.status || res.error)) || 'no response');
       } else {
         if (res.title) this.mset({ title: res.title });
+        // Kept for the join hand-off: the guest URL carries a token and a name
+        // but no hub_id, and the invited workspace cannot be opened after login
+        // without one. This reply is the only place the page learns it.
+        this._shareHubId = res.hub_id || '';
         const { mapListing } = require('./share-content');
         content = { ...mapListing(res.items), messages: [] };
       }
@@ -268,6 +272,36 @@ class signin_guest extends LetcBox {
   }
 
   /**
+   * Remember which workspace this guest was invited to, so the desk can offer
+   * to open it once they have signed in.
+   *
+   * Written just before leaving for the sign-in form and read exactly once, by
+   * the desk, after Home is ready. sessionStorage rather than localStorage: the
+   * intent belongs to this visit, and a tab closed at the sign-in form should
+   * not surface a workspace prompt days later. It survives the hash change and
+   * full reload this flow makes, which a plain in-memory field would not.
+   *
+   * Only written when the hub is actually known — an internal (private) invite
+   * carries no token, so the page never learns a hub_id and no prompt is armed.
+   * That is also what keeps the dialog away from a normal sign-in: no key, no
+   * dialog.
+   */
+  _armJoinIntent() {
+    const hub_id = this._shareHubId;
+    if (!hub_id) return;
+    try {
+      sessionStorage.setItem('drumee_guest_join', JSON.stringify({
+        hub_id,
+        name: (this.mget(_a.title) || this.mget(_a.name) || '').trim(),
+      }));
+    } catch (e) {
+      // Storage unavailable (private mode, blocked) — the guest still reaches
+      // the form, they simply do not get the prompt afterwards.
+      this.warn('[signin_guest] could not arm join intent', e && e.message);
+    }
+  }
+
+  /**
    * @param {*} cmd
    * @param {*} args
   */
@@ -275,6 +309,7 @@ class signin_guest extends LetcBox {
     const service = args.service || cmd.get(_a.service);
     switch (service) {
       case 'go-login':
+        this._armJoinIntent();
         return this._leaveTo('#/welcome/signin');
 
       case 'open-signup':
