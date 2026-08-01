@@ -53,13 +53,6 @@ function __skl_signin_guest_top_nav(ui) {
     className: `${fig}__nav-actions`,
     kids: [
       Skeletons.Note({
-        className: `${fig}__nav-login`,
-        content: LOCALE.LOGIN || "Login",
-        service: 'go-login',
-        uiHandler: [ui],
-        kidsOpt: { active: 0 },
-      }),
-      Skeletons.Note({
         className: `${fig}__nav-join`,
         content: LOCALE.JOIN_WORKSPACE || "Join Workspace",
         service: 'open-signup',

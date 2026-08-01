@@ -87,11 +87,18 @@ class signin_router extends LetcBox {
     if (this._viewParam() === 'guest') {
       const params = this._hashParams();
       await Kind.waitFor('signin_guest');
-      // `name` comes from the invite email's CTA (server: _guestLandingLink) so the
-      // header shows the real workspace instead of its generic fallback. Absent or
-      // empty is fine — the widget falls back on its own.
+      // `scope` and `name` come from the invite email's CTA (server:
+      // _guestLandingLink). scope picks the layout (internal = the Content
+      // Restricted gate, external = the shared-contents view); name puts the real
+      // workspace in the header. Both absent is fine — the widget falls back to
+      // internal + its generic copy, which is the safe direction.
       this.feed({
         kind: 'signin_guest',
+        scope: params.get('scope') || '',
+        // Anonymous share token, present on external links only. It is what lets the
+        // external layout read the real shared folder (dmz.login → show_node_by);
+        // the internal layout never receives one.
+        token: params.get('token') || '',
         title: params.get('name') || '',
         parent_name: params.get('parent') || '',
         current_name: params.get('current') || '',
