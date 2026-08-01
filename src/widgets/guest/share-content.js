@@ -71,6 +71,9 @@ function mapListing(rows) {
         ftype: row.ftype || row.filetype,
         ext: row.ext,
         mimetype: row.mimetype,
+        // Inlined data URI, present only on the poster pass (see _loadPosters).
+        poster: row.poster,
+        nid: row.nid,
       });
     }
   }

@@ -207,15 +207,41 @@ function folderTile(ui, folder) {
 }
 
 /**
- * File tile: the preview card, then name + kebab + date — the desk grid's
- * media-grid__background + meta-row. The card holds whatever previewIcon()
- * resolves: a sprite glyph, or the extension rendered as text when the grid
- * itself would fall back to that badge.
+ * The tile's artwork, in the desk grid's own order of preference
+ * (media/grid/template/preview.js):
+ *
+ *   poster present  the file's own rendered preview, as the grid's
+ *                   .preview-content — and, for a video, the play badge
+ *                   centred over it exactly as the grid overlays it.
+ *   otherwise       whatever previewIcon() resolves: a sprite glyph, or the
+ *                   extension as text where the grid falls back to that badge.
+ *
+ * The poster arrives inlined as a data URI from dmz.list_by_token; see
+ * signin_guest._loadPosters() for why it is not a URL.
  */
-function fileTile(ui, file) {
+function fileArt(ui, file) {
   const fig = ui.fig.family;
+
+  if (file.poster) {
+    const kids = [];
+    if ((file.ftype || file.filetype) === "video") {
+      kids.push(
+        Skeletons.Button.Svg({
+          ico: "raw-video",
+          className: `${fig}__ext-file-play`,
+        })
+      );
+    }
+    return Skeletons.Element({
+      tagName: "div",
+      className: `${fig}__ext-file-poster ${file.ftype || ""}`,
+      style: { backgroundImage: `url(${file.poster})` },
+      kids,
+    });
+  }
+
   const preview = previewIcon(file);
-  const art = preview.ext
+  return preview.ext
     ? Skeletons.Note({
         className: `${fig}__ext-file-ext`,
         content: String(preview.ext).toUpperCase(),
@@ -224,6 +250,15 @@ function fileTile(ui, file) {
         ico: preview.ico,
         className: `${fig}__ext-file-ico`,
       });
+}
+
+/**
+ * File tile: the preview card, then name + kebab + date — the desk grid's
+ * media-grid__background + meta-row.
+ */
+function fileTile(ui, file) {
+  const fig = ui.fig.family;
+  const art = fileArt(ui, file);
 
   return Skeletons.Box.Y({
     className: `${fig}__ext-file`,

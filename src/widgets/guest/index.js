@@ -161,6 +161,49 @@ class signin_guest extends LetcBox {
     this._shareContent = content;
     // Re-render with what came back (or with empty rows on failure).
     this.feed(require('./skeleton').default(this));
+    if (content.files && content.files.length) this._loadPosters(token);
+  }
+
+  /**
+   * Second pass: fetch the file previews and upgrade the tiles in place.
+   *
+   * Split from the listing on purpose. The previews come back inlined as data
+   * URIs rather than as URLs, because the URL the desk grid uses
+   * (file/<format>/<nid>/<hub_id>, i.e. media.<format>) authorises against the
+   * caller's own session — the grant this page can never hold — so serving them
+   * any other way would mean opening a second anonymous route. Inlining keeps
+   * everything behind the one token-gated call.
+   *
+   * The cost of that choice is size: one video poster outweighs the entire
+   * metadata listing, and asking for both at once measured ~330KB / +1.3s on
+   * stage, which the grid would spend staring at an empty panel. So the listing
+   * paints first with filetype icons, and each poster replaces its icon as this
+   * arrives. A failure here is silent — the icons are already a valid render.
+   *
+   * @param {string} token
+   */
+  async _loadPosters(token) {
+    try {
+      const res = await this.postService(this._svc('dmz', 'list_by_token'), {
+        token,
+        page: 1,
+        with_posters: 1,
+      });
+      if (!res || res.status !== 'TICKET_OK' || !res.items) return;
+      const posters = {};
+      for (const row of res.items) {
+        if (row && row.nid && row.poster) posters[row.nid] = row.poster;
+      }
+      if (!Object.keys(posters).length) return;
+      const files = this._shareContent.files.map((f) =>
+        posters[f.nid] ? { ...f, poster: posters[f.nid] } : f
+      );
+      this._shareContent = { ...this._shareContent, files };
+      this.feed(require('./skeleton').default(this));
+    } catch (e) {
+      // Icons stay; nothing to recover.
+      this.warn('[signin_guest] posters unavailable', e && (e.reason || e.message));
+    }
   }
 
   /**
