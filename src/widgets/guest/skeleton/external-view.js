@@ -70,7 +70,7 @@ function windowBar(ui) {
     attrOpt: { "aria-hidden": "true" },
     kids: [
       Skeletons.Button.Svg({ ico: "app-share", className: `${fig}__ext-bar-btn link` }),
-      Skeletons.Button.Svg({ ico: "gear-header", className: `${fig}__ext-bar-btn settings` }),
+      Skeletons.Button.Svg({ ico: "setting", className: `${fig}__ext-bar-btn settings` }),
       Skeletons.Button.Svg({ ico: "desktop_fullview", className: `${fig}__ext-bar-btn zoom` }),
       Skeletons.Note({ className: `${fig}__ext-bar-minimize`, content: "−" }),
       Skeletons.Button.Svg({ ico: "cross", className: `${fig}__ext-bar-btn close` }),
