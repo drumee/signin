@@ -281,13 +281,18 @@ class signin_guest extends LetcBox {
    * not surface a workspace prompt days later. It survives the hash change and
    * full reload this flow makes, which a plain in-memory field would not.
    *
-   * Only written when the hub is actually known — an internal (private) invite
-   * carries no token, so the page never learns a hub_id and no prompt is armed.
-   * That is also what keeps the dialog away from a normal sign-in: no key, no
-   * dialog.
+   * The workspace comes off the link (`hub`), which the invite email sets for
+   * internal and external alike. An older link without it still works when it is
+   * external, because the listing reply carries hub_id; an older INTERNAL link
+   * has neither and arms nothing.
+   *
+   * No hub, no key, no dialog — which is also what keeps the dialog away from an
+   * ordinary sign-in.
    */
   _armJoinIntent() {
-    const hub_id = this._shareHubId;
+    // The link carries the workspace id on both scopes; the external listing
+    // reply is a fallback for links minted before it did.
+    const hub_id = (this.mget(_a.hub_id) || '').trim() || this._shareHubId;
     if (!hub_id) return;
     try {
       sessionStorage.setItem('drumee_guest_join', JSON.stringify({
