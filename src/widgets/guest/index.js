@@ -150,8 +150,18 @@ class signin_guest extends LetcBox {
         // The share knows its own name; prefer it over the one on the URL.
         const name = info.title || info.filename || info.name;
         if (name) this.mset({ title: name });
+        // The share's CONTENT hub, which is NOT the hub this page bootstrapped:
+        // we are served from the endpoint's own host (/-/<endpoint>/#/welcome/…),
+        // so without this the server resolves the wrong hub and the ACL denies
+        // the listing with 403 PERMISSION_DENIED — the nid belongs to a hub the
+        // session isn't scoped to. ui-essentials documents the same trap for the
+        // neutral share host, where dmz/sharebox pins Visitor.share_hub_id; an
+        // explicit hub_id in the call args wins over that default, so passing it
+        // here is the direct equivalent.
+        const shareHub = info.actual_hub_id || info.hub_id || '';
         const rows = await this.postService(this._svc('media', 'show_node_by'), {
           nid: info.nid,
+          hub_id: shareHub,
           page: 1,
         });
         const { mapListing } = require('./share-content');
