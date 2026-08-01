@@ -337,23 +337,40 @@ function fileTile(ui, file) {
 function conversation(ui, messages) {
   const fig = ui.fig.family;
 
+  // avatar | (author, bubble, time) — the chat-item layout: the author's
+  // picture in its own column, everything else stacked beside it.
   const bubbles = messages.map((m) =>
-    Skeletons.Box.Y({
+    Skeletons.Box.X({
       className: `${fig}__ext-msg ${m.out ? "out" : "in"}`,
       kids: [
-        // No author line: the reference shows the bubble and its time only.
-        // Every message in this panel is someone else's, so a per-bubble name
-        // would repeat on every row without telling a guest anything they can
-        // act on.
-        Skeletons.Note({
-          className: `${fig}__ext-bubble ${m.out ? "out" : "in"}`,
-          content: m.text,
+        m.avatar
+          ? Skeletons.Element({
+              tagName: "div",
+              className: `${fig}__ext-msg-avatar`,
+              style: { backgroundImage: `url(${m.avatar})` },
+            })
+          : Skeletons.Element({
+              tagName: "div",
+              className: `${fig}__ext-msg-avatar empty`,
+            }),
+        Skeletons.Box.Y({
+          className: `${fig}__ext-msg-main`,
+          kids: [
+            Skeletons.Note({
+              className: `${fig}__ext-msg-author`,
+              content: m.author || "",
+            }),
+            Skeletons.Note({
+              className: `${fig}__ext-bubble ${m.out ? "out" : "in"}`,
+              content: m.text,
+            }),
+            Skeletons.Note({
+              className: `${fig}__ext-msg-time`,
+              content: m.time || "",
+            }),
+          ].filter(Boolean),
         }),
-        Skeletons.Note({
-          className: `${fig}__ext-msg-time`,
-          content: m.time || "",
-        }),
-      ].filter(Boolean),
+      ],
     })
   );
 

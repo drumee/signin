@@ -698,23 +698,44 @@
     align-items: stretch;
   }
 
-  // Every bubble sits on the right, as the reference shows. The panel is
-  // read-only, so there is no second voice to distinguish by side.
+  // A message row: avatar column, then the author/bubble/time stack. Every
+  // message here is someone else's, so they all read as incoming.
   &__ext-msg {
     width: 100%;
-    align-items: flex-end;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-    &.in {
-      gap: 4px;
-    }
+  // The author's picture, as a background so a missing or slow image leaves a
+  // neutral circle rather than a broken-image glyph.
+  &__ext-msg-avatar {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--normal-bg-80, #e5e5ea);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  &__ext-msg-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   &__ext-msg-author {
-    font-family: var(--font-bold);
-    font-weight: 700;
-    font-size: 10px;
+    font-family: "Geist", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
     line-height: 1.4;
-    color: #0b0a21;
+    color: var(--normal-fg-10, #0b0a21);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   // display:block so the inline filename span flows with the text instead of
@@ -729,20 +750,20 @@
     line-height: 1.4;
     color: #0b0a21;
 
-    // Pink, with the square corner at the bottom right where the bubble meets
-    // its timestamp.
+    // White, with the square corner at the top left where the bubble meets the
+    // author's name.
     &.out,
     &.in {
-      background-color: #ffa8dc;
-      border-radius: 16px 16px 0 16px;
+      background-color: #ffffff;
+      border-radius: 0 16px 16px 16px;
     }
   }
 
   &__ext-msg-time {
-    padding-top: 6px;
+    padding-top: 2px;
     font-size: 10px;
     line-height: 1.4;
-    text-align: right;
+    text-align: left;
     color: #84848c;
   }
 
