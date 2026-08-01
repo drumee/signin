@@ -133,5 +133,6 @@
   "TASK": "Task",
   "MEETING": "Meeting",
   "NEW": "New",
-  "CHAT": "Chat"
+  "CHAT": "Chat",
+  "MEMBER": "Member"
 }

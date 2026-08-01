@@ -162,6 +162,39 @@ class signin_guest extends LetcBox {
     // Re-render with what came back (or with empty rows on failure).
     this.feed(require('./skeleton').default(this));
     if (content.files && content.files.length) this._loadPosters(token);
+    this._loadChat(token);
+  }
+
+  /**
+   * The workspace conversation, from dmz.chat_by_token.
+   *
+   * Separate from the listing for the same reason the posters are: the file
+   * grid is what the page is for, and it should not wait on a second query to
+   * appear. The panel fills in when this lands.
+   *
+   * The server scopes the messages to the shared node and sends display names
+   * only — never an author's email — so nothing here has to redact.
+   *
+   * Silent on failure: an empty conversation panel is a reasonable page, and a
+   * share whose chat cannot be read still lists its files.
+   *
+   * @param {string} token
+   */
+  async _loadChat(token) {
+    try {
+      const res = await this.postService(this._svc('dmz', 'chat_by_token'), {
+        token,
+        page: 1,
+      });
+      if (!res || res.status !== 'TICKET_OK' || !res.messages) return;
+      const { mapMessages } = require('./chat-content');
+      const messages = mapMessages(res.messages);
+      if (!messages.length) return;
+      this._shareContent = { ...this._shareContent, messages };
+      this.feed(require('./skeleton').default(this));
+    } catch (e) {
+      this.warn('[signin_guest] chat unavailable', e && (e.reason || e.message));
+    }
   }
 
   /**
