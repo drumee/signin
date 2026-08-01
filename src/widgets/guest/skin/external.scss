@@ -476,6 +476,20 @@
     }
   }
 
+  // The audio record-disc. The grid drops this artwork straight into
+  // media-grid__background with no wrapper and no class of its own, so it
+  // renders at the size baked into the file (64x64) and is centred by the
+  // card. Nothing here recolours it — the disc carries its own gradients.
+  &__ext-file-disc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      display: block;
+    }
+  }
+
   // Play badge over a video poster: smaller than the file glyph, white with a
   // soft shadow so it stays legible on a dark or a light frame.
   &__ext-file-play {

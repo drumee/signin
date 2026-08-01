@@ -221,10 +221,25 @@ function folderTile(ui, folder) {
  */
 function fileArt(ui, file) {
   const fig = ui.fig.family;
+  const type = file.ftype || file.filetype || "";
+
+  // filetype "audio" never reaches the icon map. grid/template/index.js
+  // switches on filetype BEFORE calling preview.js and swaps in a bespoke
+  // record-disc drawing for audio, so an .mp3 shows the disc rather than the
+  // desktop_musicfile note glyph the map would have given it. The artwork is
+  // the grid's own file, copied verbatim, not a redraw.
+  if (type === "audio") {
+    return Skeletons.Element({
+      tagName: "div",
+      className: `${fig}__ext-file-disc`,
+      // raw-loader hands back the markup; assigned to innerHTML.
+      content: require("../filetype/audio.txt").default,
+    });
+  }
 
   if (file.poster) {
     const kids = [];
-    if ((file.ftype || file.filetype) === "video") {
+    if (type === "video") {
       kids.push(
         Skeletons.Button.Svg({
           ico: "raw-video",
@@ -234,7 +249,7 @@ function fileArt(ui, file) {
     }
     return Skeletons.Element({
       tagName: "div",
-      className: `${fig}__ext-file-poster ${file.ftype || ""}`,
+      className: `${fig}__ext-file-poster ${type}`,
       style: { backgroundImage: `url(${file.poster})` },
       kids,
     });
