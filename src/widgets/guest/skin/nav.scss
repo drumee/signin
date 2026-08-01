@@ -86,18 +86,6 @@
     flex: 0 0 auto;
   }
 
-  &__nav-login {
-    font-family: var(--font-bold);
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 20px;
-    color: #0b0a21;
-    white-space: nowrap;
-    cursor: pointer;
-    padding: 8px 0;
-    transition: color 0.2s;
-  }
-
   &__nav-join {
     padding: 6px 24px;
     border-radius: 4px;
@@ -114,8 +102,7 @@
   }
 }
 
-.signin-guest__nav-link:hover .signin-guest__nav-link-label,
-.signin-guest__nav-login:hover {
+.signin-guest__nav-link:hover .signin-guest__nav-link-label {
   color: #433cc5;
 }
 
