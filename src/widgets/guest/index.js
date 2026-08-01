@@ -112,6 +112,23 @@ class signin_guest extends LetcBox {
    * @param {string} name
    * @returns {string}
    */
+  /**
+   * True when this page is running on the main-domain session, i.e. the session
+   * key is the auth cookie itself. server-core derives the key from the vhost
+   * minus main_domain, so on the bare main domain it resolves to `regsid` — the
+   * one case dmz.login refuses to rebind. Treated as true when bootstrap is
+   * unavailable: the safe assumption is "cannot read the share".
+   * @returns {boolean}
+   */
+  _isMainDomainSession() {
+    try {
+      const { keysel } = bootstrap() || {};
+      return !keysel || keysel === 'regsid';
+    } catch (e) {
+      return true;
+    }
+  }
+
   _svc(group, name) {
     const g = (typeof SERVICE !== 'undefined' && SERVICE && SERVICE[group]) || null;
     return (g && g[name]) || `${group}.${name}`;
@@ -138,6 +155,28 @@ class signin_guest extends LetcBox {
   async _loadShare() {
     const token = this._shareToken();
     if (!token) return;
+    // A share cannot be read from a MAIN-DOMAIN session, by design. Both
+    // dmz.login paths refuse to bind the share's guest identity when the
+    // session key is the main-domain auth cookie:
+    //
+    //   "[dmz.login][SECURITY] secure_share bind skipped: DMZ session resolved
+    //    to the main-domain regsid (would hijack/clamp the auth session)"
+    //
+    // login still answers with the node, but no grant is ever attached, so the
+    // listing comes back 403 PERMISSION_DENIED. The share view avoids this by
+    // running on the share's own host/keysel, where sid !== regsid.
+    //
+    // So don't ask: firing a request whose refusal is guaranteed just fills the
+    // console with 403s. Render the empty state instead. Lifting this needs
+    // either a token-authoritative listing endpoint that never touches the
+    // caller's session, or serving this page from the share's own keysel.
+    if (this._isMainDomainSession()) {
+      this.warn(
+        '[signin_guest] share listing skipped: a main-domain session cannot bind a share identity (dmz.login regsid guard)'
+      );
+      this._shareContent = { folders: [], files: [], messages: [] };
+      return;
+    }
     let content = { folders: [], files: [], messages: [] };
     try {
       const info = await this.postService(this._svc('dmz', 'login'), {
