@@ -439,38 +439,48 @@
     align-items: stretch;
   }
 
+  // Mirrors .media-grid__background (builtins/media/grid/skin/container.scss):
+  // a square card, tinted with --grid-card-bg, clipped so a preview can never
+  // spill past the corner radius.
   &__ext-file-art {
     width: 100%;
     aspect-ratio: 1 / 1;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.05);
+    flex: 0 0 auto;
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--grid-card-radius, 8px);
+    background: var(--grid-card-bg, rgba(0, 0, 0, 0.05));
     align-items: center;
     justify-content: center;
   }
 
   // Figma tints each file kind differently; the sprite glyphs paint with
   // currentColor / an inherited fill, so `color` + `fill` both get set.
+  // .preview-icon: --grid-icon-file (60px) in --grid-color-icon-file (purple).
+  // The real grid paints every non-image type in that one colour rather than a
+  // per-type tint, so drop the per-kind rules that used to sit below.
   &__ext-file-ico {
-    width: 60px;
-    height: 60px;
+    width: var(--grid-icon-file, 60px);
+    height: var(--grid-icon-file, 60px);
     flex: 0 0 auto;
+    color: var(--grid-color-icon-file, #847eff);
+    fill: var(--grid-color-icon-file, #847eff);
 
     svg {
       width: 100%;
       height: 100%;
+      fill: currentColor;
     }
   }
 
-  &__ext-file-art.doc &__ext-file-ico,
-  &__ext-file-art.note &__ext-file-ico {
-    color: #847eff;
-    fill: #847eff;
-  }
-
+  // .media-grid__meta-row: 32px single-line baseline, 8px above, filename and
+  // kebab on the top line, date beneath.
   &__ext-file-meta {
     width: 100%;
-    align-items: center;
+    min-height: var(--grid-meta-row-h, 32px);
+    padding-top: 8px;
+    box-sizing: border-box;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 4px;
   }
@@ -500,13 +510,18 @@
     }
   }
 
+  // .media-grid__date
   &__ext-file-date {
     width: 100%;
     padding-top: 2px;
+    font-family: "Geist", sans-serif;
+    font-weight: 400;
     font-size: 10px;
     line-height: 1.4;
-    color: #65656c;
+    color: var(--grid-color-meta, #65656c);
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   // ---- Conversation panel ----
