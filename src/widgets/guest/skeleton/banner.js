@@ -1,7 +1,8 @@
 /**
  * Sticky bottom conversion banner (Figma 1602:77020): purple gradient bar with the
  * lightning tile + headline on the left, social-proof subline + "Sign Up Free" on
- * the right. Both the bar's CTA and the nav's Join Workspace fire `open-signup`.
+ * the right. The bar's CTA fires `open-signup`; the nav's Join Workspace goes
+ * to the sign-in form instead (`go-login`).
  * @param {LetcBox} ui
  */
 function __skl_signin_guest_banner(ui) {

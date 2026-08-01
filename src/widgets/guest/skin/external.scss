@@ -651,28 +651,41 @@
   &__ext-chat-actions {
     flex: 0 0 auto;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     pointer-events: none;
   }
 
+  // .window__chat-header-btn: a compact 24px hit box around a 16px glyph.
   &__ext-chat-btn {
-    width: 16px;
-    height: 16px;
-    flex: 0 0 16px;
-    color: var(--normal-fg-20, #65656c);
-    fill: var(--normal-fg-20, #65656c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 auto;
+    border-radius: 4px;
+    color: var(--normal-fg-10, #0b0a21);
+    fill: var(--normal-fg-10, #0b0a21);
 
-    svg { width: 100%; height: 100%; display: block; }
+    svg { width: 16px; height: 16px; display: block; }
   }
 
+  // .window__chat-header-title: Geist 14 regular, NORMAL case. The folder
+  // window overrides the shared mono/uppercase section label here for exactly
+  // this header, so "Team Chat" reads as words, not a caps tag.
   &__ext-chat-title {
-    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
-    font-weight: 600;
-    font-size: 10px;
-    line-height: 1;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    color: #0b0a21;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: "Geist", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--normal-fg-10, #0b0a21);
   }
 
   &__ext-chat-body {
@@ -685,44 +698,61 @@
     align-items: stretch;
   }
 
+  // A message row: avatar column, then the author/bubble/time stack. Every
+  // message here is someone else's, so they all read as incoming.
   &__ext-msg {
     width: 100%;
+    align-items: flex-start;
+    gap: 10px;
+  }
 
-    &.out {
-      align-items: flex-end;
-    }
+  // The author's picture, as a background so a missing or slow image leaves a
+  // neutral circle rather than a broken-image glyph.
+  &__ext-msg-avatar {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--normal-bg-80, #e5e5ea);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
 
-    &.in {
-      align-items: flex-start;
-      gap: 4px;
-    }
+  &__ext-msg-main {
+    flex: 1 1 auto;
+    min-width: 0;
+    align-items: flex-start;
+    gap: 4px;
   }
 
   &__ext-msg-author {
-    font-family: var(--font-bold);
-    font-weight: 700;
-    font-size: 10px;
+    font-family: "Geist", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
     line-height: 1.4;
-    color: #0b0a21;
+    color: var(--normal-fg-10, #0b0a21);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 
   // display:block so the inline filename span flows with the text instead of
   // becoming a sibling flex item.
   &__ext-bubble {
     display: block;
-    width: 100%;
-    max-width: 320px;
+    width: auto;
+    max-width: 240px;
     padding: 12px;
     box-sizing: border-box;
     font-size: 12px;
     line-height: 1.4;
     color: #0b0a21;
 
-    &.out {
-      background-color: #ffa8dc;
-      border-radius: 16px 0 16px 16px;
-    }
-
+    // White, with the square corner at the top left where the bubble meets the
+    // author's name.
+    &.out,
     &.in {
       background-color: #ffffff;
       border-radius: 0 16px 16px 16px;
@@ -730,9 +760,10 @@
   }
 
   &__ext-msg-time {
-    padding-top: 4px;
-    font-size: 8px;
+    padding-top: 2px;
+    font-size: 10px;
     line-height: 1.4;
+    text-align: left;
     color: #84848c;
   }
 
@@ -747,24 +778,46 @@
 
   &__ext-composer-field {
     width: 100%;
-    padding: 10px 12px;
+    padding: 12px 14px;
     box-sizing: border-box;
-    border-radius: 8px;
+    border: 1px solid var(--border-default, #e5e5ea);
+    border-radius: 12px;
     background-color: #ffffff;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
   }
 
-  &__ext-composer-left {
+  &__ext-composer-right {
+    flex: 0 0 auto;
     align-items: center;
-    gap: 4px;
+    gap: 10px;
+  }
+
+  &__ext-composer-emoji {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    color: #84848c;
+    fill: #84848c;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  &__ext-composer-left {
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 10px;
     min-width: 0;
   }
 
   &__ext-composer-clip {
-    width: 15px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex: 0 0 auto;
     color: #aeaeb2;
     fill: #aeaeb2;
@@ -776,15 +829,15 @@
   }
 
   &__ext-composer-placeholder {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.4;
     color: #aeaeb2;
     white-space: nowrap;
   }
 
   &__ext-composer-send {
-    width: 14.25px;
-    height: 12px;
+    width: 18px;
+    height: 18px;
     flex: 0 0 auto;
     color: #847eff;
     fill: #847eff;

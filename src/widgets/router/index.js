@@ -99,6 +99,10 @@ class signin_router extends LetcBox {
         // external layout read the real shared folder (dmz.login → show_node_by);
         // the internal layout never receives one.
         token: params.get('token') || '',
+        // Which workspace the invite is for (server: _guestLandingLink). Present
+        // on both scopes; it is the ONLY way the internal layout can know, since
+        // it has no token to resolve one from.
+        hub_id: params.get('hub') || '',
         title: params.get('name') || '',
         parent_name: params.get('parent') || '',
         current_name: params.get('current') || '',

@@ -52,10 +52,14 @@ function __skl_signin_guest_top_nav(ui) {
   const actions = Skeletons.Box.X({
     className: `${fig}__nav-actions`,
     kids: [
+      // Join Workspace goes to the SIGN-IN form, not sign-up: someone who was
+      // invited to a workspace already has, or is about to be given, an account
+      // there, and the form links on to sign-up for anyone who does not.
+      // The banner's "Sign Up Free" is the sign-up route and keeps open-signup.
       Skeletons.Note({
         className: `${fig}__nav-join`,
         content: LOCALE.JOIN_WORKSPACE || "Join Workspace",
-        service: 'open-signup',
+        service: 'go-login',
         uiHandler: [ui],
         kidsOpt: { active: 0 },
       }),

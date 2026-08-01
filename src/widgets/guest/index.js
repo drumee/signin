@@ -152,6 +152,10 @@ class signin_guest extends LetcBox {
         this.warn('[signin_guest] share not listable:', (res && (res.status || res.error)) || 'no response');
       } else {
         if (res.title) this.mset({ title: res.title });
+        // Kept for the join hand-off: the guest URL carries a token and a name
+        // but no hub_id, and the invited workspace cannot be opened after login
+        // without one. This reply is the only place the page learns it.
+        this._shareHubId = res.hub_id || '';
         const { mapListing } = require('./share-content');
         content = { ...mapListing(res.items), messages: [] };
       }
@@ -162,6 +166,39 @@ class signin_guest extends LetcBox {
     // Re-render with what came back (or with empty rows on failure).
     this.feed(require('./skeleton').default(this));
     if (content.files && content.files.length) this._loadPosters(token);
+    this._loadChat(token);
+  }
+
+  /**
+   * The workspace conversation, from dmz.chat_by_token.
+   *
+   * Separate from the listing for the same reason the posters are: the file
+   * grid is what the page is for, and it should not wait on a second query to
+   * appear. The panel fills in when this lands.
+   *
+   * The server scopes the messages to the shared node and sends display names
+   * only — never an author's email — so nothing here has to redact.
+   *
+   * Silent on failure: an empty conversation panel is a reasonable page, and a
+   * share whose chat cannot be read still lists its files.
+   *
+   * @param {string} token
+   */
+  async _loadChat(token) {
+    try {
+      const res = await this.postService(this._svc('dmz', 'chat_by_token'), {
+        token,
+        page: 1,
+      });
+      if (!res || res.status !== 'TICKET_OK' || !res.messages) return;
+      const { mapMessages } = require('./chat-content');
+      const messages = mapMessages(res.messages);
+      if (!messages.length) return;
+      this._shareContent = { ...this._shareContent, messages };
+      this.feed(require('./skeleton').default(this));
+    } catch (e) {
+      this.warn('[signin_guest] chat unavailable', e && (e.reason || e.message));
+    }
   }
 
   /**
@@ -235,16 +272,63 @@ class signin_guest extends LetcBox {
   }
 
   /**
+   * Remember which workspace this guest was invited to, so the desk can offer
+   * to open it once they have signed in.
+   *
+   * Written just before leaving for the sign-in form and read exactly once, by
+   * the desk, after Home is ready. sessionStorage rather than localStorage: the
+   * intent belongs to this visit, and a tab closed at the sign-in form should
+   * not surface a workspace prompt days later. It survives the hash change and
+   * full reload this flow makes, which a plain in-memory field would not.
+   *
+   * The workspace comes off the link (`hub`), which the invite email sets for
+   * internal and external alike. An older link without it still works when it is
+   * external, because the listing reply carries hub_id; an older INTERNAL link
+   * has neither and arms nothing.
+   *
+   * No hub, no key, no dialog — which is also what keeps the dialog away from an
+   * ordinary sign-in.
+   */
+  _armJoinIntent() {
+    // The link carries the workspace id on both scopes; the external listing
+    // reply is a fallback for links minted before it did.
+    const hub_id = (this.mget(_a.hub_id) || '').trim() || this._shareHubId;
+    if (!hub_id) return;
+    try {
+      // localStorage, not session: signing up sends the user to their mail
+      // client and back through a NEW TAB on the verify link, which a
+      // session-scoped key does not survive. This mirrors the signup router's
+      // own captureRef (drumee_ref), which persists across the same flow for
+      // the same reason. `ts` lets the desk ignore an intent that has gone
+      // stale — see _maybeOfferInvitedWorkspace.
+      localStorage.setItem('drumee_guest_join', JSON.stringify({
+        hub_id,
+        name: (this.mget(_a.title) || this.mget(_a.name) || '').trim(),
+        ts: Date.now(),
+      }));
+    } catch (e) {
+      // Storage unavailable (private mode, blocked) — the guest still reaches
+      // the form, they simply do not get the prompt afterwards.
+      this.warn('[signin_guest] could not arm join intent', e && e.message);
+    }
+  }
+
+  /**
    * @param {*} cmd
    * @param {*} args
   */
   onUiEvent(cmd, args = {}) {
     const service = args.service || cmd.get(_a.service);
     switch (service) {
+      // Both exits arm the intent. Sign-in is the documented route (the form
+      // links on to signup), but the banner goes straight to signup, and a
+      // guest who takes that route was invited just the same.
       case 'go-login':
+        this._armJoinIntent();
         return this._leaveTo('#/welcome/signin');
 
       case 'open-signup':
+        this._armJoinIntent();
         return this._leaveTo('#/welcome/signup');
     }
   }

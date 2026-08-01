@@ -41,9 +41,9 @@ function __skl_signin_guest_header(ui) {
                 ico: "apps-link-simple",
                 className: `${fig}__header-link`,
               })
-            : Skeletons.Element({
-                className: `${fig}__header-lock`,
-                content: " ",
+            : Skeletons.Button.Svg({
+                ico: "lock",
+               className: `${fig}__header-lock`,
               }),
           Skeletons.Note({
             className: `${fig}__header-sublabel`,

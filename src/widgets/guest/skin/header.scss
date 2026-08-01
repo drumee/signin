@@ -65,15 +65,14 @@
   }
 
   &__header-lock {
-    width: 8px;
-    height: 10.5px;
+    width: 16px;
+    height: 16px;
     flex: 0 0 auto;
     background: url('../assets/header-lock.svg') no-repeat center / contain;
   }
 
   &__header-sublabel {
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: 17px;
     color: #0b0a21;
   }
 }

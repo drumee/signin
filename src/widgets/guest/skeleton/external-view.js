@@ -337,23 +337,40 @@ function fileTile(ui, file) {
 function conversation(ui, messages) {
   const fig = ui.fig.family;
 
+  // avatar | (author, bubble, time) — the chat-item layout: the author's
+  // picture in its own column, everything else stacked beside it.
   const bubbles = messages.map((m) =>
-    Skeletons.Box.Y({
+    Skeletons.Box.X({
       className: `${fig}__ext-msg ${m.out ? "out" : "in"}`,
       kids: [
-        m.out ? null : Skeletons.Note({
-          className: `${fig}__ext-msg-author`,
-          content: m.author || "",
+        m.avatar
+          ? Skeletons.Element({
+              tagName: "div",
+              className: `${fig}__ext-msg-avatar`,
+              style: { backgroundImage: `url(${m.avatar})` },
+            })
+          : Skeletons.Element({
+              tagName: "div",
+              className: `${fig}__ext-msg-avatar empty`,
+            }),
+        Skeletons.Box.Y({
+          className: `${fig}__ext-msg-main`,
+          kids: [
+            Skeletons.Note({
+              className: `${fig}__ext-msg-author`,
+              content: m.author || "",
+            }),
+            Skeletons.Note({
+              className: `${fig}__ext-bubble ${m.out ? "out" : "in"}`,
+              content: m.text,
+            }),
+            Skeletons.Note({
+              className: `${fig}__ext-msg-time`,
+              content: m.time || "",
+            }),
+          ].filter(Boolean),
         }),
-        Skeletons.Note({
-          className: `${fig}__ext-bubble ${m.out ? "out" : "in"}`,
-          content: m.text,
-        }),
-        Skeletons.Note({
-          className: `${fig}__ext-msg-time`,
-          content: m.time || "",
-        }),
-      ].filter(Boolean),
+      ],
     })
   );
 
@@ -376,9 +393,19 @@ function conversation(ui, messages) {
               }),
             ],
           }),
-          Skeletons.Button.Svg({
-            ico: "app-send",
-            className: `${fig}__ext-composer-send`,
+          Skeletons.Box.X({
+            className: `${fig}__ext-composer-right`,
+            kids: [
+              // The app's own emoji glyph, as the chat action menu uses it.
+              Skeletons.Button.Svg({
+                ico: "chat-action-smiley",
+                className: `${fig}__ext-composer-emoji`,
+              }),
+              Skeletons.Button.Svg({
+                ico: "app-send",
+                className: `${fig}__ext-composer-send`,
+              }),
+            ],
           }),
         ],
       }),
