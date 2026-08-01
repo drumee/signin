@@ -43,7 +43,10 @@ function fileName(row) {
 function fileKind(row) {
   const t = row.ftype || row.filetype;
   if (t === "image") return "image";
-  return KIND_BY_EXT[String(row.ext || "").toLowerCase()] || "doc";
+  // Real listings carry ftype values well beyond file/folder — document, video,
+  // script, audio … — so anything without an explicit extension mapping gets the
+  // GENERIC file glyph rather than being mislabelled as a Word document.
+  return KIND_BY_EXT[String(row.ext || "").toLowerCase()] || "note";
 }
 
 /**

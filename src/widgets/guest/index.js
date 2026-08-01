@@ -112,23 +112,6 @@ class signin_guest extends LetcBox {
    * @param {string} name
    * @returns {string}
    */
-  /**
-   * True when this page is running on the main-domain session, i.e. the session
-   * key is the auth cookie itself. server-core derives the key from the vhost
-   * minus main_domain, so on the bare main domain it resolves to `regsid` — the
-   * one case dmz.login refuses to rebind. Treated as true when bootstrap is
-   * unavailable: the safe assumption is "cannot read the share".
-   * @returns {boolean}
-   */
-  _isMainDomainSession() {
-    try {
-      const { keysel } = bootstrap() || {};
-      return !keysel || keysel === 'regsid';
-    } catch (e) {
-      return true;
-    }
-  }
-
   _svc(group, name) {
     const g = (typeof SERVICE !== 'undefined' && SERVICE && SERVICE[group]) || null;
     return (g && g[name]) || `${group}.${name}`;
@@ -137,74 +120,40 @@ class signin_guest extends LetcBox {
   /**
    * Load the real shared folder using the token the invite link carried.
    *
-   * Two calls, the same pair ui-team's dmz/sharebox makes:
-   *   dmz.login          redeems the token and opens the anonymous session the
-   *                      next call needs; returns the shared node (nid, name).
-   *                      hub_id is optional — the server resolves it from the
-   *                      token, which is why the link needn't carry one.
-   *   media.show_node_by lists that node's children ({nid, page}).
+   * One call: dmz.list_by_token({ token, page }). The server resolves the share
+   * from the token, refuses anything that is not plainly open (revoked, expired,
+   * locked, password- or email-gated), scopes the listing to the shared node and
+   * clamps each row's privilege to the share's capabilities.
    *
-   * The server decides what a token may see (its privilege is clamped to the
-   * share's caps server-side), so nothing here widens access; this only renders
-   * what the session is already allowed to list.
+   * Nothing here widens access — the client cannot name a node, so it cannot ask
+   * for anything the token does not already cover.
    *
-   * Anything unexpected — no token, an error, a gated share (dmz.login answers
-   * with a `status` such as REQUIRED_PASSWORD) — leaves the page on empty rows
-   * rather than falling back to the sample.
+   * Any refusal or error leaves the page on empty rows; the Figma sample is
+   * never substituted for a real share.
    */
   async _loadShare() {
     const token = this._shareToken();
     if (!token) return;
-    // A share cannot be read from a MAIN-DOMAIN session, by design. Both
-    // dmz.login paths refuse to bind the share's guest identity when the
-    // session key is the main-domain auth cookie:
-    //
-    //   "[dmz.login][SECURITY] secure_share bind skipped: DMZ session resolved
-    //    to the main-domain regsid (would hijack/clamp the auth session)"
-    //
-    // login still answers with the node, but no grant is ever attached, so the
-    // listing comes back 403 PERMISSION_DENIED. The share view avoids this by
-    // running on the share's own host/keysel, where sid !== regsid.
-    //
-    // So don't ask: firing a request whose refusal is guaranteed just fills the
-    // console with 403s. Render the empty state instead. Lifting this needs
-    // either a token-authoritative listing endpoint that never touches the
-    // caller's session, or serving this page from the share's own keysel.
-    if (this._isMainDomainSession()) {
-      this.warn(
-        '[signin_guest] share listing skipped: a main-domain session cannot bind a share identity (dmz.login regsid guard)'
-      );
-      this._shareContent = { folders: [], files: [], messages: [] };
-      return;
-    }
     let content = { folders: [], files: [], messages: [] };
     try {
-      const info = await this.postService(this._svc('dmz', 'login'), {
+      // ONE call, authorised by the token alone (server: dmz.list_by_token).
+      // Deliberately not dmz.login + media.show_node_by: dmz.login refuses to
+      // bind a share identity onto a main-domain session (its regsid guard,
+      // which exists so a share can never hijack or clamp someone's auth
+      // session), so from this page that pair can only ever 403. The listing
+      // endpoint answers from the token and never touches the caller's session.
+      const res = await this.postService(this._svc('dmz', 'list_by_token'), {
         token,
-        hub_id: this.mget('hub_id') || '',
+        page: 1,
       });
-      if (!info || info.error || info.error_code || info.status) {
-        this.warn('[signin_guest] share not readable', (info && (info.status || info.error)) || 'no response');
+      if (!res || res.error || res.error_code || res.status !== 'TICKET_OK') {
+        // Gated, revoked, expired or unknown — the server tells us which, and
+        // deliberately sends no items. Show the empty state, never the sample.
+        this.warn('[signin_guest] share not listable:', (res && (res.status || res.error)) || 'no response');
       } else {
-        // The share knows its own name; prefer it over the one on the URL.
-        const name = info.title || info.filename || info.name;
-        if (name) this.mset({ title: name });
-        // The share's CONTENT hub, which is NOT the hub this page bootstrapped:
-        // we are served from the endpoint's own host (/-/<endpoint>/#/welcome/…),
-        // so without this the server resolves the wrong hub and the ACL denies
-        // the listing with 403 PERMISSION_DENIED — the nid belongs to a hub the
-        // session isn't scoped to. ui-essentials documents the same trap for the
-        // neutral share host, where dmz/sharebox pins Visitor.share_hub_id; an
-        // explicit hub_id in the call args wins over that default, so passing it
-        // here is the direct equivalent.
-        const shareHub = info.actual_hub_id || info.hub_id || '';
-        const rows = await this.postService(this._svc('media', 'show_node_by'), {
-          nid: info.nid,
-          hub_id: shareHub,
-          page: 1,
-        });
+        if (res.title) this.mset({ title: res.title });
         const { mapListing } = require('./share-content');
-        content = { ...mapListing(rows), messages: [] };
+        content = { ...mapListing(res.items), messages: [] };
       }
     } catch (e) {
       this.warn('[signin_guest] share load failed', e && (e.reason || e.message));
