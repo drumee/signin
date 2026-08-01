@@ -252,20 +252,29 @@
     gap: 12px;
   }
 
+  // "+ New" pill — the folder toolbar's .window-button__label-button verbatim
+  // (folder/skin/index.scss __new-ctrl): 30px tall, min-width 82, radius 8,
+  // Inter 500 14/16 on #b2adfa. Note the lavender is #b2adfa, NOT the page's
+  // pink share accent — this control keeps the app's own action colour.
   &__ext-new-ctrl {
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    height: 32px;
+    height: 30px;
+    min-height: 30px;
+    min-width: 82px;
     padding: 0 14px;
     box-sizing: border-box;
-    border-radius: 6px;
-    background-color: var(--area-share, #ffa8dc);
-    font-family: "Geist", var(--font-bold), sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--normal-fg-10, #0b0a21);
+    border: 0;
+    border-radius: 8px;
+    background-color: #b2adfa;
+    font-family: "Inter", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    color: #0b0a20;
+    text-align: center;
     white-space: nowrap;
   }
 
@@ -280,48 +289,59 @@
       width: 100%;
       height: 100%;
       display: block;
+      fill: currentColor;
     }
   }
 
-  // Segmented list/grid control: the active segment shows its check, the other
-  // hides it — the same two-glyph segment fileViewToggle builds.
+  &__ext-new-label {
+    font-weight: 500;
+  }
+
+  // Segmented list/grid control — .window-folder-topbar__view-toggle: a 60x30
+  // white pill of two 30x30 halves, the active half filled #b2adfa. The check
+  // glyph the shared skeleton emits stays hidden; the fill alone signals
+  // selection, exactly as the folder window does it.
   &__ext-view-toggle {
-    align-items: center;
-    height: 32px;
-    padding: 2px;
+    display: inline-flex;
+    align-items: stretch;
+    width: 60px;
+    height: 30px;
+    flex: 0 0 60px;
+    border: 0;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: none;
+    overflow: hidden;
     box-sizing: border-box;
-    border-radius: 6px;
-    background-color: rgba(0, 0, 0, 0.05);
   }
 
   &__ext-view-seg {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    height: 28px;
-    padding: 0 10px;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    gap: 0;
+    padding: 0;
+    border: 0;
     box-sizing: border-box;
-    border-radius: 4px;
-    color: var(--normal-fg-10, #0b0a21);
+    background-color: #fff;
+    color: #65656c;
+
+    svg {
+      fill: currentColor;
+    }
   }
 
   &__ext-view-check {
-    width: 12px;
-    height: 12px;
-    flex: 0 0 12px;
     display: none;
-    color: currentColor;
-    fill: currentColor;
-
-    svg { width: 100%; height: 100%; display: block; }
   }
 
   &__ext-view-glyph {
     width: 14px;
     height: 14px;
-    flex: 0 0 14px;
-    color: currentColor;
-    fill: currentColor;
+    flex-shrink: 0;
 
     svg { width: 100%; height: 100%; display: block; }
   }
@@ -336,7 +356,6 @@
     background: transparent;
     font-family: "Geist", var(--font-bold), sans-serif;
     font-size: 13px;
-    font-weight: 700;
     line-height: 1;
     color: var(--normal-fg-10, #0b0a21);
     white-space: nowrap;
@@ -649,6 +668,14 @@
       height: 100%;
     }
   }
+}
+
+// Active half — list when data-state="1", grid otherwise (the default, and what
+// this page renders). Same selector shape as the folder window's rule.
+.signin-guest__ext-view-toggle[data-state="1"] .signin-guest__ext-view-seg.list,
+.signin-guest__ext-view-toggle:not([data-state="1"]) .signin-guest__ext-view-seg.grid {
+  background-color: #b2adfa;
+  color: #65656c;
 }
 
 .signin-guest__ext-bubble.out .signin-guest__ext-bubble-file {
