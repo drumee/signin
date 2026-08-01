@@ -439,8 +439,9 @@
     align-items: stretch;
   }
 
-  // .media-grid__background — the square card: tinted with --grid-card-bg and
-  // clipped so a preview can never spill past the corner radius.
+  // Mirrors .media-grid__background (builtins/media/grid/skin/container.scss):
+  // a square card, tinted with --grid-card-bg, clipped so a preview can never
+  // spill past the corner radius.
   &__ext-file-art {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -451,40 +452,12 @@
     background: var(--grid-card-bg, rgba(0, 0, 0, 0.05));
     align-items: center;
     justify-content: center;
-
-    // Once a real frame is in the card the tint has nothing left to do, and it
-    // would show through anything the poster does not cover.
-    &:has(.signin-guest__ext-file-poster[style*="background-image"]) {
-      background: transparent;
-    }
   }
 
-  // .preview-container — fills the card so a poster (absolute) and an icon
-  // (flex-centred) both have a non-zero box to work in. The types that bring
-  // their own artwork drop the tint here too.
-  &__ext-file-preview {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    flex: 1 1 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--grid-card-radius, 8px);
-    overflow: hidden;
-
-    &.image,
-    &.web,
-    &.vector,
-    &.video {
-      background-color: transparent;
-    }
-  }
-
-  // .preview-content — the frame itself, filling .preview-container absolutely
-  // so background-image has a box, cover-cropped and clipped to the same
-  // radius. Documents crop to the top so the title stays readable; photos crop
-  // to centre. Only a video centres a child, which is its play badge.
+  // The file's own rendered preview — the grid's `.preview-content`: absolutely
+  // filling the card so the background-image has a box, cover-cropped, and
+  // clipped to the same radius. Documents crop to the top so the title stays
+  // readable; photos crop to centre. Mirrors media/grid/skin/container.scss.
   &__ext-file-poster {
     position: absolute;
     inset: 0;
@@ -494,20 +467,17 @@
     background-repeat: no-repeat;
     background-position: center;
     border-radius: var(--grid-card-radius, 8px);
-
-    &.video {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &.document {
       background-position: top;
     }
   }
 
-  // .preview-icon.video — the play badge: smaller than the file glyph, white
-  // with a soft shadow so it stays legible on a dark or a light frame.
+  // Play badge over a video poster: smaller than the file glyph, white with a
+  // soft shadow so it stays legible on a dark or a light frame.
   &__ext-file-play {
     width: 40px;
     height: 40px;
