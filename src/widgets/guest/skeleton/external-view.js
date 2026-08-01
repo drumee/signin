@@ -341,10 +341,10 @@ function conversation(ui, messages) {
     Skeletons.Box.Y({
       className: `${fig}__ext-msg ${m.out ? "out" : "in"}`,
       kids: [
-        m.out ? null : Skeletons.Note({
-          className: `${fig}__ext-msg-author`,
-          content: m.author || "",
-        }),
+        // No author line: the reference shows the bubble and its time only.
+        // Every message in this panel is someone else's, so a per-bubble name
+        // would repeat on every row without telling a guest anything they can
+        // act on.
         Skeletons.Note({
           className: `${fig}__ext-bubble ${m.out ? "out" : "in"}`,
           content: m.text,
@@ -376,9 +376,19 @@ function conversation(ui, messages) {
               }),
             ],
           }),
-          Skeletons.Button.Svg({
-            ico: "app-send",
-            className: `${fig}__ext-composer-send`,
+          Skeletons.Box.X({
+            className: `${fig}__ext-composer-right`,
+            kids: [
+              // The app's own emoji glyph, as the chat action menu uses it.
+              Skeletons.Button.Svg({
+                ico: "chat-action-smiley",
+                className: `${fig}__ext-composer-emoji`,
+              }),
+              Skeletons.Button.Svg({
+                ico: "app-send",
+                className: `${fig}__ext-composer-send`,
+              }),
+            ],
           }),
         ],
       }),
