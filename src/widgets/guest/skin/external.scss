@@ -475,6 +475,28 @@
 
   // .media-grid__meta-row: 32px single-line baseline, 8px above, filename and
   // kebab on the top line, date beneath.
+  // Extension text badge — the grid's `.preview-icon.extension` fallback for a
+  // document whose extension has no icon of its own. The original draws an SVG
+  // file shape with the label inside it; without that shape here the label is
+  // the whole mark, so it takes the icon colour rather than the on-shape white
+  // (--grid-color-icon-extension), which would be invisible on the card.
+  &__ext-file-ext {
+    max-width: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
+    font-family: "Geist", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    text-align: center;
+    justify-content: center;
+    color: var(--grid-color-icon-file, #847eff);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   &__ext-file-meta {
     width: 100%;
     min-height: var(--grid-meta-row-h, 32px);

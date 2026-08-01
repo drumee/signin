@@ -14,15 +14,7 @@
  * @param {LetcBox} ui
  */
 
-// Figma shows one glyph per file kind; map the row's `kind` onto the sprite.
-const FILE_ICO = {
-  doc: "app-doc-file",
-  pdf: "app-pdf-file",
-  note: "app-file",
-  sheet: "app-task-list",
-  slides: "app-file",
-  image: "bg-image",
-};
+const { previewIcon } = require('../preview-icon');
 
 /**
  * Title bar: folder glyph + name + SHARED badge on the left, the window's own
@@ -214,20 +206,31 @@ function folderTile(ui, folder) {
   });
 }
 
-/** File tile: type glyph on a tinted square, then name + date. */
+/**
+ * File tile: the preview card, then name + kebab + date — the desk grid's
+ * media-grid__background + meta-row. The card holds whatever previewIcon()
+ * resolves: a sprite glyph, or the extension rendered as text when the grid
+ * itself would fall back to that badge.
+ */
 function fileTile(ui, file) {
   const fig = ui.fig.family;
+  const preview = previewIcon(file);
+  const art = preview.ext
+    ? Skeletons.Note({
+        className: `${fig}__ext-file-ext`,
+        content: String(preview.ext).toUpperCase(),
+      })
+    : Skeletons.Button.Svg({
+        ico: preview.ico,
+        className: `${fig}__ext-file-ico`,
+      });
+
   return Skeletons.Box.Y({
     className: `${fig}__ext-file`,
     kids: [
       Skeletons.Box.X({
         className: `${fig}__ext-file-art ${file.kind || "doc"}`,
-        kids: [
-          Skeletons.Button.Svg({
-            ico: FILE_ICO[file.kind] || FILE_ICO.doc,
-            className: `${fig}__ext-file-ico`,
-          }),
-        ],
+        kids: [art],
       }),
       Skeletons.Box.X({
         className: `${fig}__ext-file-meta`,

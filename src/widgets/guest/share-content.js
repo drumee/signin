@@ -62,7 +62,16 @@ function mapListing(rows) {
     if (isFolder(row)) {
       folders.push({ name: row.filename });
     } else {
-      files.push({ name: fileName(row), kind: fileKind(row), date: formatDate(row) });
+      files.push({
+        name: fileName(row),
+        kind: fileKind(row),
+        date: formatDate(row),
+        // Carried through untouched for preview-icon.js, which resolves the
+        // glyph exactly as the desk grid does (filetype, then extension).
+        ftype: row.ftype || row.filetype,
+        ext: row.ext,
+        mimetype: row.mimetype,
+      });
     }
   }
   return { folders, files };

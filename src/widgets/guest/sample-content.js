@@ -20,12 +20,12 @@ module.exports = {
     { name: "Sub-folder v8" },
   ],
   files: [
-    { name: "spec_v2.docx", kind: "doc", date: "Oct 12, 2023" },
-    { name: "spec_v2.pdf", kind: "pdf", date: "Oct 12, 2023" },
-    { name: "note", kind: "note", date: "Oct 12, 2023" },
-    { name: "Spreadsheet", kind: "sheet", date: "Oct 12, 2023" },
-    { name: "Presentation", kind: "slides", date: "Oct 12, 2023" },
-    { name: "bg_concept.png", kind: "image", date: "Oct 12, 2023" },
+    { name: "spec_v2.docx", kind: "doc", date: "Oct 12, 2023", ftype: "document", ext: "docx" },
+    { name: "spec_v2.pdf", kind: "pdf", date: "Oct 12, 2023", ftype: "document", ext: "pdf" },
+    { name: "note", kind: "note", date: "Oct 12, 2023", ftype: "note" },
+    { name: "Spreadsheet", kind: "sheet", date: "Oct 12, 2023", ftype: "document", ext: "xlsx" },
+    { name: "Presentation", kind: "slides", date: "Oct 12, 2023", ftype: "document", ext: "pptx" },
+    { name: "bg_concept.png", kind: "image", date: "Oct 12, 2023", ftype: "image", ext: "png" },
   ],
   messages: [
     {
