@@ -5,7 +5,7 @@
 // [data-scope="external"] so the two layouts cannot bleed into each other.
 
 .signin-guest__ui[data-scope="external"] {
-  // Shared workspaces recolour the header tile + breadcrumb from red to pink.
+  // Shared workspaces recolour the header tile from red to pink.
   .signin-guest__header-tile {
     background-color: rgba(255, 168, 220, 0.15);
   }
@@ -13,10 +13,6 @@
   .signin-guest__header-tile-ico {
     color: #ffa8dc;
     fill: #ffa8dc;
-  }
-
-  .signin-guest__crumb.current {
-    color: #ffa8dc;
   }
 
   .signin-guest__header-link {

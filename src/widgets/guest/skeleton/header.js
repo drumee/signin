@@ -1,6 +1,6 @@
 /**
  * Workspace header: folder tile + "Restricted Project: {name}" + "Restricted Guest
- * Access" subline on the left, breadcrumb pill on the right.
+ * Access" subline.
  *
  * All three strings come from the widget's OWN options so a host can pass real
  * names without this page ever calling an API; with nothing passed they fall back
@@ -72,28 +72,10 @@ function __skl_signin_guest_header(ui) {
     ],
   });
 
-  const breadcrumb = Skeletons.Box.X({
-    className: `${fig}__breadcrumb`,
-    kids: [
-      Skeletons.Note({
-        className: `${fig}__crumb parent`,
-        content: ui.mget(_a.parent_name) || LOCALE.GUEST_BREADCRUMB_PARENT || "Workspace",
-      }),
-      Skeletons.Note({
-        className: `${fig}__crumb separator`,
-        content: "/",
-      }),
-      Skeletons.Note({
-        className: `${fig}__crumb current`,
-        content: ui.mget('current_name') || LOCALE.GUEST_BREADCRUMB_CURRENT || "Private content",
-      }),
-    ],
-  });
-
   return Skeletons.Box.X({
     className: `${fig}__header`,
     debug: __filename,
-    kids: [left, breadcrumb],
+    kids: [left],
   });
 }
 

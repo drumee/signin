@@ -76,31 +76,4 @@
     line-height: 1.4;
     color: #0b0a21;
   }
-
-  // Breadcrumb pill
-  &__breadcrumb {
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 16px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    background-color: #ffffff;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    max-width: 100%;
-    flex-wrap: wrap;
-  }
-
-  &__crumb {
-    font-family: var(--font-bold);
-    font-weight: 600;
-    font-size: 12px;
-    line-height: normal;
-    color: #aeaeb2;
-    white-space: nowrap;
-
-    &.current {
-      color: #d65f59;
-    }
-  }
 }
