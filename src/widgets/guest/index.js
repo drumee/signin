@@ -295,9 +295,16 @@ class signin_guest extends LetcBox {
     const hub_id = (this.mget(_a.hub_id) || '').trim() || this._shareHubId;
     if (!hub_id) return;
     try {
-      sessionStorage.setItem('drumee_guest_join', JSON.stringify({
+      // localStorage, not session: signing up sends the user to their mail
+      // client and back through a NEW TAB on the verify link, which a
+      // session-scoped key does not survive. This mirrors the signup router's
+      // own captureRef (drumee_ref), which persists across the same flow for
+      // the same reason. `ts` lets the desk ignore an intent that has gone
+      // stale — see _maybeOfferInvitedWorkspace.
+      localStorage.setItem('drumee_guest_join', JSON.stringify({
         hub_id,
         name: (this.mget(_a.title) || this.mget(_a.name) || '').trim(),
+        ts: Date.now(),
       }));
     } catch (e) {
       // Storage unavailable (private mode, blocked) — the guest still reaches
@@ -313,11 +320,15 @@ class signin_guest extends LetcBox {
   onUiEvent(cmd, args = {}) {
     const service = args.service || cmd.get(_a.service);
     switch (service) {
+      // Both exits arm the intent. Sign-in is the documented route (the form
+      // links on to signup), but the banner goes straight to signup, and a
+      // guest who takes that route was invited just the same.
       case 'go-login':
         this._armJoinIntent();
         return this._leaveTo('#/welcome/signin');
 
       case 'open-signup':
+        this._armJoinIntent();
         return this._leaveTo('#/welcome/signup');
     }
   }
