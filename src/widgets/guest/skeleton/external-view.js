@@ -218,13 +218,29 @@ function folderTile(ui, folder) {
  *
  * The poster arrives inlined as a data URI from dmz.list_by_token; see
  * signin_guest._loadPosters() for why it is not a URL.
+ *
+ * Layering follows the grid exactly. A poster or an icon is wrapped in a
+ * .preview-container; the extension badge is NOT — preview.js returns
+ * Template.SvgText on its own there. The card itself (__ext-file-art, the
+ * grid's media-grid__background) stays outside all three.
  */
 function fileArt(ui, file) {
   const fig = ui.fig.family;
+  const type = file.ftype || file.filetype || "";
+
+  // .preview-container ${type} — the box a poster fills absolutely and an icon
+  // centres in. Transparent for the types that carry their own artwork.
+  const container = (kids) =>
+    Skeletons.Element({
+      tagName: "div",
+      className: `${fig}__ext-file-preview ${type}`,
+      kids,
+    });
 
   if (file.poster) {
     const kids = [];
-    if ((file.ftype || file.filetype) === "video") {
+    if (type === "video") {
+      // .preview-icon.video — the play badge the grid centres over the frame.
       kids.push(
         Skeletons.Button.Svg({
           ico: "raw-video",
@@ -232,20 +248,24 @@ function fileArt(ui, file) {
         })
       );
     }
-    return Skeletons.Element({
-      tagName: "div",
-      className: `${fig}__ext-file-poster ${file.ftype || ""}`,
-      style: { backgroundImage: `url(${file.poster})` },
-      kids,
-    });
+    return container([
+      Skeletons.Element({
+        tagName: "div",
+        className: `${fig}__ext-file-poster ${type}`,
+        style: { backgroundImage: `url(${file.poster})` },
+        kids,
+      }),
+    ]);
   }
 
   const preview = previewIcon(file);
   if (!preview.ext) {
-    return Skeletons.Button.Svg({
-      ico: preview.ico,
-      className: `${fig}__ext-file-ico`,
-    });
+    return container([
+      Skeletons.Button.Svg({
+        ico: preview.ico,
+        className: `${fig}__ext-file-ico`,
+      }),
+    ]);
   }
 
   // Extension badge — a .txt, or any document whose extension has no icon of
