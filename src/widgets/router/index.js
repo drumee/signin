@@ -58,9 +58,57 @@ class signin_router extends LetcBox {
   }
 
   /**
+   * Read the hash query — it lives inside the hash fragment, same as the OAuth
+   * hand-off above. `#/welcome/signin?view=guest&name=Alpha` → URLSearchParams.
+   * @returns {URLSearchParams} empty when the hash carries no query.
+   */
+  _hashParams() {
+    const hash = location.hash || '';
+    const qi = hash.indexOf('?');
+    return new URLSearchParams(qi < 0 ? '' : hash.slice(qi + 1));
+  }
+
+  /**
+   * Read a `view` selector out of the hash query.
+   * `#/welcome/signin?view=guest` → 'guest'.
+   * @returns {string} the requested view, or '' when none was asked for.
+   */
+  _viewParam() {
+    return this._hashParams().get('view') || '';
+  }
+
+  /**
     *
     */
   async onDomRefresh() {
+    // Anonymous guest landing page. Checked FIRST: the sign-in paths below end by
+    // rewriting location.hash to a bare "#/welcome/signin", which would drop the
+    // ?view=guest selector.
+    if (this._viewParam() === 'guest') {
+      const params = this._hashParams();
+      await Kind.waitFor('signin_guest');
+      // `scope` and `name` come from the invite email's CTA (server:
+      // _guestLandingLink). scope picks the layout (internal = the Content
+      // Restricted gate, external = the shared-contents view); name puts the real
+      // workspace in the header. Both absent is fine — the widget falls back to
+      // internal + its generic copy, which is the safe direction.
+      this.feed({
+        kind: 'signin_guest',
+        scope: params.get('scope') || '',
+        // Anonymous share token, present on external links only. It is what lets the
+        // external layout read the real shared folder (dmz.login → show_node_by);
+        // the internal layout never receives one.
+        token: params.get('token') || '',
+        // Which workspace the invite is for (server: _guestLandingLink). Present
+        // on both scopes; it is the ONLY way the internal layout can know, since
+        // it has no token to resolve one from.
+        hub_id: params.get('hub') || '',
+        title: params.get('name') || '',
+        parent_name: params.get('parent') || '',
+        current_name: params.get('current') || '',
+      });
+      return;
+    }
     // OAuth 2FA hand-off: render the OTP screen pointed at oauth.verify_otp,
     // which finalizes the pending session (no client-side secret).
     const mfa = this._oauthMfaParams();
