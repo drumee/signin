@@ -49,7 +49,7 @@ jobs:
           case "$TARGET" in
             TEST) SRC=/usr/src/drumee.test/$REPO; BRANCH=test;    EP=test;    ENVARG="";        VPATH=/-/test/plugins/$UI_NAME ;;
             UAT)  SRC=/usr/src/drumee/$REPO;      BRANCH=preview; EP=preview; ENVARG="preview"; VPATH=/-/preview/plugins/$UI_NAME ;;
-            PROD) SRC=/usr/src/drumee/$REPO;      BRANCH=preview; EP=main;    ENVARG="";        VPATH=/-/plugins/$UI_NAME ;;
+            PROD) SRC=/usr/src/drumee/$REPO;      BRANCH=main; EP=main;    ENVARG="";        VPATH=/-/plugins/$UI_NAME ;;
             *) echo "Unsupported target: $TARGET"; exit 1 ;;
           esac
           # loc=stage -> build+deploy locally on the runner host (drumee.in) `main`
