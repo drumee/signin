@@ -145,14 +145,7 @@ export function header(ui, content, tips, opt = {}) {
     }),
   ];
 
-  if (tips) {
-    kids.push(
-      Skeletons.Note({
-        className: `${fig}__tips`,
-        content: tips,
-      }),
-    );
-  }
+  
 
   let a = Skeletons.Box.Y({
     className: `${ui.fig.family}__header`,
