@@ -6,6 +6,10 @@ const {
   termsAndConditions,
 } = require("../../toolkit/skeleton");
 
+// Exported from Figma 5:74242 — the real lockup, not the sprite approximation.
+// url-loader turns this into a data URI at build time (webpack/module.js).
+const LOGO = require("../../../assets/drumee-logo.svg");
+
 function __skl_welcome_signup(ui) {
   const fig = ui.fig.family;
   let haptic = 10000;
@@ -112,6 +116,7 @@ function __skl_welcome_signup(ui) {
         ui,
         LOCALE.WELCOME_TO_DRUMEE || "Welcome to DRUMEE",
         LOCALE.SIGN_IN_SUBTITLE || "Log in to your sovereign workspace",
+        { logo: LOGO.default || LOGO },
       ),
       form,
       Skeletons.Element({ content: LOCALE.OR, className: `${fig}__separator` }),

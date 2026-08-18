@@ -6,6 +6,25 @@
 .signin-form {
   @include signin-main;
 
+  // Exported lockup (Figma 5:74242) — replaces the sprite mark + typeset
+  // "drumee" that header() falls back to. Only the sign-in form opts in, so
+  // the guest header and router keep the old pairing.
+  //
+  // Both dimensions are pinned to the export's natural 120.723:24 ratio: it
+  // carries preserveAspectRatio="none", so an off-ratio box stretches the mark.
+  &__logo-image {
+    width: 120.72px;
+    height: 24px;
+    flex: 0 0 auto;
+
+    img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
   &__buttons,
   &__form {
     gap: var(--spacer-4);
