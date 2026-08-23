@@ -2,13 +2,13 @@ name: CD - deploy signin
 
 on:
   push:
-    branches: [test, preview]
+    branches: [test, preview, staging]
   workflow_dispatch:
     inputs:
       target:
         description: "Deploy target environment"
         type: choice
-        options: [TEST, UAT, PROD]
+        options: [TEST, UAT, PROD, STAGING]
         default: TEST
 
 concurrency:
@@ -41,6 +41,7 @@ jobs:
             case "${{ github.ref_name }}" in
               test)    TARGET=TEST ;;
               preview) TARGET=UAT ;;
+              staging) TARGET=STAGING ;;
               *) echo "Unsupported push branch: ${{ github.ref_name }}"; exit 1 ;;
             esac
           else
@@ -50,8 +51,13 @@ jobs:
             TEST) SRC=/usr/src/drumee.test/$REPO; BRANCH=test;    EP=test;    ENVARG="";        VPATH=/-/test/plugins/$UI_NAME ;;
             UAT)  SRC=/usr/src/drumee/$REPO;      BRANCH=preview; EP=preview; ENVARG="preview"; VPATH=/-/preview/plugins/$UI_NAME ;;
             PROD) SRC=/usr/src/drumee/$REPO;      BRANCH=main; EP=main;    ENVARG="";        VPATH=/-/plugins/$UI_NAME ;;
+            STAGING) SRC=/usr/src/drumee/$REPO;   BRANCH=staging; EP=main; ENVARG="";        VPATH=/-/plugins/$UI_NAME ;;
             *) echo "Unsupported target: $TARGET"; exit 1 ;;
           esac
+          if [ "$TARGET" = "STAGING" ]; then
+            echo "SGP_HOST=vps-1b631265.vps.ovh.net" >> "$GITHUB_ENV"
+            echo "CONTAINER=drumee-uat" >> "$GITHUB_ENV"
+          fi
           # loc=stage -> build+deploy locally on the runner host (drumee.in) `main`
           # loc=container -> build+deploy into the prod box (sgp) docker container
           LOC=container; [ "$TARGET" = "TEST" ] && LOC=stage
