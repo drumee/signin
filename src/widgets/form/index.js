@@ -10,6 +10,47 @@ const RECONNECT = 'reconnect';
 // Resend cooldown for the check-inbox screen, in seconds.
 const COOLDOWN_SEC = 20;
 
+/**
+ * The campaign and referral this visit arrived on, as flat request params.
+ *
+ * WHY THIS HAS TO BE SENT. google.initiate / apple.initiate park attribution
+ * on the oauth_state row so it survives the redirect out to the provider —
+ * the callback runs server-side and cannot reach browser storage. But they
+ * read it off the REQUEST (`this.input.get("utm_campaign")`, and `ref`
+ * likewise), and this app was posting an empty payload. Measured on stage:
+ * 289 oauth_state rows, none carrying a campaign or a source. Every OAuth
+ * signup was recorded as organic, and the referral handle was lost with it.
+ *
+ * FROM localStorage, NOT THE URL. The landing capture (ui-team libs/campaign)
+ * stores the tags on arrival and then STRIPS them from the address, so by the
+ * time anyone reaches this button the URL no longer carries them. Storage is
+ * the only remaining copy.
+ *
+ * FLATTENED, because that is the shape initiate reads: the stored value is an
+ * object, the service asks for utm_source / utm_medium / utm_campaign /
+ * utm_content one by one.
+ *
+ * KEEP THE KEYS IN STEP with libs/campaign (which writes drumee_utm) and with
+ * signup's clearStoredAttribution (which removes both once a signup spends
+ * them).
+ *
+ * @returns {Object} only what was actually stored — {} when nothing was
+ */
+function storedAttribution() {
+  const out = {};
+  try {
+    const utm = JSON.parse(localStorage.getItem('drumee_utm') || '{}') || {};
+    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content']) {
+      if (utm[k]) out[k] = String(utm[k]).trim().slice(0, 64);
+    }
+  } catch (e) { /* private mode, quota, or a corrupt value */ }
+  try {
+    const ref = localStorage.getItem('drumee_ref') || '';
+    if (ref) out.ref = String(ref).trim().toLowerCase().slice(0, 64);
+  } catch (e) { /* as above */ }
+  return out;
+}
+
 class signin_form extends Signup {
 
   /**
@@ -398,7 +439,7 @@ class signin_form extends Signup {
         this.showForgot();
         break;
       case 'use-apple':
-        this.postService(SERVICE.apple.initiate, {}).then((data) => {
+        this.postService(SERVICE.apple.initiate, storedAttribution()).then((data) => {
           this._handleResponse(data);
           document.onvisibilitychange = () => {
             location.reload()
@@ -406,7 +447,7 @@ class signin_form extends Signup {
         })
         break;
       case 'use-google':
-        this.postService(SERVICE.google.initiate, {}).then((data) => {
+        this.postService(SERVICE.google.initiate, storedAttribution()).then((data) => {
           this._handleResponse(data);
           document.onvisibilitychange = () => {
             location.reload()
