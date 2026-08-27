@@ -11,7 +11,8 @@ const RECONNECT = 'reconnect';
 const COOLDOWN_SEC = 20;
 
 /**
- * The campaign and referral this visit arrived on, as flat request params.
+ * The campaign, referral and DESTINATION this visit arrived on, as flat
+ * request params.
  *
  * WHY THIS HAS TO BE SENT. google.initiate / apple.initiate park attribution
  * on the oauth_state row so it survives the redirect out to the provider —
@@ -34,6 +35,21 @@ const COOLDOWN_SEC = 20;
  * signup's clearStoredAttribution (which removes both once a signup spends
  * them).
  *
+ * `dest` RIDES ALONG FOR THE SAME REASON, and is the one key here that is not
+ * attribution. A campaign CTA names where the visitor is going —
+ * "#/desk/billing?plan=team&tab=checkout&promo=…" — and ui-team parks that in
+ * sessionStorage before the signin plugin rewrites the hash. That carries an
+ * email/password sign-in, which stays in one tab on one origin. It does not
+ * carry OAuth: the callback is server-side, it rebuilds the landing URL from
+ * scratch, and a URL fragment never reaches a server at all. So the
+ * destination has to travel the same road the campaign already travels — into
+ * oauth_state at initiate, back out onto the landing URL at callback.
+ *
+ * sessionStorage, NOT localStorage, unlike everything else here: that is where
+ * ui-team's billing-deep-link keeps it, deliberately, so an "open billing"
+ * intent dies with the tab rather than surprising someone days later. Read
+ * only — clearing it belongs to that module's consume().
+ *
  * @returns {Object} only what was actually stored — {} when nothing was
  */
 function storedAttribution() {
@@ -47,6 +63,26 @@ function storedAttribution() {
   try {
     const ref = localStorage.getItem('drumee_ref') || '';
     if (ref) out.ref = String(ref).trim().toLowerCase().slice(0, 64);
+  } catch (e) { /* as above */ }
+  // ITS OWN try/catch, like the two above: a destination must never be able to
+  // stop somebody signing in. Private mode, blocked storage and a corrupt value
+  // all throw on access, and "no destination" is the honest answer to each.
+  try {
+    const raw = sessionStorage.getItem('drumee_billingDeepLink');
+    if (raw) {
+      const p = JSON.parse(raw) || {};
+      // Rebuilt from the keys, not forwarded as a blob: loby validates this
+      // against an allowlist of one path and four params and refuses anything
+      // it did not expect, so sending the stored object's own shape would only
+      // produce a value the server throws away. Fixed order, matching what the
+      // sanitiser rebuilds, so the two ends agree on one string.
+      const q = [];
+      for (const k of ['plan', 'cycle', 'tab', 'promo']) {
+        if (p[k]) q.push(`${k}=${String(p[k]).trim()}`);
+      }
+      const dest = `/desk/billing${q.length ? `?${q.join('&')}` : ''}`;
+      if (dest.length <= 255) out.dest = dest;
+    }
   } catch (e) { /* as above */ }
   return out;
 }
