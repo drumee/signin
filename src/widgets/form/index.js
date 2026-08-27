@@ -406,17 +406,27 @@ class signin_form extends Signup {
 
       case "ok":
         setTimeout(() => {
-          // ONE navigation, carrying the destination if there is one. The URL
-          // is built at the last possible moment and applied atomically:
-          // setting location.hash earlier and reloading afterwards leaves a
-          // window in which the router rewrites the hash back to
-          // #/welcome/signin, which is exactly what the first version of this
-          // did. See billingReturnUrl.
+          // MOVE THE URL, THEN RELOAD — in that order, and both are needed.
           //
-          // replace(), not assign(): the signin screen should not be a back-
-          // button destination once the session exists.
+          // billingReturnUrl() differs from the current address only in the
+          // FRAGMENT, and a navigation that differs only in the fragment is a
+          // SAME-DOCUMENT navigation: replace() moves the hash and does not
+          // reload. Returning on it therefore left the visitor sitting on the
+          // sign-in form with a session and no re-boot — a regression this code
+          // shipped once, and the reason the two lines are now adjacent rather
+          // than one being an early return.
+          //
+          // reload() after it picks up the moved hash, so the destination
+          // survives into the fresh document and, from there, across the host
+          // switch the router is about to perform. They are adjacent and
+          // synchronous, so no hashchange handler can re-route in between —
+          // which is what defeated the earlier attempt that set the hash a
+          // second before reloading.
+          //
+          // replace(), not assign(): the sign-in screen should not be a
+          // back-button destination once the session exists.
           const back = billingReturnUrl();
-          if (back) return location.replace(back);
+          if (back) location.replace(back);
           location.reload()
         }, 1000)
         // let { onboarded, email, firstname, lastname } = data.user.profile;
