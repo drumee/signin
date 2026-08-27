@@ -47,8 +47,19 @@ const COOLDOWN_SEC = 20;
  *
  * sessionStorage, NOT localStorage, unlike everything else here: that is where
  * ui-team's billing-deep-link keeps it, deliberately, so an "open billing"
- * intent dies with the tab rather than surprising someone days later. Read
- * only — clearing it belongs to that module's consume().
+ * intent dies with the tab rather than surprising someone days later.
+ *
+ * AND IT IS CLEARED ONCE IT HAS BEEN HANDED OVER. This used to say "read only —
+ * clearing belongs to consume()", and that was wrong in one case that matters.
+ * An account on its own subdomain is armed on TWO origins: the main domain,
+ * where the CTA was clicked, and the org host it is switched to after signing
+ * in. consume() runs on the org host and clears only that one. Logging out then
+ * navigates back to the main domain (Butler.logout sets location.hostname), and
+ * the copy left there is read at the NEXT sign-in — reopening checkout and
+ * reapplying the coupon for somebody who never clicked anything.
+ *
+ * Once the value is on the URL, the URL is the carrier and the stored copy is a
+ * stale duplicate. Dropping it here is what makes the intent single-use.
  *
  * @returns {Object} only what was actually stored — {} when nothing was
  */
@@ -85,7 +96,18 @@ function storedAttribution() {
         if (p[k]) q.push(`${k}=${String(p[k]).trim()}`);
       }
       const dest = `/desk/billing${q.length ? `?${q.join('&')}` : ''}`;
-      if (dest.length <= 255) out.dest = dest;
+      if (dest.length <= 255) {
+        out.dest = dest;
+        // Handed to loby, which parks it on oauth_state and puts it back on the
+        // landing URL. The stored copy is redundant from here and would
+        // otherwise re-fire on a later sign-in — see the note above.
+        //
+        // The cost is an ABANDONED OAuth attempt: a visitor who bounces off the
+        // provider's consent screen loses the destination and has to click the
+        // CTA again. Preferred over the alternative, which is the campaign
+        // reopening itself for someone who never clicked at all.
+        try { sessionStorage.removeItem('drumee_billingDeepLink'); } catch (e) { /* as above */ }
+      }
     }
   } catch (e) { /* as above */ }
   return out;
@@ -162,7 +184,12 @@ function billingReturnUrl() {
     // duplicating a key would make parseParams read whichever came first.
     const hash = String(location.hash || '#/welcome/signin');
     const path = hash.split('?')[0] || '#/welcome/signin';
-    return `${location.origin}${location.pathname}${location.search}${path}?${q.join('&')}`;
+    const url = `${location.origin}${location.pathname}${location.search}${path}?${q.join('&')}`;
+    // The URL is the carrier now, so drop the stored copy. Safe here in a way
+    // it is not at OAuth initiate: this runs on a COMPLETED sign-in, and the
+    // caller navigates to `url` immediately.
+    try { sessionStorage.removeItem('drumee_billingDeepLink'); } catch (e) { /* as above */ }
+    return url;
   } catch (e) {
     // Private mode, blocked storage, a corrupt value. Signing in must never
     // depend on any of it — the visitor simply reloads as before.

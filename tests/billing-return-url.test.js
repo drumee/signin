@@ -32,13 +32,31 @@ const stripComments = (s) => s
 const HELPER = /function billingReturnUrl\(\) \{[\s\S]*?\n\}/.exec(SRC);
 assert.ok(HELPER, "billingReturnUrl is gone");
 
-/** The real helper, against stubbed storage and location. */
+/**
+ * A sessionStorage that actually stores and actually removes.
+ *
+ * A stub whose getItem returns a constant cannot show whether the helper
+ * CLEARS what it read — which is the property that makes the destination
+ * single-use, and the one that was missing.
+ */
+function store(intent) {
+  const m = new Map();
+  if (intent != null) m.set("drumee_billingDeepLink", intent);
+  return {
+    getItem: (k) => (m.has(k) ? m.get(k) : null),
+    removeItem: (k) => m.delete(k),
+    setItem: (k, v) => m.set(k, v),
+    size: () => m.size,
+  };
+}
+
+/** The real helper, against a live store and a stubbed location. */
 function call(intent, loc = {
   origin: "https://drumee.in", pathname: "/-/huan/", search: "", hash: "#/welcome/signin",
-}) {
+}, ss = null) {
   return new Function("sessionStorage", "location",
     `${HELPER[0]}; return billingReturnUrl();`
-  )({ getItem: () => intent }, loc);
+  )(ss || store(intent), loc);
 }
 
 const FULL = JSON.stringify({
@@ -185,10 +203,45 @@ test("values are encoded", () => {
   assert.ok(/promo=A(%20|\+)B%26C/.test(u), u);
 });
 
-test("the stored intent is read, never cleared", () => {
-  // Clearing belongs to ui-team's billing-deep-link consume(). A sign-in that
-  // fails must leave the intent exactly as it was.
-  const body = stripComments(HELPER[0]);
-  assert.ok(!/removeItem|\.clear\(/.test(body),
-    "billingReturnUrl mutates storage — a failed sign-in would lose the destination");
+// ── the destination is single-use ──────────────────────────────────────
+// THE BUG THIS REPLACED an earlier assertion for. That one required the helper
+// NOT to clear, on the reasoning that consume() owns clearing. It is wrong for
+// the case that matters: an account on its own subdomain is armed on TWO
+// origins — the main domain where the CTA was clicked, and the org host it is
+// switched to after signing in. consume() runs on the org host and clears only
+// that copy. Butler.logout then sets location.hostname back to the main domain,
+// where the other copy is still sitting, and the NEXT sign-in replays the whole
+// flow for somebody who never clicked anything.
+test("the intent is cleared once the URL carries it", () => {
+  const ss = store(FULL);
+  const url = call(null, undefined, ss);
+  assert.ok(url, "no URL was built");
+  assert.equal(ss.getItem("drumee_billingDeepLink"), null,
+    "the stored copy survives — it will re-fire at the next sign-in on this origin");
+  assert.equal(ss.size(), 0);
+});
+
+test("a second sign-in with no new click builds nothing", () => {
+  const ss = store(FULL);
+  call(null, undefined, ss);                 // first login, after the CTA
+  assert.equal(call(null, undefined, ss), null,
+    "billing reopens on a later sign-in without anyone clicking the CTA");
+});
+
+test("the OAuth dest hands off and clears too", () => {
+  // Same argument on the other path: loby parks it on oauth_state and puts it
+  // back on the landing URL, so the stored copy is redundant from that moment.
+  const ss = store(FULL);
+  const out = new Function("localStorage", "sessionStorage",
+    `${ATTR[0]}; return storedAttribution();`
+  )({ getItem: () => null }, ss);
+  assert.ok(out.dest, "no dest was built");
+  assert.equal(ss.getItem("drumee_billingDeepLink"), null,
+    "the stored copy survives an OAuth hand-off and would re-fire later");
+});
+
+test("nothing is cleared when there was nothing to hand over", () => {
+  const ss = store(null);
+  assert.equal(call(null, undefined, ss), null);
+  assert.equal(ss.size(), 0);
 });
