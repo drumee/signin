@@ -91,6 +91,77 @@ test("an existing hash query is rebuilt, not appended to", () => {
   assert.ok(u.endsWith("#/welcome/signin?billing=1&plan=team"), u);
 });
 
+// ── the recipient marker must survive this hop ─────────────────────────
+// THE GAP THIS FILE WAS MISSING. The CTA carries `for=<tag>` naming who the
+// mail was written for, and the dashboard refuses a link whose tag does not
+// match the signed-in account. This function rebuilds the URL from a FIXED key
+// list — so a marker absent from that list is dropped exactly where it is
+// needed, every link reads as unaddressed on the far side, and the check passes
+// by default for anyone. The feature would look present and do nothing.
+test("the recipient marker is carried across the host switch", () => {
+  const u = call(JSON.stringify({ plan: "team", promo: "P1", for: "cd8f5912" }));
+  const q = new URLSearchParams(u.slice(u.indexOf("?") + 1));
+  assert.equal(q.get("for"), "cd8f5912",
+    "the marker is dropped — any account signing in would get the checkout");
+});
+
+test("a link with no marker still works", () => {
+  // Absent means "not bound", not "refuse" — links written before the marker
+  // existed must keep working.
+  const u = call(JSON.stringify({ plan: "team" }));
+  assert.ok(!/[?&]for=/.test(u), u);
+});
+
+test("every key the deep link defines is carried, none invented", () => {
+  // Pinned as a SET rather than case-by-case: this list has been extended twice
+  // (promo, then for) and each time the omission was silent.
+  const u = call(JSON.stringify({
+    plan: "team", cycle: "monthly", tab: "checkout", promo: "P1", for: "cd8f5912",
+  }));
+  const keys = [...new URLSearchParams(u.slice(u.indexOf("?") + 1)).keys()].sort();
+  assert.deepEqual(keys, ["billing", "cycle", "for", "plan", "promo", "tab"],
+    "the carried key set changed — a dropped key fails silently on the far side");
+});
+
+// ── the OTHER key list: the OAuth dest ─────────────────────────────────
+// storedAttribution() builds a `dest` param for google/apple.initiate, which
+// loby parks on oauth_state so the destination survives the provider bounce.
+// It has its OWN copy of the key list, and a mutation proved it was covered by
+// nothing: dropping `for` there passed every case in this file, because the
+// cases only exercised billingReturnUrl. Two lists, two chances to lose a key
+// silently.
+const ATTR = /function storedAttribution\(\) \{[\s\S]*?\n\}/.exec(SRC);
+assert.ok(ATTR, "storedAttribution is gone");
+const attribution = (intent) => new Function(
+  "localStorage", "sessionStorage",
+  `${ATTR[0]}; return storedAttribution();`
+)({ getItem: () => null }, { getItem: () => intent });
+
+test("the OAuth dest carries the recipient marker too", () => {
+  const out = attribution(JSON.stringify({
+    plan: "team", cycle: "monthly", tab: "checkout", promo: "P1", for: "cd8f5912",
+  }));
+  assert.ok(out.dest, "no dest was built");
+  const q = new URLSearchParams(out.dest.slice(out.dest.indexOf("?") + 1));
+  assert.equal(q.get("for"), "cd8f5912",
+    "the marker is dropped on the OAuth path — an addressed link would read as "
+    + "unaddressed after the provider bounce");
+});
+
+test("both key lists carry the same keys", () => {
+  // The two are separate literals in one file and have drifted once already.
+  const lists = [...SRC.matchAll(/for \(const k of \[('plan'[^\]]*)\]\)/g)]
+    .map((m) => m[1].replace(/['\s]/g, "").split(","));
+  assert.equal(lists.length, 2, `expected two deep-link key lists, found ${lists.length}`);
+  assert.deepEqual(lists[0], lists[1],
+    "the OAuth dest and the return URL carry different keys — one of them is "
+    + "silently losing part of the destination");
+});
+
+test("the dest degrades without an intent", () => {
+  assert.equal(attribution(null).dest, undefined, "a dest was invented with nothing stored");
+});
+
 // ── it must never be able to block a sign-in ───────────────────────────
 test("no intent, corrupt json and blocked storage all yield null", () => {
   assert.equal(call(null), null, "absent intent");

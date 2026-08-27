@@ -77,7 +77,11 @@ function storedAttribution() {
       // produce a value the server throws away. Fixed order, matching what the
       // sanitiser rebuilds, so the two ends agree on one string.
       const q = [];
-      for (const k of ['plan', 'cycle', 'tab', 'promo']) {
+      // `for` rides with the rest: it is the marker naming who the campaign CTA
+      // was written for, and dropping it here would make every link read as
+      // unaddressed on the far side — which is the same as having no check at
+      // all. loby's _sanitiseDest allowlists it for the same reason.
+      for (const k of ['plan', 'cycle', 'tab', 'promo', 'for']) {
         if (p[k]) q.push(`${k}=${String(p[k]).trim()}`);
       }
       const dest = `/desk/billing${q.length ? `?${q.join('&')}` : ''}`;
@@ -146,7 +150,11 @@ function billingReturnUrl() {
     // send the visitor to billing on the OLD host, before the switch; the arg
     // rides the switch and is read on arrival.
     const q = ['billing=1'];
-    for (const k of ['plan', 'cycle', 'tab', 'promo']) {
+    // `for` is carried too. Without it the URL that survives the host switch is
+    // unaddressed, the desk's recipient check passes by default, and any account
+    // that signs in gets the checkout — the exact case this marker exists to
+    // refuse.
+    for (const k of ['plan', 'cycle', 'tab', 'promo', 'for']) {
       if (p[k]) q.push(`${k}=${encodeURIComponent(String(p[k]).trim())}`);
     }
     // Rebuilt onto the CURRENT route rather than appended blindly: the hash may
