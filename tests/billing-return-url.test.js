@@ -29,7 +29,10 @@ const stripComments = (s) => s
   .replace(/\/\*[\s\S]*?\*\//g, "")
   .replace(/(^|[^:])\/\/.*$/gm, "$1");
 
-const HELPER = /function billingReturnUrl\(\) \{[\s\S]*?\n\}/.exec(SRC);
+// Matched on the NAME, not the parameter list. This helper gained `signerEmail`
+// when the hand-off became recipient-aware, and a signature-pinned extractor
+// failed the whole file for a change that kept every property it tested.
+const HELPER = /function billingReturnUrl\([^)]*\) \{[\s\S]*?\n\}/.exec(SRC);
 assert.ok(HELPER, "billingReturnUrl is gone");
 
 /**
@@ -50,13 +53,24 @@ function store(intent) {
   };
 }
 
-/** The real helper, against a live store and a stubbed location. */
+// The two helpers billingReturnUrl now leans on.
+const TAGFN = /function recipientTag\([^)]*\) \{[\s\S]*?\n\}/.exec(SRC);
+const SIGNFN = /function intentIsForSigner\([^)]*\) \{[\s\S]*?\n\}/.exec(SRC);
+assert.ok(TAGFN && SIGNFN, "the recipient helpers are gone");
+const tag = new Function(`${TAGFN[0]}; return recipientTag;`)();
+
+/**
+ * The real helper, against a live store and a stubbed location.
+ *
+ * `signer` defaults to the address the fixtures are addressed to, so the
+ * existing cases keep testing the happy path; the mismatch cases pass their own.
+ */
 function call(intent, loc = {
   origin: "https://drumee.in", pathname: "/-/huan/", search: "", hash: "#/welcome/signin",
-}, ss = null) {
+}, ss = null, signer = "a@example.com") {
   return new Function("sessionStorage", "location",
-    `${HELPER[0]}; return billingReturnUrl();`
-  )(ss || store(intent), loc);
+    `${TAGFN[0]} ${SIGNFN[0]} ${HELPER[0]}; return billingReturnUrl(arguments[2]);`
+  )(ss || store(intent), loc, signer);
 }
 
 const FULL = JSON.stringify({
@@ -117,9 +131,13 @@ test("an existing hash query is rebuilt, not appended to", () => {
 // needed, every link reads as unaddressed on the far side, and the check passes
 // by default for anyone. The feature would look present and do nothing.
 test("the recipient marker is carried across the host switch", () => {
-  const u = call(JSON.stringify({ plan: "team", promo: "P1", for: "cd8f5912" }));
+  // Addressed to the default signer, so the hand-off actually happens — the
+  // marker is only carried for the person the link names.
+  const MINE = tag("a@example.com");
+  const u = call(JSON.stringify({ plan: "team", promo: "P1", for: MINE }));
+  assert.ok(u, "the hand-off was refused for its own recipient");
   const q = new URLSearchParams(u.slice(u.indexOf("?") + 1));
-  assert.equal(q.get("for"), "cd8f5912",
+  assert.equal(q.get("for"), MINE,
     "the marker is dropped — any account signing in would get the checkout");
 });
 
@@ -134,8 +152,10 @@ test("every key the deep link defines is carried, none invented", () => {
   // Pinned as a SET rather than case-by-case: this list has been extended twice
   // (promo, then for) and each time the omission was silent.
   const u = call(JSON.stringify({
-    plan: "team", cycle: "monthly", tab: "checkout", promo: "P1", for: "cd8f5912",
+    plan: "team", cycle: "monthly", tab: "checkout", promo: "P1",
+    for: tag("a@example.com"),
   }));
+  assert.ok(u, "the hand-off was refused for its own recipient");
   const keys = [...new URLSearchParams(u.slice(u.indexOf("?") + 1)).keys()].sort();
   assert.deepEqual(keys, ["billing", "cycle", "for", "plan", "promo", "tab"],
     "the carried key set changed — a dropped key fails silently on the far side");
@@ -201,6 +221,56 @@ test("values are encoded", () => {
   const u = call(JSON.stringify({ promo: "A B&C" }));
   assert.ok(!/promo=A B/.test(u), `unencoded value in ${u}`);
   assert.ok(/promo=A(%20|\+)B%26C/.test(u), u);
+});
+
+// ── it is handed only to the person the link names ─────────────────────
+// THE SCENARIO: a mail to A, clicked, then B signs in. Nothing must happen AND
+// the destination must survive — B has not used A's chance. A signs in next, on
+// the same tab, and gets it.
+//
+// This origin is where that matters: the desk runs on the org host after a host
+// switch, while Butler.logout brings the visitor back HERE. A copy handed away
+// on B's sign-in is exactly the one A would have found.
+const ADDRESSED = (to) => JSON.stringify({
+  plan: "team", cycle: "monthly", tab: "checkout", promo: "P1", for: tag(to),
+});
+
+test("a mismatched signer gets no URL and the intent survives", () => {
+  const ss = store(ADDRESSED("a@example.com"));
+  assert.equal(call(null, undefined, ss, "b@example.com"), null,
+    "B was handed the destination");
+  assert.equal(ss.size(), 1,
+    "B's sign-in destroyed a destination B was refused — A can never claim it");
+});
+
+test("the recipient then gets it, and it is taken", () => {
+  const ss = store(ADDRESSED("a@example.com"));
+  call(null, undefined, ss, "b@example.com");        // B first, refused
+  const url = call(null, undefined, ss, "a@example.com");
+  assert.ok(url && url.includes("billing=1"), "A was refused after B's attempt");
+  assert.equal(ss.size(), 0, "A's use did not take it — it would replay");
+});
+
+test("an unmarked intent is handed to whoever signs in", () => {
+  // Absent means "not bound", not "refuse".
+  const ss = store(JSON.stringify({ plan: "team" }));
+  assert.ok(call(null, undefined, ss, "anyone@example.com"), "an unbound link was refused");
+});
+
+test("an unreadable signer address does not discard the intent", () => {
+  // Turning a missing profile field into a dead campaign link is the worse
+  // failure — it hands off rather than refusing, and does not throw.
+  const ss = store(ADDRESSED("a@example.com"));
+  assert.ok(call(null, undefined, ss, ""), "a missing signer refused the link");
+});
+
+test("the call site passes the address that just signed in", () => {
+  // Without it every sign-in looks like the recipient's and the guard is inert.
+  const ok = stripComments(SRC.slice(SRC.indexOf('case "ok":')));
+  const body = ok.slice(0, ok.indexOf("return;"));
+  assert.match(body, /billingReturnUrl\(signer\)/, "the guard is called with no signer");
+  assert.match(body, /data\.user\.profile\s*\n?\s*&&\s*data\.user\.profile\.email|data\.user\.profile\.email/,
+    "the signer is not read from the signed-in profile");
 });
 
 // ── the destination is single-use ──────────────────────────────────────
