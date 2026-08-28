@@ -63,51 +63,6 @@ const COOLDOWN_SEC = 20;
  *
  * @returns {Object} only what was actually stored — {} when nothing was
  */
-/**
- * The opaque marker naming who a campaign CTA was written for.
- *
- * FNV-1a, matching analytics-server's _recipientTag and ui-team's recipientTag
- * byte for byte — three copies now, because three repos cannot share code, and
- * a suite in ui-team compares them. If they drift, every link is refused.
- *
- * @param {String} email
- * @returns {String|null} 8 hex chars, or null for an unusable address
- */
-function recipientTag(email) {
-  const s = String(email || '').trim().toLowerCase();
-  if (!s) return null;
-  let h = 0x811c9dc5;
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i);
-    h = Math.imul(h, 0x01000193) >>> 0;
-  }
-  return h.toString(16).padStart(8, '0');
-}
-
-/**
- * Is the stored destination addressed to the account that just signed in?
- *
- * THE DECISION BELONGS HERE, and this is the only point where all three facts
- * are present at once: who signed in, the intent, and the origin still holding
- * it. Downstream is too late — the desk runs on the org host after a host
- * switch, while Butler.logout brings the visitor back to THIS origin, so a copy
- * handed away here is precisely the one the recipient would have found.
- *
- * TRUE WHEN THE LINK NAMES NOBODY, and when no address is readable: absent
- * means "not bound", not "refuse", and turning a missing profile field into a
- * dead campaign link is the worse failure.
- *
- * @param {Object} intent parsed drumee_billingDeepLink
- * @param {String} email  the address that just signed in
- * @returns {Boolean}
- */
-function intentIsForSigner(intent, email) {
-  const want = intent && intent.for;
-  if (!want) return true;
-  if (!email) return true;
-  return recipientTag(email) === String(want).trim().toLowerCase();
-}
-
 function storedAttribution() {
   const out = {};
   try {
@@ -213,7 +168,7 @@ function storedAttribution() {
  *
  * @returns {String|null} the URL to leave on, or null to reload as before
  */
-function billingReturnUrl(signerEmail) {
+function billingReturnUrl() {
   try {
     const raw = sessionStorage.getItem('drumee_billingDeepLink');
     // null, not false — the contract is "a URL or nothing", and the caller
@@ -222,10 +177,24 @@ function billingReturnUrl(signerEmail) {
     // itself and reported whether it had.)
     if (!raw) return null;
     const p = JSON.parse(raw) || {};
-    // NOT FOR THIS SIGNER: leave everything exactly as it is — no URL, no
-    // clear, plain reload. The person the link names may sign in on this very
-    // tab a moment from now, and this origin is where they will look.
-    if (!intentIsForSigner(p, signerEmail)) return null;
+    // NO RECIPIENT CHECK HERE, and its removal is the point.
+    //
+    // This used to refuse a hand-off when the intent named somebody other than
+    // the account signing in, read from `data.user.profile.email`. That shape
+    // is not something this app otherwise uses — the only other reference to it
+    // in this file is commented out — so the value was unverifiable, and a
+    // wrong answer here decides the whole flow: refuse when it should not and
+    // the recipient never gets their destination.
+    //
+    // The recipient decision now lives entirely on `Visitor`, in the two places
+    // that run AFTER a session exists and can read it authoritatively: the
+    // router, which declines to drop this origin's copy for a visitor the link
+    // was not written for, and the desk, which refuses to open for them and
+    // keeps the intent. ONE identity source, asked where it is reliable.
+    //
+    // Handing off unconditionally is safe because of that: the destination
+    // travels on the URL, the wrong account is refused downstream, and the copy
+    // here is only dropped once `Visitor` confirms the recipient.
     // The ARG form, not the "#/desk/billing" path form. The path form would
     // send the visitor to billing on the OLD host, before the switch; the arg
     // rides the switch and is read on arrival.
@@ -518,13 +487,7 @@ class signin_form extends Signup {
           //
           // replace(), not assign(): the sign-in screen should not be a
           // back-button destination once the session exists.
-          // The address that just signed in — the same source the onboarding
-          // branch below reads. Without it every sign-in looks like the
-          // recipient's and the guard is inert.
-          const signer = (data && data.user && data.user.profile
-            && data.user.profile.email)
-            || (this.getData() || {}).username || "";
-          const back = billingReturnUrl(signer);
+          const back = billingReturnUrl();
           if (back) location.replace(back);
           location.reload()
         }, 1000)

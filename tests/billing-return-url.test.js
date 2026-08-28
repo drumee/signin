@@ -53,25 +53,30 @@ function store(intent) {
   };
 }
 
-// The two helpers billingReturnUrl now leans on.
-const TAGFN = /function recipientTag\([^)]*\) \{[\s\S]*?\n\}/.exec(SRC);
-const SIGNFN = /function intentIsForSigner\([^)]*\) \{[\s\S]*?\n\}/.exec(SRC);
-assert.ok(TAGFN && SIGNFN, "the recipient helpers are gone");
-const tag = new Function(`${TAGFN[0]}; return recipientTag;`)();
-
 /**
  * The real helper, against a live store and a stubbed location.
  *
- * `signer` defaults to the address the fixtures are addressed to, so the
- * existing cases keep testing the happy path; the mismatch cases pass their own.
+ * NO SIGNER ARGUMENT ANY MORE. This app hands off unconditionally: it cannot
+ * read who signed in from anything it can trust — `data.user.profile` is not a
+ * shape it otherwise uses, and the only other reference to it here is commented
+ * out. The recipient decision moved to `Visitor`, in ui-team's router and desk,
+ * which run after a session exists and can read it authoritatively.
  */
 function call(intent, loc = {
   origin: "https://drumee.in", pathname: "/-/huan/", search: "", hash: "#/welcome/signin",
-}, ss = null, signer = "a@example.com") {
+}, ss = null) {
   return new Function("sessionStorage", "location",
-    `${TAGFN[0]} ${SIGNFN[0]} ${HELPER[0]}; return billingReturnUrl(arguments[2]);`
-  )(ss || store(intent), loc, signer);
+    `${HELPER[0]}; return billingReturnUrl();`
+  )(ss || store(intent), loc);
 }
+
+/** The tag shape the marker uses, for fixtures only — the app no longer hashes. */
+const tag = (email) => {
+  const s = String(email || "").trim().toLowerCase();
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8, "0");
+};
 
 const FULL = JSON.stringify({
   plan: "team", cycle: "monthly", tab: "checkout", promo: "EMAILMKT270826_2",
@@ -223,54 +228,32 @@ test("values are encoded", () => {
   assert.ok(/promo=A(%20|\+)B%26C/.test(u), u);
 });
 
-// ── it is handed only to the person the link names ─────────────────────
-// THE SCENARIO: a mail to A, clicked, then B signs in. Nothing must happen AND
-// the destination must survive — B has not used A's chance. A signs in next, on
-// the same tab, and gets it.
+// ── it hands off unconditionally, and that is deliberate ───────────────
+// This app used to refuse a hand-off when the intent named somebody else,
+// reading the signer from data.user.profile.email. That shape is not one this
+// app otherwise uses — the only other reference to it is commented out — so the
+// value was unverifiable, and a wrong answer decided the whole flow: refuse when
+// it should not, and the recipient never gets their destination.
 //
-// This origin is where that matters: the desk runs on the org host after a host
-// switch, while Butler.logout brings the visitor back HERE. A copy handed away
-// on B's sign-in is exactly the one A would have found.
-const ADDRESSED = (to) => JSON.stringify({
-  plan: "team", cycle: "monthly", tab: "checkout", promo: "P1", for: tag(to),
+// The decision now lives on `Visitor`, in ui-team's router and desk. ONE
+// identity source, asked where it is reliable. Handing off here is safe because
+// of that: the destination travels on the URL, the wrong account is refused
+// downstream, and this origin's copy is only dropped once Visitor confirms the
+// recipient.
+test("an addressed intent is handed off whoever is signing in", () => {
+  const ss = store(JSON.stringify({ plan: "team", promo: "P1", for: tag("a@example.com") }));
+  const u = call(null, undefined, ss);
+  assert.ok(u && u.includes("billing=1"), "the hand-off was refused");
+  assert.match(u, /[?&]for=/, "the marker was not carried — downstream cannot refuse anyone");
 });
 
-test("a mismatched signer gets no URL and the intent survives", () => {
-  const ss = store(ADDRESSED("a@example.com"));
-  assert.equal(call(null, undefined, ss, "b@example.com"), null,
-    "B was handed the destination");
-  assert.equal(ss.size(), 1,
-    "B's sign-in destroyed a destination B was refused — A can never claim it");
-});
-
-test("the recipient then gets it, and it is taken", () => {
-  const ss = store(ADDRESSED("a@example.com"));
-  call(null, undefined, ss, "b@example.com");        // B first, refused
-  const url = call(null, undefined, ss, "a@example.com");
-  assert.ok(url && url.includes("billing=1"), "A was refused after B's attempt");
-  assert.equal(ss.size(), 0, "A's use did not take it — it would replay");
-});
-
-test("an unmarked intent is handed to whoever signs in", () => {
-  // Absent means "not bound", not "refuse".
-  const ss = store(JSON.stringify({ plan: "team" }));
-  assert.ok(call(null, undefined, ss, "anyone@example.com"), "an unbound link was refused");
-});
-
-test("an unreadable signer address does not discard the intent", () => {
-  // Turning a missing profile field into a dead campaign link is the worse
-  // failure — it hands off rather than refusing, and does not throw.
-  const ss = store(ADDRESSED("a@example.com"));
-  assert.ok(call(null, undefined, ss, ""), "a missing signer refused the link");
-});
-
-test("the call site passes the address that just signed in", () => {
-  // Without it every sign-in looks like the recipient's and the guard is inert.
-  const ok = stripComments(SRC.slice(SRC.indexOf('case "ok":')));
-  const body = ok.slice(0, ok.indexOf("return;"));
-  assert.match(body, /billingReturnUrl\(signer\)/, "the guard is called with no signer");
-  assert.match(body, /data\.user\.profile\s*\n?\s*&&\s*data\.user\.profile\.email|data\.user\.profile\.email/,
-    "the signer is not read from the signed-in profile");
+test("no identity is read here", () => {
+  // A signer argument reintroduces the second source that killed the
+  // destination when the two disagreed.
+  const body = stripComments(HELPER[0]);
+  assert.ok(!/profile|signer|intentIsForSigner|recipientTag/.test(body),
+    "billingReturnUrl reads an identity again — the recipient decision belongs "
+    + "to Visitor, in the router and the desk");
 });
 
 // ── the destination is single-use ──────────────────────────────────────
