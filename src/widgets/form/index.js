@@ -11,7 +11,8 @@ const RECONNECT = 'reconnect';
 const COOLDOWN_SEC = 20;
 
 /**
- * The campaign and referral this visit arrived on, as flat request params.
+ * The campaign, referral and DESTINATION this visit arrived on, as flat
+ * request params.
  *
  * WHY THIS HAS TO BE SENT. google.initiate / apple.initiate park attribution
  * on the oauth_state row so it survives the redirect out to the provider —
@@ -34,6 +35,32 @@ const COOLDOWN_SEC = 20;
  * signup's clearStoredAttribution (which removes both once a signup spends
  * them).
  *
+ * `dest` RIDES ALONG FOR THE SAME REASON, and is the one key here that is not
+ * attribution. A campaign CTA names where the visitor is going —
+ * "#/desk/billing?plan=team&tab=checkout&promo=…" — and ui-team parks that in
+ * sessionStorage before the signin plugin rewrites the hash. That carries an
+ * email/password sign-in, which stays in one tab on one origin. It does not
+ * carry OAuth: the callback is server-side, it rebuilds the landing URL from
+ * scratch, and a URL fragment never reaches a server at all. So the
+ * destination has to travel the same road the campaign already travels — into
+ * oauth_state at initiate, back out onto the landing URL at callback.
+ *
+ * sessionStorage, NOT localStorage, unlike everything else here: that is where
+ * ui-team's billing-deep-link keeps it, deliberately, so an "open billing"
+ * intent dies with the tab rather than surprising someone days later.
+ *
+ * AND IT IS CLEARED ONCE IT HAS BEEN HANDED OVER. This used to say "read only —
+ * clearing belongs to consume()", and that was wrong in one case that matters.
+ * An account on its own subdomain is armed on TWO origins: the main domain,
+ * where the CTA was clicked, and the org host it is switched to after signing
+ * in. consume() runs on the org host and clears only that one. Logging out then
+ * navigates back to the main domain (Butler.logout sets location.hostname), and
+ * the copy left there is read at the NEXT sign-in — reopening checkout and
+ * reapplying the coupon for somebody who never clicked anything.
+ *
+ * Once the value is on the URL, the URL is the carrier and the stored copy is a
+ * stale duplicate. Dropping it here is what makes the intent single-use.
+ *
  * @returns {Object} only what was actually stored — {} when nothing was
  */
 function storedAttribution() {
@@ -48,7 +75,153 @@ function storedAttribution() {
     const ref = localStorage.getItem('drumee_ref') || '';
     if (ref) out.ref = String(ref).trim().toLowerCase().slice(0, 64);
   } catch (e) { /* as above */ }
+  // ITS OWN try/catch, like the two above: a destination must never be able to
+  // stop somebody signing in. Private mode, blocked storage and a corrupt value
+  // all throw on access, and "no destination" is the honest answer to each.
+  try {
+    const raw = sessionStorage.getItem('drumee_billingDeepLink');
+    if (raw) {
+      const p = JSON.parse(raw) || {};
+      // Rebuilt from the keys, not forwarded as a blob: loby validates this
+      // against an allowlist of one path and four params and refuses anything
+      // it did not expect, so sending the stored object's own shape would only
+      // produce a value the server throws away. Fixed order, matching what the
+      // sanitiser rebuilds, so the two ends agree on one string.
+      const q = [];
+      // `for` rides with the rest: it is the marker naming who the campaign CTA
+      // was written for, and dropping it here would make every link read as
+      // unaddressed on the far side — which is the same as having no check at
+      // all. loby's _sanitiseDest allowlists it for the same reason.
+      for (const k of ['plan', 'cycle', 'tab', 'promo', 'for']) {
+        if (p[k]) q.push(`${k}=${String(p[k]).trim()}`);
+      }
+      const dest = `/desk/billing${q.length ? `?${q.join('&')}` : ''}`;
+      if (dest.length <= 255) {
+        out.dest = dest;
+        // Handed to loby, which parks it on oauth_state and puts it back on the
+        // landing URL. The stored copy is redundant from here and would
+        // otherwise re-fire on a later sign-in — see the note above.
+        //
+        // NO RECIPIENT CHECK HERE, unlike billingReturnUrl below, and it is not
+        // an oversight: this runs when the visitor CLICKS Google or Apple,
+        // before anyone has authenticated, so there is no signer to compare
+        // against. The desk still refuses a mismatched link on arrival — but
+        // this origin's copy is already gone by then, so a wrong-account OAuth
+        // sign-in does cost the recipient their destination. Closing that means
+        // moving the check to the OAuth landing, which is another repo and a
+        // separate piece of work.
+        //
+        // The cost is an ABANDONED OAuth attempt: a visitor who bounces off the
+        // provider's consent screen loses the destination and has to click the
+        // CTA again. Preferred over the alternative, which is the campaign
+        // reopening itself for someone who never clicked at all.
+        try { sessionStorage.removeItem('drumee_billingDeepLink'); } catch (e) { /* as above */ }
+      }
+    }
+  } catch (e) { /* as above */ }
   return out;
+}
+
+/**
+ * Put the billing destination back on the URL before the post-login reload.
+ *
+ * WHY THIS EXISTS, and it is the difference between the two sign-in methods.
+ *
+ * The billing intent is armed in sessionStorage on the origin the CTA was
+ * clicked — drumee.in. A successful sign-in reloads, and ui-team's router then
+ * runs, in this order:
+ *
+ *   if (Visitor.isOnline() && hostname != Organization.host())
+ *     changeHost(Organization.host());      // location.host = host
+ *
+ * Every account that claimed the Team promo lives on its own subdomain
+ * (team-NNNN.drumee.in), so for exactly the audience these campaign links are
+ * sent to, that branch fires. `location.host = host` is a CROSS-ORIGIN
+ * navigation, and sessionStorage is per-origin: the intent does not survive it.
+ * The desk then mounts on the new host, finds nothing armed, and the visitor
+ * lands on a bare desk having asked for a checkout screen.
+ *
+ * ui-team anticipated this. libs/billing-deep-link accepts a second URL shape —
+ * `?billing=1` anywhere in the hash — precisely because "changeHost does
+ * location.host = host, which keeps path and hash, so an arg rides across the
+ * host switch a signed-in visitor gets sent through, where per-origin storage
+ * cannot follow". That carrier works; it simply was never on the URL, because
+ * this app replaces the hash with #/welcome/signin long before the switch.
+ *
+ * So this writes it back. After the reload the URL carries the destination, the
+ * host switch preserves it, and the router's captureFromUrl() re-arms it on the
+ * NEW origin — where the desk can finally consume it.
+ *
+ * NOT NEEDED FOR OAUTH, which never reaches this method: that flow leaves for
+ * the provider and returns through loby, which builds its own landing URL. That
+ * path carries the destination on oauth_state instead.
+ *
+ * Read-only on the stored intent. Clearing it belongs to billing-deep-link's
+ * consume(), and a sign-in that fails must leave it exactly as it was.
+ *
+ * RETURNS A URL RATHER THAN SETTING location.hash, and that is not a style
+ * choice — the first version of this did set the hash and it did not stick.
+ * The router owns the hash on this screen and rewrites it back to
+ * #/welcome/signin, and the sign-in success path waits a second before
+ * reloading, so there is a wide window for that to happen. Handing the caller a
+ * URL lets it navigate ONCE, atomically, with no gap for anything to undo.
+ *
+ * @returns {String|null} the URL to leave on, or null to reload as before
+ */
+function billingReturnUrl() {
+  try {
+    const raw = sessionStorage.getItem('drumee_billingDeepLink');
+    // null, not false — the contract is "a URL or nothing", and the caller
+    // branches on it. A stray boolean here reads as a third state that does not
+    // exist. (It did return false once: a leftover from when this set the hash
+    // itself and reported whether it had.)
+    if (!raw) return null;
+    const p = JSON.parse(raw) || {};
+    // NO RECIPIENT CHECK HERE, and its removal is the point.
+    //
+    // This used to refuse a hand-off when the intent named somebody other than
+    // the account signing in, read from `data.user.profile.email`. That shape
+    // is not something this app otherwise uses — the only other reference to it
+    // in this file is commented out — so the value was unverifiable, and a
+    // wrong answer here decides the whole flow: refuse when it should not and
+    // the recipient never gets their destination.
+    //
+    // The recipient decision now lives entirely on `Visitor`, in the two places
+    // that run AFTER a session exists and can read it authoritatively: the
+    // router, which declines to drop this origin's copy for a visitor the link
+    // was not written for, and the desk, which refuses to open for them and
+    // keeps the intent. ONE identity source, asked where it is reliable.
+    //
+    // Handing off unconditionally is safe because of that: the destination
+    // travels on the URL, the wrong account is refused downstream, and the copy
+    // here is only dropped once `Visitor` confirms the recipient.
+    // The ARG form, not the "#/desk/billing" path form. The path form would
+    // send the visitor to billing on the OLD host, before the switch; the arg
+    // rides the switch and is read on arrival.
+    const q = ['billing=1'];
+    // `for` is carried too. Without it the URL that survives the host switch is
+    // unaddressed, the desk's recipient check passes by default, and any account
+    // that signs in gets the checkout — the exact case this marker exists to
+    // refuse.
+    for (const k of ['plan', 'cycle', 'tab', 'promo', 'for']) {
+      if (p[k]) q.push(`${k}=${encodeURIComponent(String(p[k]).trim())}`);
+    }
+    // Rebuilt onto the CURRENT route rather than appended blindly: the hash may
+    // already carry params (oauth_mfa=1&email=… on the 2FA screen), and
+    // duplicating a key would make parseParams read whichever came first.
+    const hash = String(location.hash || '#/welcome/signin');
+    const path = hash.split('?')[0] || '#/welcome/signin';
+    const url = `${location.origin}${location.pathname}${location.search}${path}?${q.join('&')}`;
+    // The URL is the carrier now, so drop the stored copy. Safe here in a way
+    // it is not at OAuth initiate: this runs on a COMPLETED sign-in, and the
+    // caller navigates to `url` immediately.
+    try { sessionStorage.removeItem('drumee_billingDeepLink'); } catch (e) { /* as above */ }
+    return url;
+  } catch (e) {
+    // Private mode, blocked storage, a corrupt value. Signing in must never
+    // depend on any of it — the visitor simply reloads as before.
+    return null;
+  }
 }
 
 class signin_form extends Signup {
@@ -295,6 +468,27 @@ class signin_form extends Signup {
 
       case "ok":
         setTimeout(() => {
+          // MOVE THE URL, THEN RELOAD — in that order, and both are needed.
+          //
+          // billingReturnUrl() differs from the current address only in the
+          // FRAGMENT, and a navigation that differs only in the fragment is a
+          // SAME-DOCUMENT navigation: replace() moves the hash and does not
+          // reload. Returning on it therefore left the visitor sitting on the
+          // sign-in form with a session and no re-boot — a regression this code
+          // shipped once, and the reason the two lines are now adjacent rather
+          // than one being an early return.
+          //
+          // reload() after it picks up the moved hash, so the destination
+          // survives into the fresh document and, from there, across the host
+          // switch the router is about to perform. They are adjacent and
+          // synchronous, so no hashchange handler can re-route in between —
+          // which is what defeated the earlier attempt that set the hash a
+          // second before reloading.
+          //
+          // replace(), not assign(): the sign-in screen should not be a
+          // back-button destination once the session exists.
+          const back = billingReturnUrl();
+          if (back) location.replace(back);
           location.reload()
         }, 1000)
         // let { onboarded, email, firstname, lastname } = data.user.profile;
