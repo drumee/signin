@@ -13,13 +13,28 @@ const LOGO = require("../../../assets/drumee-logo.svg");
 function __skl_welcome_signup(ui) {
   const fig = ui.fig.family;
   let haptic = 10000;
-  let message = Skeletons.Box.X({
-    className: `${fig}__error-container`,
+
+  // Figma 155:46949 — the validation message and the "Forgot Password" link
+  // share ONE row under the password field: message flush left, link flush
+  // right. The message Note starts empty and collapses to zero width, which
+  // leaves the link right-aligned on its own in the resting state (155:46798,
+  // where the design drops the link entirely — we keep it).
+  //
+  // sys_pn stays `_a.message`, so renderMessage()/ensurePart() reach it here
+  // exactly as they did when it lived in its own centred container.
+  const fieldNote = Skeletons.Box.X({
+    className: `${fig}__field-note`,
     kids: [
       Skeletons.Note({
         className: `${fig}__error-content`,
         content: "",
         sys_pn: _a.message,
+      }),
+      Skeletons.Note({
+        className: `${fig}__forgot-link`,
+        content: LOCALE.FORGOT_PASSWORD || "Forgot Password →",
+        service: "reset-password",
+        uiHandler: [ui],
       }),
     ],
   });
@@ -43,8 +58,10 @@ function __skl_welcome_signup(ui) {
         ],
       })
     : null;
-  const form = Skeletons.Box.Y({
-    className: `${fig}__form`,
+  // Figma 155:46935 — labels and fields are one flat 12px column; the 24px
+  // gap of the form section only separates that column from the submit button.
+  const fields = Skeletons.Box.Y({
+    className: `${fig}__fields`,
     kids: [
       entry(ui, {
         label: LOCALE.EMAIL || "EMAIL",
@@ -62,19 +79,15 @@ function __skl_welcome_signup(ui) {
         sys_pn: _a.password,
         service: _a.input,
         ico: "",
+        footer: [fieldNote],
       }),
-      Skeletons.Box.X({
-        className: `${fig}__forgot-row`,
-        kids: [
-          Skeletons.Note({
-            className: `${fig}__forgot-link`,
-            content: LOCALE.FORGOT_PASSWORD || "Forgot Password →",
-            service: "reset-password",
-            uiHandler: [ui],
-          }),
-        ],
-      }),
-      message,
+    ],
+  });
+
+  const form = Skeletons.Box.Y({
+    className: `${fig}__form`,
+    kids: [
+      fields,
       verifyBanner,
       button(ui, {
         label: LOCALE.LOG_IN_TO_WORKSPACE || "Log In to Workspace",
@@ -95,6 +108,7 @@ function __skl_welcome_signup(ui) {
         type: _a.api,
         ico: "logo-google",
         priority: "secondary",
+        variant: "google",
         haptic,
       }),
       button(ui, {
@@ -103,6 +117,7 @@ function __skl_welcome_signup(ui) {
         type: _a.api,
         ico: "logo-apple",
         priority: "secondary",
+        variant: "apple",
         haptic,
       }),
     ],
@@ -116,33 +131,40 @@ function __skl_welcome_signup(ui) {
         ui,
         LOCALE.WELCOME_TO_DRUMEE || "Welcome to DRUMEE",
         LOCALE.SIGN_IN_SUBTITLE || "Log in to your sovereign workspace",
-        { logo: LOGO.default || LOGO },
+        { logo: LOGO.default || LOGO, progress: false },
       ),
       form,
       Skeletons.Element({ content: LOCALE.OR, className: `${fig}__separator` }),
       buttons,
-      Skeletons.Box.X({
-        className: `${fig}__links`,
+      // Figma 155:46849 — the sign-up prompt and the legal links are one
+      // 16px-gap block, not two children of the card's 32px column.
+      Skeletons.Box.Y({
+        className: `${fig}__footer-links`,
         kids: [
-          Skeletons.Element({
-            content: LOCALE.Q_NO_ACCOUNT || "Don't have an account?",
-            className: `${fig}__text`,
+          Skeletons.Box.X({
+            className: `${fig}__links`,
+            kids: [
+              Skeletons.Element({
+                content: LOCALE.Q_NO_ACCOUNT || "Don't have an account?",
+                className: `${fig}__text`,
+              }),
+              Skeletons.Element({
+                content: LOCALE.START_FREE || "Start free →",
+                className: `${fig}__text link`,
+                on_click: () => {
+                  try { history.replaceState(null, '', '#/welcome/signup'); } catch (e) {}
+                  if (window.Welcome && _.isFunction(Welcome.loadSignup)) {
+                    Welcome.loadSignup();
+                  } else {
+                    location.hash = "#/welcome/signup";
+                  }
+                },
+              }),
+            ],
           }),
-          Skeletons.Element({
-            content: LOCALE.START_FREE || "Start free →",
-            className: `${fig}__text link`,
-            on_click: () => {
-              try { history.replaceState(null, '', '#/welcome/signup'); } catch (e) {}
-              if (window.Welcome && _.isFunction(Welcome.loadSignup)) {
-                Welcome.loadSignup();
-              } else {
-                location.hash = "#/welcome/signup";
-              }
-            },
-          }),
+          termsAndConditions(ui),
         ],
       }),
-      termsAndConditions(ui),
     ],
   });
 
