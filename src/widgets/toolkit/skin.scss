@@ -11,22 +11,75 @@
     overflow: auto;
     font-family: var(--font-main);
     flex-wrap: wrap;
-    padding: var(--spacer-7) var(--spacer-7);
+    padding: var(--sf-page-pad) var(--spacer-7);
     position: relative;
+
+    // ---- Fluid vertical rhythm -------------------------------------------
+    //
+    // At the Figma values the card measures 793px, 857px with page padding —
+    // taller than the viewport on any laptop, so the form scrolled. The
+    // horizontal design is untouched; only the vertical spacing gives.
+    //
+    // Each step is `clamp(floor, calc(A·vh - B), figma)`, with A and B solved
+    // so the value sits at its Figma maximum from 880px of viewport upwards
+    // (the design frame is 1064px, so the whole 880-1064 band renders exactly
+    // as drawn) and reaches its floor at 560px. The fixed content — two 45px
+    // fields, three 56px buttons, the 32px heading — is 421px on its own, so
+    // below ~700px the spacing has nothing left to give and the controls
+    // themselves step down (see the max-height query below).
+    //
+    // Deriving A/B for a new step: slope = (figma - floor) / 320,
+    // A = slope * 100, B = slope * 880 - figma.
+    --sf-section-gap: clamp(12px, calc(6.25vh - 23px), 32px);
+    --sf-header-gap: clamp(12px, calc(6.25vh - 23px), 32px);
+    --sf-lead: clamp(0px, calc(2.5vh - 14px), 8px);
+    --sf-card-pad: clamp(16px, calc(10vh - 40px), 48px);
+    --sf-page-pad: clamp(8px, calc(7.5vh - 34px), 32px);
+    --sf-field-gap: clamp(8px, calc(1.25vh + 1px), 12px);
+    --sf-note-gap: clamp(4px, calc(1.25vh - 3px), 8px);
+    --sf-form-gap: clamp(10px, calc(4.375vh - 14.5px), 24px);
+    --sf-footer-gap: clamp(6px, calc(3.125vh - 11.5px), 16px);
+
+    // Fixed-height controls. They hold their Figma size until the spacing has
+    // bottomed out, then step down once — that is what buys the last ~45px.
+    --sf-field-h: 45px;
+    --sf-button-h: 56px;
+    --sf-title-size: 32px;
+
+    // 700px, not the ~690px where overflow actually begins: the extra margin
+    // absorbs font-metric differences between build targets.
+    @media (max-height: 700px) {
+      --sf-field-h: 40px;
+      --sf-button-h: 48px;
+      --sf-title-size: 24px;
+    }
+
+    // Figma 155:46798 backs the frame with a mesh gradient: lavender pooling
+    // along the upper-left edge and the lower-right edge, white through the
+    // middle. Sampled off the exported 1920x1080 plate — it peaks at #F0EFFF
+    // top-left and #EBEBFF bottom-right, i.e. brand violet at ~9% and ~12%
+    // over white — and reproduced with two radials rather than shipping a
+    // 240KB PNG. Each ramp runs all the way to its ellipse edge; stopping it
+    // short leaves a visible contour where the last quantised step lands.
+    background-color: #ffffff;
 
     &::before {
       content: "";
       position: absolute;
-      bottom: -200px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 885px;
-      height: 727px;
-      background: radial-gradient(
-        ellipse at center,
-        rgba(177, 172, 255, 0.35) 0%,
-        transparent 70%
-      );
+      inset: 0;
+      background:
+        radial-gradient(
+          ellipse 58% 65% at 0% 15%,
+          rgba(89, 80, 255, 0.09) 0%,
+          rgba(89, 80, 255, 0.075) 35%,
+          rgba(89, 80, 255, 0) 100%
+        ),
+        radial-gradient(
+          ellipse 52% 58% at 100% 92%,
+          rgba(89, 80, 255, 0.12) 0%,
+          rgba(89, 80, 255, 0.1) 30%,
+          rgba(89, 80, 255, 0) 100%
+        );
       pointer-events: none;
       z-index: 0;
     }
@@ -53,13 +106,11 @@
     align-items: center;
     width: 100%;
     max-width: 520px;
-    gap: 20px;
-    background-color: var(--white);
-    padding: 24px 40px;
+    gap: var(--sf-section-gap);
+    padding: var(--sf-card-pad);
     border-radius: 12px;
     position: relative;
     z-index: 1;
-    border: 1px solid var(--border-default);
 
     &[data-device="mobile"] {
       top: 0;
@@ -69,7 +120,7 @@
 
   &__header {
     width: 100%;
-    gap: 32px;
+    gap: var(--sf-header-gap);
   }
 
   &__header-top {
@@ -132,10 +183,10 @@
 
   &__title {
     font-family: var(--font-bold);
-    font-size: 32px;
-    line-height: 35px;
+    font-size: var(--sf-title-size, 32px);
+    line-height: 1.1;
     font-weight: 600;
-    color: rgb(67, 60, 197);
+    color: #433cc5;
   }
 
   &__tips {
@@ -167,11 +218,15 @@
   }
 
   &__button-main {
-    height: 56px;
+    // Falls back to the Figma 56px wherever --sf-button-h is not in scope
+    // (the OTP router lives outside the sign-in form's variable scope).
+    height: var(--sf-button-h, 56px);
     opacity: 1;
     gap: var(--spacer-4);
     border-radius: 4px;
-    padding: 16px 24px;
+    // Derived from the height so a shorter button keeps its 24px label
+    // centred instead of overflowing a 16px content box.
+    padding: calc((var(--sf-button-h, 56px) - 24px) / 2) 24px;
     cursor: pointer;
     transition: all 0.2s ease;
     align-items: center;
@@ -192,14 +247,15 @@
     }
 
     &.primary {
-      padding-right: 6px;
       justify-content: center;
       grid-template-columns: 1fr;
-      background: rgb(67, 60, 197);
+      background: #433cc5;
       color: #ffffff;
       align-content: center;
       flex-wrap: wrap;
-      border-radius: 4px;
+      // Figma's "Button Lightmode" component (I155:46828;48:1849) is a 12px
+      // radius, not 4px.
+      border-radius: 12px;
       font-family: var(--font-medium);
       font-weight: 600;
       font-size: 16px;
@@ -207,6 +263,13 @@
       &:hover {
         background: rgb(89, 80, 255);
         box-shadow: 0 4px 16px rgba(89, 80, 255, 0.4);
+      }
+
+      // The 6px right inset exists only to make room for the 40px white icon
+      // disc (check-inbox's Resend). A label-only primary — the sign-in submit
+      // — must keep its 24px on both sides or the text sits 9px off centre.
+      &:has(.icon.svg-wrapper) {
+        padding-right: 6px;
       }
 
       .icon.svg-wrapper {
@@ -228,18 +291,40 @@
       background-color: rgba(89, 80, 255, 0.1);
       border: none;
       border-radius: 8px;
-      color: rgb(67, 60, 197);
+      color: #433cc5;
 
       &:hover {
         background-color: rgba(89, 80, 255, 0.15);
       }
 
+      // Figma 155:46837 draws the provider mark bare at its natural size —
+      // no disc, no padding.
       .icon.svg-wrapper {
-        height: 28px;
-        width: 28px;
-        color: rgb(52, 52, 58);
-        border-radius: 50%;
-        padding: 4px;
+        height: 20px;
+        width: 20px;
+        padding: 0;
+        border-radius: 0;
+        background: none;
+        color: #433cc5;
+        fill: #433cc5;
+      }
+
+      // Continue with Apple (155:46844) is the neutral grey chip with a black
+      // mark; its glyph is 16x20, not square.
+      &.apple {
+        background-color: #f2f2f7;
+        color: #000000;
+
+        &:hover {
+          background-color: #e7e7ef;
+        }
+
+        .icon.svg-wrapper {
+          width: 16px;
+          height: 20px;
+          color: #000000;
+          fill: #000000;
+        }
       }
 
       &.full-width {
@@ -258,8 +343,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    line-height: 20px;
+    // Buttons/Medium Button: Geist SemiBold 16 / 24.
+    line-height: 24px;
     font-size: 16px;
+    font-weight: 600;
     font-family: var(--font-medium);
   }
 

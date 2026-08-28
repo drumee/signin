@@ -575,7 +575,10 @@ class signin_form extends Signup {
         input.type = isVisible ? 'password' : 'text';
         const useEl = eyePart.el.querySelector('svg use');
         if (useEl) {
-          useEl.setAttribute('xlink:href', isVisible ? '#--icon-eye_closed' : '#--icon-eye');
+          // apps-eye, not eye: `eye` is the older 22x16 outline glyph, while
+          // Figma 155:46948 pairs the Phosphor EyeClosed with the Phosphor Eye
+          // — which the sprite carries as apps-eye.
+          useEl.setAttribute('xlink:href', isVisible ? '#--icon-eye_closed' : '#--icon-apps-eye');
         }
         eyePart.el.dataset.state = isVisible ? '0' : '1';
         break;

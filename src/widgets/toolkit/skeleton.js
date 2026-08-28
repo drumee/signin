@@ -12,6 +12,7 @@ export function button(ui, opt) {
     sys_pn,
     className,
     priority = "primary",
+    variant = "",
     type,
     haptic,
   } = opt;
@@ -51,7 +52,7 @@ export function button(ui, opt) {
   );
 
   return main({
-    className: `${pfx}-main ${priority}`,
+    className: `${pfx}-main ${priority} ${variant}`.trim(),
     partHandler: [ui],
     uiHandler: [ui],
     sys_pn,
@@ -70,7 +71,7 @@ export function button(ui, opt) {
  * @returns
  */
 export function header(ui, content, tips, opt = {}) {
-  const { logo } = opt;
+  const { logo, progress = true } = opt;
   const fig = ui.fig.family;
 
   // `logo` is the exported lockup (glyph + wordmark as one asset). Callers that
@@ -102,37 +103,41 @@ export function header(ui, content, tips, opt = {}) {
         ],
       });
 
+  // Figma 155:46803 keeps the header row to the lockup alone. `progress` is
+  // opt-out rather than opt-in so the guest header and the OTP router, which
+  // still show the five-step bar, are untouched.
+  const progressBar = progress
+    ? Skeletons.Box.X({
+        className: `${fig}__progress-bar`,
+        kids: [
+          Skeletons.Element({
+            className: `${fig}__progress-step active`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+        ],
+      })
+    : null;
+
   let kids = [
     Skeletons.Box.X({
       className: `${fig}__header-top`,
-      kids: [
-        lockup,
-        Skeletons.Box.X({
-          className: `${fig}__progress-bar`,
-          kids: [
-            Skeletons.Element({
-              className: `${fig}__progress-step active`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-          ],
-        }),
-      ],
+      kids: [lockup, progressBar].filter(Boolean),
     }),
     Skeletons.Box.Y({
       className: `${fig}__text-container`,
@@ -242,6 +247,7 @@ export function password(ui, opt) {
     service = _a.input,
     autocomplete,
     ico,
+    footer,
   } = opt;
   autocomplete = autocomplete || name;
   const pfx = `${ui.fig.family}__entry`;
@@ -295,10 +301,19 @@ export function password(ui, opt) {
     }),
   );
 
+  // Figma 155:46944: the field and whatever sits under it (the validation /
+  // "Forgot Password" row) are their own 8px-gap group, tighter than the 12px
+  // that separates the label from the field. Always wrapping keeps one
+  // selector for the row whether or not a caller passes a footer.
   kids.push(
-    Skeletons.Box.X({
-      className: `${pfx}-row`,
-      kids: entryKids,
+    Skeletons.Box.Y({
+      className: `${pfx}-group`,
+      kids: [
+        Skeletons.Box.X({
+          className: `${pfx}-row`,
+          kids: entryKids,
+        }),
+      ].concat(footer || []),
     }),
   );
 
@@ -327,7 +342,7 @@ export function termsAndConditions(ui, opt) {
       }),
       Skeletons.Element({
         className: `${pfx}__terms-dot`,
-        content: "•",
+        content: " ",
       }),
       Skeletons.Note({
         className: `${pfx}__terms-link`,

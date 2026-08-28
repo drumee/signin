@@ -25,28 +25,52 @@
     }
   }
 
-  &__buttons,
-  &__form {
-    gap: var(--spacer-4);
+  // Social Sign In Cluster (155:46834) is an 8px stack.
+  &__buttons {
+    gap: var(--sf-note-gap);
     width: 100%;
+  }
+
+  // Form Section (155:46813): 8px lead-in, then 24px between the field column
+  // and the submit button.
+  &__form {
+    gap: var(--sf-form-gap);
+    width: 100%;
+    margin-top: var(--sf-lead);
+  }
+
+  // 155:46935 — labels and fields share one flat 12px column.
+  &__fields {
+    width: 100%;
+    gap: var(--sf-field-gap);
   }
 
   &__entry-main {
     width: 100%;
-    gap: 6px;
+    gap: var(--sf-field-gap);
+  }
+
+  // 155:46944 — a field and its validation row sit 8px apart, tighter than the
+  // 12px label/field step.
+  &__entry-group {
+    width: 100%;
+    gap: var(--sf-note-gap);
   }
 
   &__entry-label {
+    // Body/Mini Body: Geist Regular 12 / 1.4, no tracking.
     font-size: 12px;
-    font-family: var(--font-medium);
-    letter-spacing: 1px;
+    line-height: 1.4;
+    font-family: var(--font-main);
+    font-weight: 400;
+    letter-spacing: 0;
     text-transform: uppercase;
-    color: rgb(101, 101, 108);
+    color: #65656c;
   }
 
   &__entry-row {
     width: 100%;
-    height: 45px;
+    height: var(--sf-field-h, 45px);
     background: rgba(0, 0, 0, 0.05);
     border: none;
     border-radius: 4px;
@@ -62,10 +86,12 @@
   }
 
   &__entry-ico {
+    // 155:46819 is a 20x16 box; a square one stretches the envelope.
     width: 20px;
-    height: 20px;
+    height: 16px;
     flex-shrink: 0;
-    color: rgb(101, 101, 108);
+    color: #65656c;
+    fill: #65656c;
 
     svg {
       width: 100%;
@@ -90,13 +116,15 @@
 
     input {
       width: 100%;
-      height: 43px;
+      height: calc(var(--sf-field-h, 45px) - 2px);
       background: transparent;
       border: none;
       outline: none;
-      color: rgb(52, 52, 58);
-      font-size: 15px;
-      line-height: 43px;
+      // Body/Small Body, Grey/80 — the design uses the same grey for the
+      // placeholder (155:46822) and for typed text (155:46942, 155:46947).
+      color: #65656c;
+      font-size: 14px;
+      line-height: calc(var(--sf-field-h, 45px) - 2px);
       font-family: var(--font-main);
       padding: 0;
       margin: 0;
@@ -104,8 +132,8 @@
       vertical-align: middle;
 
       &::placeholder {
-        color: rgb(101, 101, 108);
-        line-height: 43px;
+        color: #65656c;
+        line-height: calc(var(--sf-field-h, 45px) - 2px);
       }
 
       &:focus {
@@ -118,13 +146,13 @@
       &:-webkit-autofill:hover,
       &:-webkit-autofill:focus,
       &:-webkit-autofill:active {
-        -webkit-text-fill-color: rgb(52, 52, 58) !important;
+        -webkit-text-fill-color: #65656c !important;
         -webkit-box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.05) inset !important;
         box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.05) inset !important;
         background-color: transparent !important;
         background-image: none !important;
         transition: background-color 5000s ease-in-out 0s;
-        caret-color: rgb(52, 52, 58);
+        caret-color: #65656c;
         border-radius: 0;
       }
     }
@@ -149,7 +177,8 @@
     height: 21px;
     flex-shrink: 0;
     cursor: pointer;
-    color: rgb(101, 101, 108);
+    color: #65656c;
+    fill: #65656c;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -170,40 +199,52 @@
     }
   }
 
+  // Footer Links (155:46849): 8px lead-in, then 16px between the sign-up
+  // prompt and the legal row.
+  &__footer-links {
+    width: 100%;
+    align-items: center;
+    gap: var(--sf-footer-gap);
+    margin-top: var(--sf-lead);
+  }
+
   &__links {
     width: 100%;
     justify-content: center;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
   }
 
   &__text {
     font-family: var(--font-main);
     font-size: 14px;
     line-height: 20px;
-    color: rgb(52, 52, 58);
+    color: #34343a;
     font-weight: 600;
 
     &.link {
       font-family: var(--font-medium);
-      color: rgb(89, 80, 255);
+      // "Start free →" is Primary/30 (155:46851), not the full-strength brand.
+      color: #b1adff;
       cursor: pointer;
       transition: color 0.2s;
 
       &:hover {
-        color: rgb(67, 60, 197);
+        color: rgb(89, 80, 255);
       }
     }
   }
 
+  // Divider (155:46829): 8px lead-in, 16px between the rules and "or".
   &__separator {
     width: 100%;
     height: auto;
     font-family: var(--font-main);
     font-size: 12px;
-    line-height: 20px;
-    color: rgb(52, 52, 58);
-    gap: var(--spacer-5);
+    line-height: 1.4;
+    color: #34343a;
+    gap: 16px;
+    margin-top: var(--sf-lead);
 
     &::before,
     &::after {
@@ -216,19 +257,25 @@
     }
   }
 
-  &__forgot-row {
+  // 155:46949 — one row under the password field: validation message flush
+  // left, "Forgot Password →" flush right. With an empty message the Note
+  // collapses and space-between leaves the link alone on the right.
+  &__field-note {
     width: 100%;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: -2px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   &__forgot-link {
+    flex: 0 0 auto;
     font-family: var(--font-main);
     font-size: 12px;
     line-height: 1.4;
-    color: rgb(52, 52, 58);
+    // Primary/100 (155:46951).
+    color: #0b0a21;
     text-decoration: underline;
+    white-space: nowrap;
     cursor: pointer;
     transition: color 0.2s;
 
@@ -251,10 +298,16 @@
   }
 
   // ---- Forgot-password view ("Enter Email") ----
+  // The sign-in card lost its fill, border and 24/40 padding to match Figma
+  // 155:46801; this view is not part of that node, so it restates them here
+  // rather than inheriting a shell that no longer exists.
   &__forgot {
     align-items: center;
     text-align: center;
+    gap: 20px;
+    padding: 24px 40px;
     background-color: #ffffff;
+    border: 1px solid var(--border-default);
     box-shadow: 0 8px 32px rgba(11, 10, 33, 0.06);
   }
 
@@ -317,11 +370,15 @@
   }
 
   &__error-content {
-    color: rgb(214, 78, 73);
+    // Signal/Error over Body/Mini Body (155:46950), left-aligned beside the
+    // forgot link rather than centred on its own line.
+    flex: 0 1 auto;
+    min-width: 0;
+    color: #d74e49;
     font-family: var(--font-main);
     font-size: 12px;
-    line-height: 22px;
-    text-align: center;
+    line-height: 1.4;
+    text-align: left;
   }
 
   // "Email not verified. Verify email →" — same visual language as the
@@ -338,28 +395,38 @@
     width: 100%;
     justify-content: center;
     align-items: center;
-    gap: var(--spacer-5);
+    // 155:46852.
+    gap: 24px;
     flex-direction: row;
     display: flex;
   }
 
   &__terms-link {
     font-size: 12px;
-    font-family: var(--font-medium);
-    letter-spacing: 1px;
+    line-height: 1.4;
+    font-family: var(--font-main);
+    font-weight: 400;
+    letter-spacing: 0;
     text-transform: uppercase;
-    color: rgb(101, 101, 108);
+    color: #65656c;
     cursor: pointer;
     transition: color 0.2s;
 
     &:hover {
-      color: rgb(52, 52, 58);
+      color: #34343a;
     }
   }
 
+  // 155:46856 is a 4px filled dot, not a bullet glyph.
   &__terms-dot {
-    font-size: 12px;
-    color: rgb(101, 101, 108);
+    flex: 0 0 auto;
+    align-self: center;
+    width: 4px;
+    height: 4px;
+    border-radius: 12px;
+    background-color: #65656c;
+    font-size: 0;
+    line-height: 0;
   }
 
   &__wrapper {
