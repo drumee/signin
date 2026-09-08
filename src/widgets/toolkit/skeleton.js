@@ -12,6 +12,7 @@ export function button(ui, opt) {
     sys_pn,
     className,
     priority = "primary",
+    variant = "",
     type,
     haptic,
   } = opt;
@@ -51,7 +52,7 @@ export function button(ui, opt) {
   );
 
   return main({
-    className: `${pfx}-main ${priority}`,
+    className: `${pfx}-main ${priority} ${variant}`.trim(),
     partHandler: [ui],
     uiHandler: [ui],
     sys_pn,
@@ -69,51 +70,74 @@ export function button(ui, opt) {
  * @param {*} ui
  * @returns
  */
-export function header(ui, content, tips) {
+export function header(ui, content, tips, opt = {}) {
+  const { logo, progress = true } = opt;
   const fig = ui.fig.family;
+
+  // `logo` is the exported lockup (glyph + wordmark as one asset). Callers that
+  // omit it keep the sprite mark plus a typeset "drumee", which only ever
+  // approximated the real logotype — so the guest header and router are
+  // untouched. Mirrors the signup plugin's header().
+  //
+  // Element, NOT Note: Note pipes content through DOMPurify against
+  // _K.allowed_tag (p a br b u i ul li quote span div svg use del ins h). `img`
+  // is not on that list, so a Note strips it and renders empty while CSS still
+  // reserves the box. Element maps to kind `wrapper`, which sets innerHTML
+  // directly with no sanitiser.
+  const lockup = logo
+    ? Skeletons.Element({
+        className: `${fig}__logo-image`,
+        content: `<img src="${logo}" alt="drumee" width="121" height="24">`,
+      })
+    : Skeletons.Box.X({
+        className: `${fig}__logo-container`,
+        kids: [
+          Skeletons.Button.Svg({
+            ico: "logo-upload",
+            className: `${fig}__logo-content`,
+          }),
+          Skeletons.Element({
+            className: `${fig}__logo-text`,
+            content: "drumee",
+          }),
+        ],
+      });
+
+  // Figma 155:46803 keeps the header row to the lockup alone. `progress` is
+  // opt-out rather than opt-in so the guest header and the OTP router, which
+  // still show the five-step bar, are untouched.
+  const progressBar = progress
+    ? Skeletons.Box.X({
+        className: `${fig}__progress-bar`,
+        kids: [
+          Skeletons.Element({
+            className: `${fig}__progress-step active`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+          Skeletons.Element({
+            className: `${fig}__progress-step`,
+            content: " ",
+          }),
+        ],
+      })
+    : null;
+
   let kids = [
     Skeletons.Box.X({
       className: `${fig}__header-top`,
-      kids: [
-        Skeletons.Box.X({
-          className: `${fig}__logo-container`,
-          kids: [
-            Skeletons.Button.Svg({
-              ico: "logo-upload",
-              className: `${fig}__logo-content`,
-            }),
-            Skeletons.Element({
-              className: `${fig}__logo-text`,
-              content: "drumee",
-            }),
-          ],
-        }),
-        Skeletons.Box.X({
-          className: `${fig}__progress-bar`,
-          kids: [
-            Skeletons.Element({
-              className: `${fig}__progress-step active`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-            Skeletons.Element({
-              className: `${fig}__progress-step`,
-              content: " ",
-            }),
-          ],
-        }),
-      ],
+      kids: [lockup, progressBar].filter(Boolean),
     }),
     Skeletons.Box.Y({
       className: `${fig}__text-container`,
@@ -126,14 +150,7 @@ export function header(ui, content, tips) {
     }),
   ];
 
-  if (tips) {
-    kids.push(
-      Skeletons.Note({
-        className: `${fig}__tips`,
-        content: tips,
-      }),
-    );
-  }
+  
 
   let a = Skeletons.Box.Y({
     className: `${ui.fig.family}__header`,
@@ -230,6 +247,7 @@ export function password(ui, opt) {
     service = _a.input,
     autocomplete,
     ico,
+    footer,
   } = opt;
   autocomplete = autocomplete || name;
   const pfx = `${ui.fig.family}__entry`;
@@ -283,10 +301,19 @@ export function password(ui, opt) {
     }),
   );
 
+  // Figma 155:46944: the field and whatever sits under it (the validation /
+  // "Forgot Password" row) are their own 8px-gap group, tighter than the 12px
+  // that separates the label from the field. Always wrapping keeps one
+  // selector for the row whether or not a caller passes a footer.
   kids.push(
-    Skeletons.Box.X({
-      className: `${pfx}-row`,
-      kids: entryKids,
+    Skeletons.Box.Y({
+      className: `${pfx}-group`,
+      kids: [
+        Skeletons.Box.X({
+          className: `${pfx}-row`,
+          kids: entryKids,
+        }),
+      ].concat(footer || []),
     }),
   );
 
@@ -315,7 +342,7 @@ export function termsAndConditions(ui, opt) {
       }),
       Skeletons.Element({
         className: `${pfx}__terms-dot`,
-        content: "•",
+        content: " ",
       }),
       Skeletons.Note({
         className: `${pfx}__terms-link`,
