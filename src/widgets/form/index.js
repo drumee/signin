@@ -260,10 +260,40 @@ class signin_form extends Signup {
       return;
     }
 
+    this._reportLoginEvent();
     Drumee.start();
     setTimeout(() => {
       if (typeof Wm === 'undefined') location.reload();
     }, 3000);
+  }
+
+  /**
+   * Report the sign-in to GA4 (the app's own property "app.drumee.com",
+   * G-9123HGZ86W) as the recommended `login` event.
+   *
+   * The counterpart of `sign_up` in the signup plugin: together they are the
+   * property's first two key events. Until they existed GA4 recorded page
+   * views and nothing a user actually did, which left the signups Google Ads
+   * reports with nothing to be reconciled against.
+   *
+   * AFTER the reconnect branch above, deliberately. A dropped websocket
+   * re-authenticates through this same method, and counting that as a login
+   * would inflate the metric with sessions nobody started.
+   *
+   * window.gtag is installed by the host bundle on Drumee-operated hosts only
+   * (ui-team libs/gtag — never on self-hosted instances, never on stage), so
+   * the call is guarded; measurement must never break the sign-in that just
+   * succeeded. Mirrored in the router widget, which owns the OTP and OAuth
+   * paths — the two are mutually exclusive per sign-in.
+   */
+  _reportLoginEvent() {
+    try {
+      if (typeof window !== "undefined" && typeof window.gtag === "function") {
+        window.gtag("event", "login", { method: "password" });
+      }
+    } catch (e) {
+      this.debug("gtag login not sent", e);
+    }
   }
 
   /**

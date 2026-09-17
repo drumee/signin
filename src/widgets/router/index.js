@@ -168,10 +168,36 @@ class signin_router extends LetcBox {
     }
 
     wsRouter.restart(1);
+    this._reportLoginEvent();
     Drumee.start();
     setTimeout(() => {
       if (typeof Wm === 'undefined') location.reload();
     }, 1500);
+  }
+
+  /**
+   * Report the sign-in to GA4 (the app's own property "app.drumee.com",
+   * G-9123HGZ86W) as the recommended `login` event.
+   *
+   * This widget owns the OTP and OAuth sign-in paths; the form widget owns the
+   * email/password one and carries the same method. They are mutually
+   * exclusive per sign-in, so a login is counted once. `method` stays
+   * "password" here: what arrives at this point is an established session, not
+   * the credential that opened it.
+   *
+   * window.gtag is installed by the host bundle on Drumee-operated hosts only
+   * (ui-team libs/gtag — never on self-hosted instances, never on stage), so
+   * the call is guarded; measurement must never break the sign-in that just
+   * succeeded.
+   */
+  _reportLoginEvent() {
+    try {
+      if (typeof window !== "undefined" && typeof window.gtag === "function") {
+        window.gtag("event", "login", { method: "password" });
+      }
+    } catch (e) {
+      this.debug("gtag login not sent", e);
+    }
   }
 
   /**
