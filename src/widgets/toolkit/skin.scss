@@ -150,7 +150,7 @@
     }
 
     &-text {
-      font-family: var(--font-bold);
+      font-family: var(--font-main);
       font-size: 30px;
       color: var(--primary-90);
       letter-spacing: -0.3px;
@@ -182,7 +182,7 @@
   }
 
   &__title {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-size: var(--sf-title-size, 32px);
     line-height: 1.1;
     font-weight: 600;
@@ -205,7 +205,7 @@
     color: rgb(101, 101, 108);
 
     span {
-      font-family: var(--font-bold);
+      font-family: var(--font-main);
       cursor: pointer;
     }
   }
@@ -256,7 +256,7 @@
       // Figma's "Button Lightmode" component (I155:46828;48:1849) is a 12px
       // radius, not 4px.
       border-radius: 12px;
-      font-family: var(--font-medium);
+      font-family: var(--font-main);
       font-weight: 600;
       font-size: 16px;
 
@@ -347,7 +347,7 @@
     line-height: 24px;
     font-size: 16px;
     font-weight: 600;
-    font-family: var(--font-medium);
+    font-family: var(--font-main);
   }
 
   &__button.spinner {

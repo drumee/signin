@@ -52,7 +52,7 @@
   }
 
   &__nav-logo-text {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 26px;
     letter-spacing: -0.5px;
@@ -71,7 +71,7 @@
   }
 
   &__nav-link-label {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 14px;
     line-height: 20px;
@@ -90,7 +90,7 @@
     padding: 6px 24px;
     border-radius: 4px;
     background-color: #433cc5;
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 14px;
     line-height: 20px;
