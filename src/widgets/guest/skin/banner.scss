@@ -62,7 +62,7 @@
   }
 
   &__banner-headline {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 18px;
     line-height: 24px;
@@ -76,7 +76,7 @@
   }
 
   &__banner-subline {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 14px;
     line-height: 20px;
@@ -93,7 +93,7 @@
     justify-content: center;
     border-radius: 4px;
     background-color: #ffffff;
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 14px;
     line-height: 20px;
