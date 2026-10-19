@@ -223,7 +223,7 @@
     font-weight: 600;
 
     &.link {
-      font-family: var(--font-medium);
+      font-family: var(--font-main);
       // "Start free →" is Primary/30 (155:46851), not the full-strength brand.
       color: #b1adff;
       cursor: pointer;
@@ -285,7 +285,7 @@
   }
 
   &__back-link {
-    font-family: var(--font-medium);
+    font-family: var(--font-main);
     font-size: 14px;
     line-height: 20px;
     color: rgb(89, 80, 255);
@@ -340,7 +340,7 @@
   }
 
   &__forgot-title {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 32px;
     line-height: 1.1;
@@ -482,7 +482,7 @@
   }
 
   &__inbox-title {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 32px;
     line-height: 1.1;
@@ -509,7 +509,7 @@
   }
 
   &__inbox-email {
-    font-family: var(--font-bold);
+    font-family: var(--font-main);
     font-weight: 600;
     font-size: 20px;
     line-height: 1.1;
