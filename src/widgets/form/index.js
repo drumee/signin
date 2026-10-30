@@ -71,6 +71,15 @@ function storedAttribution() {
       if (utm[k]) out[k] = String(utm[k]).trim().slice(0, 64);
     }
   } catch (e) { /* private mode, quota, or a corrupt value */ }
+  // Paid-campaign first touch. KEEP THE KEYS IN STEP with captureAttribution in
+  // libs/campaign. utm_* from this key win: they are the first touch, and the
+  // request has only one slot for each.
+  try {
+    const { at, ...first } = JSON.parse(localStorage.getItem('drumee_attribution') || '{}') || {};
+    Object.assign(out, first);
+    const ga = /(?:^|;\s*)_ga=GA\d\.\d\.([\d.]+)/.exec(document.cookie);
+    if (ga && Object.keys(first).length) out.ga_client_id = ga[1];
+  } catch (e) { /* as above */ }
   try {
     const ref = localStorage.getItem('drumee_ref') || '';
     if (ref) out.ref = String(ref).trim().toLowerCase().slice(0, 64);
