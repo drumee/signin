@@ -167,6 +167,10 @@ class signin_router extends LetcBox {
       Host.set(hub);
     }
 
+    // Org on another host: ONE load, straight there — Drumee.start() here
+    // re-boots on THIS host, its fallback reloads it, then ui-team's router
+    // switches host: two warm-ups (org-host-handoff).
+    if (require("../org-host-handoff").orgHostHandoff(organization, null)) return;
     wsRouter.restart(1);
     Drumee.start();
     setTimeout(() => {

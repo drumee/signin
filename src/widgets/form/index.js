@@ -224,6 +224,8 @@ function billingReturnUrl() {
   }
 }
 
+const { orgHostHandoff } = require("../org-host-handoff");
+
 class signin_form extends Signup {
 
   /**
@@ -260,6 +262,10 @@ class signin_form extends Signup {
       return;
     }
 
+    // Org on another host: ONE load, straight there — Drumee.start() here
+    // re-boots on THIS host and its 3 s fallback reloads it, then the router
+    // switches host: two warm-ups (orgHostHandoff).
+    if (orgHostHandoff(organization, billingReturnUrl())) return;
     Drumee.start();
     setTimeout(() => {
       if (typeof Wm === 'undefined') location.reload();
@@ -488,8 +494,13 @@ class signin_form extends Signup {
           // replace(), not assign(): the sign-in screen should not be a
           // back-button destination once the session exists.
           const back = billingReturnUrl();
-          if (back) location.replace(back);
-          location.reload()
+          // Org on another host: ONE load, straight there (orgHostHandoff) —
+          // a cross-origin navigation, so the page does re-boot. Otherwise
+          // reload here exactly as before.
+          if (!orgHostHandoff(data.organization, back)) {
+            if (back) location.replace(back);
+            location.reload()
+          }
         }, 1000)
         // let { onboarded, email, firstname, lastname } = data.user.profile;
         // if (!onboarded && !firstname && !lastname) {
