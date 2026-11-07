@@ -93,3 +93,21 @@ test("the ok branch and gotSignedIn both try the hand-off before reloading", () 
   const rs = rg.indexOf("Drumee.start();");
   assert.ok(rh > 0 && rh < rs, "router gotSignedIn (OTP/2FA): hand-off before Drumee.start");
 });
+
+// ── recording 2026-11-07 07:07: spinner → IDLE FORM (0:01.5) → warm-up ──────
+// The button spinner was released 500 ms after ANY answer, success included,
+// and the hand-off waited a further 1000 ms, so the form sat idle in between
+// and the sign-in read as two separate loadings.
+test("a successful sign-in keeps the button spinner (no idle form before leaving)", () => {
+  const body = SRC.slice(SRC.indexOf("  checkLoginStatus(data) {"));
+  const head = body.slice(0, body.indexOf("switch (data.status)"));
+  assert.match(head, /SIGNED_IN_STATUSES|["']ok["']/, "success is excluded from the release");
+  assert.doesNotMatch(head, /if \(!data\.secret\) \{\s*setTimeout/, "no unconditional release");
+});
+
+test("ok: the cross-host hand-off runs at once, not after the 1 s reload delay", () => {
+  const ok = SRC.slice(SRC.indexOf('case "ok":'), SRC.indexOf('case "ALREADY_SIGNED_IN":'));
+  const hand = ok.indexOf("orgHostHandoff(");
+  const timer = ok.indexOf("setTimeout(");
+  assert.ok(hand > 0 && timer > 0 && hand < timer, "hand-off before the delayed reload");
+});

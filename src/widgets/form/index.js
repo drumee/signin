@@ -225,6 +225,9 @@ function billingReturnUrl() {
 }
 
 const { orgHostHandoff } = require("../org-host-handoff");
+// Answers after which the page leaves (hand-off / reload / re-boot): the button
+// spinner stays up until it does.
+const SIGNED_IN_STATUSES = ["ok", "ALREADY_SIGNED_IN"];
 
 class signin_form extends Signup {
 
@@ -445,8 +448,12 @@ class signin_form extends Signup {
     // router then dynamically imports + renders the OTP card, and the spinner is
     // cleared naturally when that card replaces this form. Releasing it on a
     // fixed timer leaves a dead, feedback-less gap on the old form meanwhile.
-    // Every other path (no secret) releases the button so the user can retry.
-    if (!data.secret) {
+    // A SUCCESSFUL sign-in keeps it too: the page is about to leave (hand-off
+    // or reload), and releasing it showed the idle form for a beat between the
+    // button spinner and the warm-up screen — one sign-in read as two loadings
+    // (recording 2026-11-07 07:07, 0:01.5).
+    // Every other path releases the button so the user can retry.
+    if (!data.secret && !SIGNED_IN_STATUSES.includes(data.status)) {
       setTimeout(() => {
         this.setItemStatus('commit-button', "0", "haptic");
       }, 500)
@@ -472,8 +479,15 @@ class signin_form extends Signup {
       case "ARCHIVED":
         return this.renderMessage(LOCALE.BLOCKED_ACCOUNT);
 
-      case "ok":
-        setTimeout(() => {
+      case "ok": {
+        // The destination, read ONCE: billingReturnUrl() consumes the stored
+        // copy, so the hand-off and the fallback reload must share this value.
+        const back = billingReturnUrl();
+        // Org on another host: ONE load, straight there, NOW (orgHostHandoff) —
+        // no 1 s wait with the form on screen. A cross-origin navigation, so
+        // the page does re-boot.
+        const left = orgHostHandoff(data.organization, back);
+        if (!left) setTimeout(() => {
           // MOVE THE URL, THEN RELOAD — in that order, and both are needed.
           //
           // billingReturnUrl() differs from the current address only in the
@@ -493,20 +507,15 @@ class signin_form extends Signup {
           //
           // replace(), not assign(): the sign-in screen should not be a
           // back-button destination once the session exists.
-          const back = billingReturnUrl();
-          // Org on another host: ONE load, straight there (orgHostHandoff) —
-          // a cross-origin navigation, so the page does re-boot. Otherwise
-          // reload here exactly as before.
-          if (!orgHostHandoff(data.organization, back)) {
-            if (back) location.replace(back);
-            location.reload()
-          }
+          if (back) location.replace(back);
+          location.reload()
         }, 1000)
         // let { onboarded, email, firstname, lastname } = data.user.profile;
         // if (!onboarded && !firstname && !lastname) {
         //   return this.triggerHandlers({ ...data, email, service: "onboarding" })
         // }
         return;
+      }
       case "ALREADY_SIGNED_IN":
         return this.gotSignedIn(data);
 
