@@ -144,7 +144,13 @@ class signin_router extends LetcBox {
       return
     }
     let { main_domain, protocol, endpoint } = bootstrap()
-    if (!Visitor.isOnline() && location.host != main_domain) {
+    // A signed-out visitor on an organisation host is sent to the main domain's
+    // sign-in — except straight after signing out IN PLACE on this host
+    // (ui-team Butler.logout stamps window.drumeeSignedOutHost before its
+    // Drumee.start()). Redirecting then was a full page load behind the goodbye
+    // screen: two loading screens per sign-out. The form works here too.
+    const signedOutHere = window.drumeeSignedOutHost === location.host;
+    if (!Visitor.isOnline() && location.host != main_domain && !signedOutHere) {
       location.href = `${protocol}://${main_domain}${endpoint}#/welcome/signin`
       return
     }

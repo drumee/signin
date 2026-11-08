@@ -224,6 +224,34 @@ function billingReturnUrl() {
   }
 }
 
+/**
+ * After a password sign-in, leave for the account's organisation host in ONE
+ * navigation when it is not this one.
+ *
+ * Delegates to ui-team's router changeHost(), which is what the post-reload
+ * boot would have called anyway — same loose-host / DMZ refusals, same
+ * file-deep-link and offer hand-off, same history replace.
+ *
+ * @param {Object} organization the login response's organisation (my_organisation)
+ * @param {String|null} back billingReturnUrl()'s same-origin URL, if any
+ * @returns {Boolean} true when the navigation has been started
+ */
+function switchToOrganisationHost(organization, back) {
+  try {
+    const host = organization && (organization.link || organization.url);
+    if (!host) return false;
+    const [hostname] = location.host.split(':');
+    if (host === hostname) return false;
+    const router = window.uiRouter;
+    if (!router || typeof router.changeHost !== 'function') return false;
+    if (back) history.replaceState(history.state, '', back);
+    return !!router.changeHost(host);
+  } catch (e) {
+    // Anything unexpected: fall back to the reload, which still gets there.
+    return false;
+  }
+}
+
 class signin_form extends Signup {
 
   /**
@@ -488,6 +516,15 @@ class signin_form extends Signup {
           // replace(), not assign(): the sign-in screen should not be a
           // back-button destination once the session exists.
           const back = billingReturnUrl();
+          // ONE LOAD, NOT TWO. An account whose organisation has its own host
+          // (yipejo5194.drumee.in, team-NNNN.drumee.com) used to reload HERE,
+          // on the main domain, only for ui-team's router to find the host
+          // wrong and navigate again (changeHost) — two loading screens per
+          // sign-in. Go there directly, through that same changeHost, so the
+          // file-link relay and signup offer it carries still ride along. The
+          // billing destination rides the hash: replaceState moves it without
+          // navigating, and changeHost keeps the hash.
+          if (switchToOrganisationHost(data.organization, back)) return;
           if (back) location.replace(back);
           location.reload()
         }, 1000)

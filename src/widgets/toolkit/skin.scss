@@ -30,27 +30,33 @@
     //
     // Deriving A/B for a new step: slope = (figma - floor) / 320,
     // A = slope * 100, B = slope * 880 - figma.
-    --sf-section-gap: clamp(12px, calc(6.25vh - 23px), 32px);
-    --sf-header-gap: clamp(12px, calc(6.25vh - 23px), 32px);
+    //
+    // COMPACT (2026-11-08): every maximum below is ~85% of its Figma value —
+    // card 440px (was 520), padding 40 (48), gaps 28/20/14/10 (32/24/16/12),
+    // field 40 (45), button 48 (56), title 28 (32) — with A/B re-solved by the
+    // rule above. Floors and the 560/880px band are unchanged.
+    --sf-section-gap: clamp(12px, calc(5vh - 16px), 28px);
+    --sf-header-gap: clamp(12px, calc(5vh - 16px), 28px);
     --sf-lead: clamp(0px, calc(2.5vh - 14px), 8px);
-    --sf-card-pad: clamp(16px, calc(10vh - 40px), 48px);
+    --sf-card-pad: clamp(16px, calc(7.5vh - 26px), 40px);
     --sf-page-pad: clamp(8px, calc(7.5vh - 34px), 32px);
-    --sf-field-gap: clamp(8px, calc(1.25vh + 1px), 12px);
+    --sf-field-gap: clamp(8px, calc(0.625vh + 4.5px), 10px);
     --sf-note-gap: clamp(4px, calc(1.25vh - 3px), 8px);
-    --sf-form-gap: clamp(10px, calc(4.375vh - 14.5px), 24px);
-    --sf-footer-gap: clamp(6px, calc(3.125vh - 11.5px), 16px);
+    --sf-form-gap: clamp(10px, calc(3.125vh - 7.5px), 20px);
+    --sf-footer-gap: clamp(6px, calc(2.5vh - 8px), 14px);
 
     // Fixed-height controls. They hold their Figma size until the spacing has
     // bottomed out, then step down once — that is what buys the last ~45px.
-    --sf-field-h: 45px;
-    --sf-button-h: 56px;
-    --sf-title-size: 32px;
+    // Compact (~85% of Figma, 2026-11-08): 40 / 48 / 28.
+    --sf-field-h: 40px;
+    --sf-button-h: 48px;
+    --sf-title-size: 28px;
 
     // 700px, not the ~690px where overflow actually begins: the extra margin
     // absorbs font-metric differences between build targets.
     @media (max-height: 700px) {
-      --sf-field-h: 40px;
-      --sf-button-h: 48px;
+      --sf-field-h: 36px;
+      --sf-button-h: 44px;
       --sf-title-size: 24px;
     }
 
@@ -105,7 +111,7 @@
     justify-content: start;
     align-items: center;
     width: 100%;
-    max-width: 520px;
+    max-width: 440px;
     gap: var(--sf-section-gap);
     padding: var(--sf-card-pad);
     border-radius: 12px;
