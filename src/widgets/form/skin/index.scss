@@ -70,7 +70,7 @@
 
   &__entry-row {
     width: 100%;
-    height: var(--sf-field-h, 45px);
+    height: var(--sf-field-h, 40px);
     background: rgba(0, 0, 0, 0.05);
     border: none;
     border-radius: 4px;
@@ -116,7 +116,7 @@
 
     input {
       width: 100%;
-      height: calc(var(--sf-field-h, 45px) - 2px);
+      height: calc(var(--sf-field-h, 40px) - 2px);
       background: transparent;
       border: none;
       outline: none;
@@ -124,7 +124,7 @@
       // placeholder (155:46822) and for typed text (155:46942, 155:46947).
       color: #65656c;
       font-size: 14px;
-      line-height: calc(var(--sf-field-h, 45px) - 2px);
+      line-height: calc(var(--sf-field-h, 40px) - 2px);
       font-family: var(--font-main);
       padding: 0;
       margin: 0;
@@ -133,7 +133,7 @@
 
       &::placeholder {
         color: #65656c;
-        line-height: calc(var(--sf-field-h, 45px) - 2px);
+        line-height: calc(var(--sf-field-h, 40px) - 2px);
       }
 
       &:focus {
@@ -342,7 +342,7 @@
   &__forgot-title {
     font-family: var(--font-main);
     font-weight: 600;
-    font-size: 32px;
+    font-size: var(--sf-title-size, 28px);
     line-height: 1.1;
     color: rgb(67, 60, 197);
     text-align: center;
@@ -431,7 +431,7 @@
 
   &__wrapper {
     width: 100%;
-    max-width: 520px;
+    max-width: 440px;
     align-items: center;
     gap: 0;
   }
@@ -484,7 +484,7 @@
   &__inbox-title {
     font-family: var(--font-main);
     font-weight: 600;
-    font-size: 32px;
+    font-size: var(--sf-title-size, 28px);
     line-height: 1.1;
     color: rgb(67, 60, 197);
     width: 100%;
